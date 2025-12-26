@@ -267,7 +267,17 @@
     <div class="modal-content"><span class="close" onclick="fecharModal('modalRankingClientes')">×</span><h3>👤 Ranking de Clientes VIP</h3><div id="lista-ranking-clientes"></div></div>
 </div>
 <div id="modalRankingProdutos" class="modal">
-    <div class="modal-content"><span class="close" onclick="fecharModal('modalRankingProdutos')">×</span><h3>📦 Gestão de Produtos e Lucro</h3><div id="lista-ranking-produtos"></div></div>
+    <div class="modal-content">
+        <span class="close" onclick="fecharModal('modalRankingProdutos')">×</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 15px;">
+            <h3 style="margin:0;">📦 Gestão de Estoque</h3>
+            <div style="text-align: right;">
+                <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Valor Total Aplicado</span><br>
+                <span id="valor-total-estoque" style="font-size: 20px; font-weight: 800; color: var(--success);">R$ 0,00</span>
+            </div>
+        </div>
+        <div id="lista-ranking-produtos"></div>
+    </div>
 </div>
 
 <script>
@@ -339,7 +349,7 @@
         const cep = document.getElementById('cep').value;
         if(rua) {
             const endereco = `${rua}, ${num}, ${bairro}, ${cep}`;
-            window.open("http://googleusercontent.com/maps.google.com/3" + encodeURIComponent(endereco));
+            window.open("http://googleusercontent.com/maps.google.com/4" + encodeURIComponent(endereco));
         } else { alert("Preencha o endereço primeiro!"); }
     }
 
@@ -400,13 +410,9 @@
         const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
         const n = notas.find(x => x.id === id);
         if(!n || !n.whatsapp) return;
-
-        // Pega apenas o primeiro nome
         const primeiroNome = n.nome ? n.nome.split(' ')[0] : "Cliente";
-        
         let msg = "";
         const site = "https://seguromj.github.io/Nuance-/";
-
         switch(n.status) {
             case 'pendente':
                 msg = `Olá, *${primeiroNome}*! ✨ %0A%0AIdentificamos que você deixou alguns itens incríveis no seu carrinho na *Nuance* e não finalizou sua compra. 🛒💨 %0A%0ANão deixe seus drinks favoritos esperando! Clique no link abaixo para voltar e garantir seu pedido: %0A%0A🔗 ${site} %0A%0AQualquer dúvida, estou à disposição! 🍸`;
@@ -421,7 +427,6 @@
                 msg = `Pedido entregue! ✅ %0A%0AOlá *${primeiroNome}*, esperamos que aproveite cada gole do seu pedido. Muito obrigado por escolher a *Nuance*! ✨ %0A%0AQuando puder, visite nosso site para novidades: %0A🔗 ${site}`;
                 break;
         }
-
         window.open(`https://api.whatsapp.com/send?phone=55${n.whatsapp}&text=${msg}`);
     }
 
@@ -472,15 +477,36 @@
         document.getElementById('modalRankingClientes').style.display = 'block';
     }
 
+    // Função de Controle de Estoque com Valores
+    function aplicarValorEstoque() {
+        let total = 0;
+        document.querySelectorAll('.input-valor-estoque').forEach(input => {
+            const val = parseFloat(input.value) || 0;
+            total += val;
+        });
+        document.getElementById('valor-total-estoque').innerText = "R$ " + total.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+    }
+
     function abrirRankingProdutos() {
         const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
         const pastas = {};
-        notas.forEach(nota => { if(nota.produtos) nota.produtos.split('\n').forEach(linha => { const m = linha.match(/(\d+)x\s*(.*)/i); if(m) { const nome = m[2].trim().toUpperCase(); if(!pastas[nome]) pastas[nome] = []; pastas[nome].push(nota.nome); } }); });
-        document.getElementById('lista-ranking-produtos').innerHTML = Object.entries(pastas).map(([nome, itens]) => `
-            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:12px; margin-bottom:10px; padding:15px; display:flex; justify-content:space-between;">
-                <span>📦 ${nome}</span><span style="color:var(--primary); font-weight:bold;">${itens.length} vendidos</span>
+        notas.forEach(nota => { if(nota.produtos) nota.produtos.split('\n').forEach(linha => { const m = linha.match(/(\d+)x\s*(.*)/i); if(m) { const nome = m[2].trim().toUpperCase(); if(!pastas[nome]) pastas[nome] = 0; pastas[nome] += parseInt(m[1]); } }); });
+        
+        const html = Object.entries(pastas).map(([nome, quantidade]) => `
+            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:12px; margin-bottom:10px; padding:15px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span style="font-weight:bold;">📦 ${nome}</span>
+                    <span style="color:var(--primary); font-weight:bold;">${quantidade} vendidos</span>
+                </div>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="number" step="0.01" class="input-valor-estoque" placeholder="Valor Unit. ou Total" style="padding:8px; flex:1;">
+                    <button class="btn btn-nav" style="padding:8px 15px; background:var(--success); border:none;" onclick="aplicarValorEstoque()">Aplicar</button>
+                </div>
             </div>`).join('');
+            
+        document.getElementById('lista-ranking-produtos').innerHTML = html || "<p style='text-align:center; color:var(--text-muted);'>Nenhum produto vendido ainda.</p>";
         document.getElementById('modalRankingProdutos').style.display = 'block';
+        aplicarValorEstoque(); // Resetar total ao abrir
     }
 </script>
 </body>
