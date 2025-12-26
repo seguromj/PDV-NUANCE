@@ -266,13 +266,14 @@
 <div id="modalRankingClientes" class="modal">
     <div class="modal-content"><span class="close" onclick="fecharModal('modalRankingClientes')">×</span><h3>👤 Ranking de Clientes VIP</h3><div id="lista-ranking-clientes"></div></div>
 </div>
+
 <div id="modalRankingProdutos" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="max-height: 85vh; overflow-y: auto;">
         <span class="close" onclick="fecharModal('modalRankingProdutos')">×</span>
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 15px;">
-            <h3 style="margin:0;">📦 Gestão de Estoque</h3>
+            <h3 style="margin:0;">📦 Pastas de Estoque</h3>
             <div style="text-align: right;">
-                <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Valor Total Aplicado</span><br>
+                <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Total Calculado</span><br>
                 <span id="valor-total-estoque" style="font-size: 20px; font-weight: 800; color: var(--success);">R$ 0,00</span>
             </div>
         </div>
@@ -349,7 +350,7 @@
         const cep = document.getElementById('cep').value;
         if(rua) {
             const endereco = `${rua}, ${num}, ${bairro}, ${cep}`;
-            window.open("http://googleusercontent.com/maps.google.com/4" + encodeURIComponent(endereco));
+            window.open("http://googleusercontent.com/maps.google.com/5" + encodeURIComponent(endereco));
         } else { alert("Preencha o endereço primeiro!"); }
     }
 
@@ -415,7 +416,7 @@
         const site = "https://seguromj.github.io/Nuance-/";
         switch(n.status) {
             case 'pendente':
-                msg = `Olá, *${primeiroNome}*! ✨ %0A%0AIdentificamos que você deixou alguns itens incríveis no seu carrinho na *Nuance* e não finalizou sua compra. 🛒💨 %0A%0ANão deixe seus drinks favoritos esperando! Clique no link abaixo para voltar e garantir seu pedido: %0A%0A🔗 ${site} %0A%0AQualquer dúvida, estou à disposição! 🍸`;
+                msg = `Olá, *${primeiroNome}*! ✨ %0A%0AIdentificamos que você deixou alguns itens incríveis no seu carrinho na *Nuance* e não finalizou sua compra. 🛒💨 %0A%0ANão deixe seus drinks favoritos esperando! Clique no link abaixo para voltar e garantir seu pedido com esse cupom: CINCO5: %0A%0A🔗 ${site} %0A%0AQualquer dúvida, estou à disposição! 🍸`;
                 break;
             case 'preparando':
                 msg = `Ótimas notícias, *${primeiroNome}*! 🎉 %0A%0ASeu pedido *${n.shortId}* já está na bancada e nossos especialistas estão preparando seus drinks com todo carinho. 🍸✨ %0A%0AEm breve ele estará pronto para seguir até você!`;
@@ -477,36 +478,65 @@
         document.getElementById('modalRankingClientes').style.display = 'block';
     }
 
-    // Função de Controle de Estoque com Valores
     function aplicarValorEstoque() {
         let total = 0;
         document.querySelectorAll('.input-valor-estoque').forEach(input => {
-            const val = parseFloat(input.value) || 0;
-            total += val;
+            total += parseFloat(input.value) || 0;
         });
         document.getElementById('valor-total-estoque').innerText = "R$ " + total.toLocaleString('pt-BR', {minimumFractionDigits: 2});
     }
 
+    function togglePasta(pastaId) {
+        const pasta = document.getElementById(pastaId);
+        pasta.style.display = pasta.style.display === 'none' ? 'block' : 'none';
+    }
+
     function abrirRankingProdutos() {
         const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
-        const pastas = {};
-        notas.forEach(nota => { if(nota.produtos) nota.produtos.split('\n').forEach(linha => { const m = linha.match(/(\d+)x\s*(.*)/i); if(m) { const nome = m[2].trim().toUpperCase(); if(!pastas[nome]) pastas[nome] = 0; pastas[nome] += parseInt(m[1]); } }); });
-        
-        const html = Object.entries(pastas).map(([nome, quantidade]) => `
-            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:12px; margin-bottom:10px; padding:15px;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                    <span style="font-weight:bold;">📦 ${nome}</span>
-                    <span style="color:var(--primary); font-weight:bold;">${quantidade} vendidos</span>
+        const produtosAgrupados = {};
+
+        notas.forEach(nota => {
+            if(nota.produtos) {
+                nota.produtos.split('\n').forEach(linha => {
+                    const m = linha.match(/(\d+)x\s*(.*)/i);
+                    if(m) {
+                        const qtd = parseInt(m[1]);
+                        const nomeProd = m[2].trim().toUpperCase();
+                        if(!produtosAgrupados[nomeProd]) produtosAgrupados[nomeProd] = [];
+                        // Para cada unidade do produto no cupom, criamos uma entrada
+                        for(let i=0; i<qtd; i++) {
+                            produtosAgrupados[nomeProd].push({ cupom: nota.shortId, id: nota.id });
+                        }
+                    }
+                });
+            }
+        });
+
+        const html = Object.entries(produtosAgrupados).map(([nome, itens], index) => {
+            const pastaId = `pasta-${index}`;
+            return `
+            <div style="background:rgba(255,255,255,0.05); border-radius:12px; margin-bottom:15px; border: 1px solid rgba(255,255,255,0.1);">
+                <div onclick="togglePasta('${pastaId}')" style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.02); border-radius:12px;">
+                    <span style="font-weight:800;">📁 ${nome}</span>
+                    <span style="background:var(--primary); padding:2px 10px; border-radius:20px; font-size:11px;">${itens.length} UNIDADES</span>
                 </div>
-                <div style="display:flex; gap:10px; align-items:center;">
-                    <input type="number" step="0.01" class="input-valor-estoque" placeholder="Valor Unit. ou Total" style="padding:8px; flex:1;">
-                    <button class="btn btn-nav" style="padding:8px 15px; background:var(--success); border:none;" onclick="aplicarValorEstoque()">Aplicar</button>
+                <div id="${pastaId}" style="display:none; padding:15px; border-top: 1px solid rgba(255,255,255,0.05);">
+                    ${itens.map((it, idx) => `
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px;">
+                            <span style="font-size:12px; color:var(--text-muted);">CUPOM: <b>${it.cupom}</b></span>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <input type="number" step="0.01" class="input-valor-estoque" placeholder="Valor R$" style="width:100px; padding:6px; font-size:12px;">
+                                <button class="btn btn-nav" style="background:var(--success); border:none; padding:6px 10px; font-size:11px;" onclick="aplicarValorEstoque()">Aplicar</button>
+                            </div>
+                        </div>
+                    `).join('')}
                 </div>
-            </div>`).join('');
-            
-        document.getElementById('lista-ranking-produtos').innerHTML = html || "<p style='text-align:center; color:var(--text-muted);'>Nenhum produto vendido ainda.</p>";
+            </div>`;
+        }).join('');
+
+        document.getElementById('lista-ranking-produtos').innerHTML = html || "<p style='text-align:center; color:var(--text-muted);'>Nenhum produto em estoque.</p>";
         document.getElementById('modalRankingProdutos').style.display = 'block';
-        aplicarValorEstoque(); // Resetar total ao abrir
+        aplicarValorEstoque();
     }
 </script>
 </body>
