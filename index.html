@@ -122,29 +122,15 @@
         .st-rua { background: #f59e0b; }
         .st-entregue { background: #10b981; }
 
+        #lista-notas { max-height: 60vh; overflow-y: auto; padding-right: 10px; }
+        #lista-notas::-webkit-scrollbar { width: 5px; }
+        #lista-notas::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+        #contador-cupons { background: var(--primary); padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; margin-left: 10px; }
+
         @media print {
             body * { visibility: hidden; }
             #area-cupom, #area-cupom *, #area-etiqueta, #area-etiqueta * { visibility: visible; }
             #area-cupom, #area-etiqueta { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; }
-        }
-
-        /* Ajuste para permitir a rolagem das notas no modal */
-        #lista-notas { 
-            max-height: 60vh; 
-            overflow-y: auto; 
-            padding-right: 10px;
-        }
-        #lista-notas::-webkit-scrollbar { width: 5px; }
-        #lista-notas::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
-
-        /* Contador de cupons */
-        #contador-cupons {
-            background: var(--primary);
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 800;
-            margin-left: 10px;
         }
     </style>
 </head>
@@ -170,6 +156,9 @@
                 <div class="grid">
                     <button class="btn btn-importar" onclick="processarTexto()">🚀 Processar Dados</button>
                     <button class="btn btn-nav" onclick="limparCampos()">🧹 Resetar</button>
+                </div>
+                <div style="margin-top:10px;">
+                    <button class="btn" style="background: #4285F4; color:white; width:100%;" onclick="abrirGoogleMaps()">📍 Ver Localização do Cliente</button>
                 </div>
             </div>
 
@@ -219,7 +208,9 @@
                 <div style="font-size: 12px; line-height: 1.5;">
                     <b>DATA:</b> <span id="view-data"></span><br>
                     <b>CLIENTE:</b> <span id="view-nome"></span><br>
-                    <div id="view-endereco-bloco"><b>ENDEREÇO:</b> <span id="view-endereco"></span><br></div>
+                    <div id="view-endereco-bloco">
+                        <b>ENDEREÇO:</b> <span id="view-endereco"></span><br>
+                        <b>CEP:</b> <span id="view-cep-cupom"></span><br> </div>
                     <b>COLETA:</b> <span id="view-coleta"></span><br>
                     <div id="view-zap-bloco"><b>ZAP:</b> <span id="view-zap"></span><br></div>
                     <div id="view-cpf-bloco"><b>REF:</b> <span id="view-cpf"></span><br></div>
@@ -255,6 +246,7 @@
     <div style="font-size:14px;">
         <strong>CLIENTE:</strong> <span id="etiq-nome"></span><br>
         <strong>END:</strong> <span id="etiq-end"></span><br>
+        <strong>CEP:</strong> <span id="etiq-cep"></span><br>
         <strong>OBS:</strong> <span id="etiq-obs"></span>
     </div>
     <div class="divisor"></div>
@@ -264,10 +256,7 @@
 <div id="modalGestao" class="modal">
     <div class="modal-content">
         <span class="close" onclick="fecharModal('modalGestao')">×</span>
-        <h3 style="margin-top:0; display: flex; align-items: center;">
-            📁 Histórico de Vendas 
-            <span id="contador-cupons">0</span>
-        </h3>
+        <h3 style="margin-top:0; display: flex; align-items: center;">📁 Histórico de Vendas <span id="contador-cupons">0</span></h3>
         <input type="text" id="busca-nota" placeholder="🔍 Pesquisar por Nome, WhatsApp ou ID..." onkeyup="filtrarNotas()" style="margin-bottom:20px; background: rgba(0,0,0,0.2);">
         <div id="lista-notas"></div>
     </div>
@@ -276,13 +265,8 @@
 <div id="modalRankingClientes" class="modal">
     <div class="modal-content"><span class="close" onclick="fecharModal('modalRankingClientes')">×</span><h3>👤 Ranking de Clientes VIP</h3><div id="lista-ranking-clientes"></div></div>
 </div>
-
 <div id="modalRankingProdutos" class="modal">
     <div class="modal-content"><span class="close" onclick="fecharModal('modalRankingProdutos')">×</span><h3>📦 Gestão de Produtos e Lucro</h3><div id="lista-ranking-produtos"></div></div>
-</div>
-
-<div id="modalLancar" class="modal">
-    <div class="modal-content"><span class="close" onclick="fecharModal('modalLancar')">×</span><h3>🚀 Confirmar Valores</h3><div id="lista-produtos-lancar"></div><button class="btn btn-gerar" onclick="confirmarLancamento()">LANÇAR</button></div>
 </div>
 
 <script>
@@ -293,6 +277,7 @@
         const rua = document.getElementById('rua').value;
         const num = document.getElementById('numero').value;
         const bairro = document.getElementById('bairro').value;
+        const cep = document.getElementById('cep').value;
         const zap = document.getElementById('whatsapp').value;
         const cpf = document.getElementById('CPF').value;
         const pag = document.getElementById('pagamento').value;
@@ -320,6 +305,7 @@
         document.getElementById('view-nome').innerText = nome || "...";
         document.getElementById('view-data').innerText = document.getElementById('data-hora').value || "...";
         document.getElementById('view-endereco').innerText = endFormatado || "...";
+        document.getElementById('view-cep-cupom').innerText = cep || "...";
         document.getElementById('view-coleta').innerText = coleta || "...";
         document.getElementById('view-zap').innerText = zap || "";
         document.getElementById('view-zap-bloco').style.display = zap ? 'block' : 'none';
@@ -338,10 +324,22 @@
 
         document.getElementById('etiq-nome').innerText = nome;
         document.getElementById('etiq-end').innerText = (coleta.includes("MESA") || coleta.includes("RETIRADA")) ? coleta : endFormatado;
+        document.getElementById('etiq-cep').innerText = cep;
         document.getElementById('etiq-obs').innerText = obs;
         document.getElementById('etiq-prod').innerText = prod;
 
         if(!document.getElementById('view-versiculo').innerText) document.getElementById('view-versiculo').innerText = versiculos[Math.floor(Math.random() * versiculos.length)];
+    }
+
+    function abrirGoogleMaps() {
+        const rua = document.getElementById('rua').value;
+        const num = document.getElementById('numero').value;
+        const bairro = document.getElementById('bairro').value;
+        const cep = document.getElementById('cep').value;
+        if(rua) {
+            const endereco = `${rua}, ${num}, ${bairro}, ${cep}`;
+            window.open("https://www.google.com/maps/search/" + encodeURIComponent(endereco));
+        } else { alert("Preencha o endereço primeiro!"); }
     }
 
     function processarTexto() {
@@ -369,7 +367,7 @@
         notas.push(dados);
         localStorage.setItem('notas_nuance', JSON.stringify(notas));
         document.getElementById('view-id-cupom').innerText = shortId;
-        alert("Pedido Salvo com ID: " + shortId);
+        alert("Pedido Salvo: " + shortId);
         filtrarNotas();
     }
 
@@ -397,20 +395,16 @@
         }
     }
 
+    function enviarZapDireto(tel) {
+        if(tel) window.open(`https://api.whatsapp.com/send?phone=55${tel}&text=Olá!`);
+    }
+
     function filtrarNotas() {
         const busca = document.getElementById('busca-nota').value.toLowerCase();
         const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
         const lista = document.getElementById('lista-notas');
-        
-        const filtradas = notas.slice().reverse().filter(n => 
-            (n.nome||"").toLowerCase().includes(busca) || 
-            (n.whatsapp||"").toLowerCase().includes(busca.replace(/\D/g, '')) || 
-            (n.shortId||"").toLowerCase().includes(busca)
-        );
-
-        // Atualiza o contador de cupons
+        const filtradas = notas.slice().reverse().filter(n => (n.nome||"").toLowerCase().includes(busca) || (n.whatsapp||"").toLowerCase().includes(busca.replace(/\D/g, '')) || (n.shortId||"").toLowerCase().includes(busca));
         document.getElementById('contador-cupons').innerText = filtradas.length;
-
         lista.innerHTML = filtradas.map(n => `
             <div class="nota-card">
                 <div style="display:flex; justify-content:space-between;">
@@ -425,6 +419,7 @@
                         <option value="entregue" ${n.status==='entregue'?'selected':''}>Entregue</option>
                     </select>
                     <button class="btn btn-nav" style="padding:4px 8px;" onclick="reabrirNota(${n.id})">👁️ Ver</button>
+                    <button class="btn btn-nav" style="background:var(--whatsapp); padding:4px 8px; border:none;" onclick="enviarZapDireto('${n.whatsapp}')">📱 Zap</button>
                     <button class="btn btn-nav" style="background:var(--danger); padding:4px 8px;" onclick="excluirNota(${n.id})">🗑️</button>
                 </div>
             </div>
@@ -437,15 +432,12 @@
     function limparCampos() { document.querySelectorAll('input, textarea').forEach(i => i.value = ""); document.getElementById('view-id-cupom').innerText = "---"; atualizarCupom(); }
     function baixarPDF() { html2pdf().from(document.getElementById('area-cupom')).save(); }
     function imprimirEtiqueta() { document.getElementById('area-cupom').style.display='none'; document.getElementById('area-etiqueta').style.display='block'; window.print(); setTimeout(()=> {document.getElementById('area-cupom').style.display='block'; document.getElementById('area-etiqueta').style.display='none';}, 1000); }
-    function excluirNota(id) { if(confirm("Excluir nota?")) { let n = JSON.parse(localStorage.getItem('notas_nuance') || '[]').filter(x=>x.id!==id); localStorage.setItem('notas_nuance', JSON.stringify(n)); filtrarNotas(); } }
+    function excluirNota(id) { if(confirm("Excluir?")) { let n = JSON.parse(localStorage.getItem('notas_nuance') || '[]').filter(x=>x.id!==id); localStorage.setItem('notas_nuance', JSON.stringify(n)); filtrarNotas(); } }
 
     function abrirRankingClientes() {
         const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
         const clientes = {}; const fones = {};
-        notas.forEach(n => { 
-            const key = n.whatsapp || n.nome;
-            if(key) { clientes[key] = (clientes[key] || 0) + 1; fones[key] = { zap: n.whatsapp, nome: n.nome }; }
-        });
+        notas.forEach(n => { const key = n.whatsapp || n.nome; if(key) { clientes[key] = (clientes[key] || 0) + 1; fones[key] = { zap: n.whatsapp, nome: n.nome }; } });
         document.getElementById('lista-ranking-clientes').innerHTML = Object.entries(clientes).sort((a,b)=>b[1]-a[1]).map(([key, q]) => `
             <div style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; align-items:center;">
                 <div><b style="color:var(--primary);">${fones[key].nome}</b><br><small>${key}</small></div>
@@ -457,22 +449,10 @@
     function abrirRankingProdutos() {
         const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
         const pastas = {};
-        notas.forEach(nota => {
-            if(nota.produtos) nota.produtos.split('\n').forEach(linha => {
-                const m = linha.match(/(\d+)x\s*(.*)/i);
-                if(m) {
-                    const nome = m[2].trim().toUpperCase();
-                    if(!pastas[nome]) pastas[nome] = [];
-                    pastas[nome].push(nota.nome);
-                }
-            });
-        });
+        notas.forEach(nota => { if(nota.produtos) nota.produtos.split('\n').forEach(linha => { const m = linha.match(/(\d+)x\s*(.*)/i); if(m) { const nome = m[2].trim().toUpperCase(); if(!pastas[nome]) pastas[nome] = []; pastas[nome].push(nota.nome); } }); });
         document.getElementById('lista-ranking-produtos').innerHTML = Object.entries(pastas).map(([nome, itens]) => `
-            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:12px; margin-bottom:10px;">
-                <div style="padding:15px; display:flex; justify-content:space-between;">
-                    <span>📦 ${nome}</span>
-                    <span style="color:var(--primary); font-weight:bold;">${itens.length} vendidos</span>
-                </div>
+            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:12px; margin-bottom:10px; padding:15px; display:flex; justify-content:space-between;">
+                <span>📦 ${nome}</span><span style="color:var(--primary); font-weight:bold;">${itens.length} vendidos</span>
             </div>`).join('');
         document.getElementById('modalRankingProdutos').style.display = 'block';
     }
