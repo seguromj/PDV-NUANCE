@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -180,6 +179,7 @@
             <div id="area-cupom">
                 <div class="empresa-nome">NUANCE</div>
                 <div style="text-align: center; font-size: 12px; border-bottom: 1px dashed #000; margin-bottom: 5px;"><strong>COMPROVANTE DE PEDIDO</strong></div>
+                <div style="text-align: center; font-size: 12px; font-weight: bold; margin-bottom: 5px;">ID: <span id="view-id-cupom">---</span></div>
                 <div id="badge-container"></div>
                 <div style="font-size: 12px; margin: 10px 0; line-height: 1.4;">
                     DATA: <span id="view-data"></span><br>
@@ -228,7 +228,7 @@
     <div class="modal-content">
         <span class="close" onclick="fecharModal('modalGestao')">×</span>
         <h3>Histórico e Status</h3>
-        <input type="text" id="busca-nota" placeholder="Busca: Nome * Zap" onkeyup="filtrarNotas()" style="margin-bottom:15px;">
+        <input type="text" id="busca-nota" placeholder="Busca: Nome * Zap * ID" onkeyup="filtrarNotas()" style="margin-bottom:15px;">
         <div id="lista-notas"></div>
     </div>
 </div>
@@ -281,7 +281,6 @@
 
         const endFormatado = `${rua}${num ? ', ' + num : ''}${bairro ? ' - ' + bairro : ''}`;
 
-        // LÓGICA DE DISFARCE
         const badgeBox = document.getElementById('badge-container');
         const endBloco = document.getElementById('view-endereco-bloco');
         badgeBox.innerHTML = '';
@@ -308,8 +307,6 @@
         document.getElementById('view-produtos').innerText = prod || "Nenhum produto";
         document.getElementById('view-total').innerText = "R$ " + (document.getElementById('valor-total').value || "0.00");
         document.getElementById('view-obs').innerText = obs ? "OBS: " + obs : "";
-        
-        // MOSTRAR STATUS DE PAGAMENTO NO CUPOM
         document.getElementById('view-pago-status').innerText = estaPago || "---";
 
         const vC = document.getElementById('view-cupom-aplicado');
@@ -345,9 +342,22 @@
         atualizarCupom();
     }
 
+    // NOVA FUNÇÃO PARA GARANTIR ID ÚNICO E BUSCAR NO "BANCO"
     function finalizarEGerar() {
+        let notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        
+        // Geração do ID baseada no tempo (impossível repetir no mesmo dispositivo)
+        const idTimestamp = Date.now();
+        let shortId = "#" + idTimestamp.toString().slice(-6);
+
+        // Verificação extra: Se por algum milagre o ID existir, ele tenta o próximo milissegundo
+        while(notas.some(n => n.shortId === shortId)) {
+            shortId = "#" + (parseInt(shortId.replace('#','')) + 1).toString();
+        }
+
         const dados = {
-            id: Date.now(),
+            id: idTimestamp,
+            shortId: shortId,
             nome: document.getElementById('nome').value,
             data: document.getElementById('data-hora').value,
             whatsapp: document.getElementById('whatsapp').value,
@@ -364,21 +374,26 @@
             obs: document.getElementById('obs').value,
             status: 'pendente'
         };
-        let notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        
         notas.push(dados);
         localStorage.setItem('notas_nuance', JSON.stringify(notas));
-        alert("Salvo com sucesso!");
+        document.getElementById('view-id-cupom').innerText = shortId;
+        alert("Pedido Salvo com ID Exclusivo: " + shortId);
     }
 
     function filtrarNotas() {
         const busca = document.getElementById('busca-nota').value.toLowerCase();
         const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
         const lista = document.getElementById('lista-notas');
-        lista.innerHTML = notas.slice().reverse().filter(n => (n.nome||"").toLowerCase().includes(busca)).map(n => `
+        lista.innerHTML = notas.slice().reverse().filter(n => 
+            (n.nome||"").toLowerCase().includes(busca) || 
+            (n.whatsapp||"").toLowerCase().includes(busca) ||
+            (n.shortId||"").toLowerCase().includes(busca) // AQUI ELE BUSCA PELO ID NO BANCO
+        ).map(n => `
             <div class="nota-card">
                 <div class="nota-header">
                     <div class="nota-cliente-info">
-                        <b>${n.nome}</b>
+                        <b>${n.nome} <span style="color:#64748b; font-size:12px;">(${n.shortId || '#---'})</span></b>
                         <span style="color:#2563eb; font-weight:bold; font-size:10px;">📌 ${ (n.coleta || "DELIVERY").toUpperCase() }</span>
                         <span>💰 R$ ${n.total}</span>
                     </div>
@@ -476,11 +491,35 @@
     function abrirRankingClientes() {
         const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
         const clientes = {};
-        notas.forEach(n => { if(n.nome) clientes[n.nome] = (clientes[n.nome] || 0) + 1; });
-        document.getElementById('lista-ranking-clientes').innerHTML = Object.entries(clientes).sort((a,b)=>b[1]-a[1]).map(([nome, q]) => `
-            <div style="padding:10px; border-bottom:1px solid #eee;"><strong>${nome}</strong>: ${q} pedidos</div>
-        `).join('');
+        const fones = {};
+        
+        notas.forEach(n => { 
+            if(n.nome) {
+                clientes[n.nome] = (clientes[n.nome] || 0) + 1;
+                if(n.whatsapp) fones[n.nome] = n.whatsapp;
+            }
+        });
+        
+        document.getElementById('lista-ranking-clientes').innerHTML = Object.entries(clientes).sort((a,b)=>b[1]-a[1]).map(([nome, q]) => {
+            let botaoLimite = "";
+            if (q >= 10) {
+                const tel = fones[nome] || "";
+                botaoLimite = `<button class="btn btn-crm" style="width:auto; display:inline-block; margin-left:10px; padding:4px 8px;" onclick="enviarMensagemLimite('${tel}', '${nome}')">📲 Enviar Mensagem</button>`;
+            }
+            return `
+            <div style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+                <div><strong>${nome}</strong>: ${q} pedidos</div>
+                ${botaoLimite}
+            </div>`;
+        }).join('');
         document.getElementById('modalRankingClientes').style.display = 'block';
+    }
+
+    function enviarMensagemLimite(tel, nome) {
+        if(!tel) { alert("Cliente sem telefone cadastrado."); return; }
+        const pNome = nome.split(' ')[0];
+        const msg = `Olá, ${pNome}! 🥳 Notamos que você já realizou 10 pedidos conosco! Ficamos muito felizes com sua fidelidade. Entre em contato conosco para garantir um presente especial! 🥂`;
+        window.open(`https://api.whatsapp.com/send?phone=55${tel.replace(/\D/g, '')}&text=${encodeURIComponent(msg)}`, '_blank');
     }
 
     function enviarMensagemRapida() {
@@ -509,8 +548,6 @@
         let msg = "";
         const telLimpo = tel.replace(/\D/g, '');
         const pNome = (nomeFull || "Cliente").split(' ')[0];
-        
-        // Inteligência de reconhecimento de período
         const hora = new Date().getHours();
         let saudacao = "Olá";
         if (hora >= 5 && hora < 12) saudacao = "Bom dia";
@@ -544,6 +581,7 @@
             document.getElementById('coleta').value = n.coleta||""; document.getElementById('produtos-texto').value = n.produtos||"";
             document.getElementById('valor-total').value = n.total||""; document.getElementById('pagamento').value = n.pagamento||"";
             document.getElementById('obs').value = n.obs||"";
+            document.getElementById('view-id-cupom').innerText = n.shortId || "#---";
             atualizarCupom(); fecharModal('modalGestao');
         }
     }
@@ -551,7 +589,7 @@
     function togglePasta(e) { const c = e.nextElementSibling; c.style.display = c.style.display==='none'?'block':'none'; }
     function fecharModal(id) { document.getElementById(id).style.display='none'; }
     function abrirGestao() { document.getElementById('modalGestao').style.display='block'; filtrarNotas(); }
-    function limparCampos() { document.querySelectorAll('input, textarea').forEach(i => i.value = ""); atualizarCupom(); }
+    function limparCampos() { document.querySelectorAll('input, textarea').forEach(i => i.value = ""); document.getElementById('view-id-cupom').innerText = "---"; atualizarCupom(); }
     function baixarPDF() { html2pdf().from(document.getElementById('area-cupom')).save(); }
     function imprimirEtiqueta() { document.getElementById('area-cupom').style.display='none'; document.getElementById('area-etiqueta').style.display='block'; window.print(); setTimeout(()=> {document.getElementById('area-cupom').style.display='block'; document.getElementById('area-etiqueta').style.display='none';}, 1000); }
     function excluirNota(id) { if(confirm("Excluir?")) { let n = JSON.parse(localStorage.getItem('notas_nuance') || '[]').filter(x=>x.id!==id); localStorage.setItem('notas_nuance', JSON.stringify(n)); filtrarNotas(); } }
