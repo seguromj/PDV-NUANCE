@@ -210,7 +210,8 @@
                     <b>CLIENTE:</b> <span id="view-nome"></span><br>
                     <div id="view-endereco-bloco">
                         <b>ENDEREÇO:</b> <span id="view-endereco"></span><br>
-                        <b>CEP:</b> <span id="view-cep-cupom"></span><br> </div>
+                        <b>CEP:</b> <span id="view-cep-cupom"></span><br>
+                    </div>
                     <b>COLETA:</b> <span id="view-coleta"></span><br>
                     <div id="view-zap-bloco"><b>ZAP:</b> <span id="view-zap"></span><br></div>
                     <div id="view-cpf-bloco"><b>REF:</b> <span id="view-cpf"></span><br></div>
@@ -338,7 +339,7 @@
         const cep = document.getElementById('cep').value;
         if(rua) {
             const endereco = `${rua}, ${num}, ${bairro}, ${cep}`;
-            window.open("https://www.google.com/maps/search/" + encodeURIComponent(endereco));
+            window.open("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(endereco));
         } else { alert("Preencha o endereço primeiro!"); }
     }
 
@@ -395,8 +396,30 @@
         }
     }
 
-    function enviarZapDireto(tel) {
-        if(tel) window.open(`https://api.whatsapp.com/send?phone=55${tel}&text=Olá!`);
+    function enviarZapDireto(id) {
+        const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        const n = notas.find(x => x.id === id);
+        if(!n || !n.whatsapp) return;
+
+        let msg = "";
+        const site = "https://seguromj.github.io/Nuance-/";
+
+        switch(n.status) {
+            case 'pendente':
+                msg = `Olá, *${n.nome}*! ✨ %0A%0AIdentificamos que você deixou alguns itens incríveis no seu carrinho na *Nuance* e não finalizou sua compra. 🛒💨 %0A%0ANão deixe seus drinks favoritos esperando! Clique no link abaixo para voltar e garantir seu pedido: %0A%0A🔗 ${site} %0A%0AQualquer dúvida, estou à disposição! 🍸`;
+                break;
+            case 'preparando':
+                msg = `Ótimas notícias, *${n.nome}*! 🎉 %0A%0ASeu pedido *${n.shortId}* já está na bancada e nossos especialistas estão preparando seus drinks com todo carinho. 🍸✨ %0A%0AEm breve ele estará pronto para seguir até você!`;
+                break;
+            case 'rua':
+                msg = `Prepare o brinde, *${n.nome}*! 🥂 %0A%0ASeu pedido acaba de sair para entrega e já está a caminho. 🛵💨 %0A%0AEm instantes a felicidade bate à sua porta!`;
+                break;
+            case 'entregue':
+                msg = `Pedido entregue! ✅ %0A%0AOlá *${n.nome}*, esperamos que aproveite cada gole do seu pedido. Muito obrigado por escolher a *Nuance*! ✨ %0A%0AQuando puder, visite nosso site para novidades: %0A🔗 ${site}`;
+                break;
+        }
+
+        window.open(`https://api.whatsapp.com/send?phone=55${n.whatsapp}&text=${msg}`);
     }
 
     function filtrarNotas() {
@@ -419,7 +442,7 @@
                         <option value="entregue" ${n.status==='entregue'?'selected':''}>Entregue</option>
                     </select>
                     <button class="btn btn-nav" style="padding:4px 8px;" onclick="reabrirNota(${n.id})">👁️ Ver</button>
-                    <button class="btn btn-nav" style="background:var(--whatsapp); padding:4px 8px; border:none;" onclick="enviarZapDireto('${n.whatsapp}')">📱 Zap</button>
+                    <button class="btn btn-nav" style="background:var(--whatsapp); padding:4px 8px; border:none;" onclick="enviarZapDireto(${n.id})">📱 Zap</button>
                     <button class="btn btn-nav" style="background:var(--danger); padding:4px 8px;" onclick="excluirNota(${n.id})">🗑️</button>
                 </div>
             </div>
