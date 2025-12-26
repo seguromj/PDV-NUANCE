@@ -4,262 +4,285 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDV Nuance - Sistema Profissional</title>
+    <title>Nuance PDV | Premium System</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     
     <style>
-        :root { --primary: #2563eb; --danger: #dc2626; --success: #16a34a; --bg: #f1f5f9; --whatsapp: #25d366; --warning: #f59e0b; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg); margin: 0; padding: 0; color: #1e293b; }
+        :root { 
+            --primary: #6366f1; 
+            --accent: #a855f7;
+            --danger: #ef4444; 
+            --success: #10b981; 
+            --bg: #0f172a; 
+            --card: #1e293b;
+            --whatsapp: #22c55e; 
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --glass: rgba(30, 41, 59, 0.7);
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg); 
+            margin: 0; 
+            padding: 0; 
+            color: var(--text);
+            background-image: radial-gradient(circle at top right, #1e1b4b, #0f172a);
+            min-height: 100vh;
+        }
         
         .main-wrapper { display: flex; flex-direction: column; height: 100vh; }
         
         .top-bar { 
-            background: #0f172a; 
-            color: white; 
-            padding: 10px 20px; 
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 15px 30px; 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             position: sticky; top: 0; z-index: 1000;
         }
-        
-        .pdv-container { display: flex; flex: 1; overflow: hidden; padding: 20px; gap: 20px; }
-        .panel-left { flex: 1.2; background: white; border-radius: 12px; padding: 20px; overflow-y: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .panel-right { flex: 0.8; background: #e2e8f0; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; align-items: center; overflow-y: auto; border: 2px inset #cbd5e1; }
 
-        @media (max-width: 900px) {
-            .pdv-container { flex-direction: column; overflow: visible; height: auto; padding: 10px; }
-            .panel-left, .panel-right { flex: none; width: 100%; overflow: visible; box-sizing: border-box; }
-            .main-wrapper { height: auto; }
-            .panel-right { margin-top: 20px; background: white; border: none; padding: 0; }
+        .logo-area h2 { 
+            margin: 0; font-weight: 800; font-size: 22px; 
+            background: linear-gradient(to right, #818cf8, #d8b4fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+        
+        .pdv-container { display: flex; flex: 1; overflow: hidden; padding: 25px; gap: 25px; }
+        
+        .panel-left { 
+            flex: 1.2; background: var(--card); border-radius: 20px; padding: 25px; 
+            overflow-y: auto; border: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+        
+        .panel-right { 
+            flex: 0.8; background: rgba(15, 23, 42, 0.4); border-radius: 24px; padding: 25px; 
+            display: flex; flex-direction: column; align-items: center; overflow-y: auto; 
+            border: 2px dashed rgba(255,255,255,0.1);
         }
 
-        h2 { margin: 0; font-size: 20px; }
-        .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin: 15px 0 10px; border-left: 3px solid var(--primary); padding-left: 8px; }
-        
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .form-group { margin-bottom: 10px; }
-        label { display: block; margin-bottom: 4px; font-size: 12px; font-weight: 600; color: #475569; }
-        input, textarea, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; box-sizing: border-box; font-family: inherit; }
-        
-        .btn { border: none; border-radius: 8px; padding: 12px; font-weight: 600; cursor: pointer; font-size: 13px; width: 100%; display: block; margin-bottom: 8px; text-transform: uppercase; transition: opacity 0.2s; }
-        .btn-importar { background: #f59e0b; color: white; }
-        .btn-maps { background: #16a34a; color: white; }
-        .btn-wpp-entrega { background: var(--whatsapp); color: white; }
-        .btn-limpar { background: #64748b; color: white; }
-        .btn-gerar { background: var(--primary); color: white; margin-top: 15px; font-size: 15px; padding: 16px; }
-        .btn-print { background: var(--success); color: white; width: 100%; }
-        .btn-pdf { background: #334155; color: white; width: 100%; }
-        .btn-nav { background: #334155; color: white; padding: 8px 12px; width: auto; font-size: 11px; margin-left: 4px; }
-        .btn-crm { background: var(--whatsapp); color: white; margin-top: 5px; }
-        .btn-delete { background: var(--danger); color: white; padding: 4px 8px; width: auto; font-size: 10px; border-radius: 4px; }
-        .btn-reabrir { background: var(--primary); color: white; padding: 4px 8px; width: auto; font-size: 10px; border-radius: 4px; }
-        .btn-lancar { background: #10b981; color: white; padding: 4px 8px; width: auto; font-size: 10px; border-radius: 4px; }
-        .btn-etiqueta { background: #f59e0b; color: white; padding: 4px 8px; width: auto; font-size: 10px; border-radius: 4px; }
+        @media (max-width: 1024px) {
+            .pdv-container { flex-direction: column; height: auto; overflow: visible; }
+            .panel-left, .panel-right { flex: none; width: 100%; box-sizing: border-box; }
+            .main-wrapper { height: auto; }
+        }
 
-        #lista-notas { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
-        .nota-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .nota-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .section-title { 
+            font-size: 12px; font-weight: 800; text-transform: uppercase; 
+            color: var(--accent); margin: 25px 0 15px; 
+            display: flex; align-items: center; gap: 10px;
+        }
+        .section-title::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,0.05); }
         
-        .nota-cliente-info b { font-size: 15px; color: #16a34a; display: block; text-transform: uppercase; }
-        .nota-cliente-info span { font-size: 11px; color: #64748b; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 600; color: var(--text-muted); }
         
-        .nota-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-        .nota-status-row { display: flex; align-items: center; gap: 8px; padding-top: 10px; border-top: 1px solid #f1f5f9; margin-top: 5px; }
-        .btn-icon-wpp { background: #25d366; color: white; border: none; border-radius: 6px; padding: 6px 10px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; font-weight: 600; }
+        input, textarea, select { 
+            width: 100%; padding: 12px 15px; background: #0f172a; 
+            border: 1px solid #334155; border-radius: 10px; font-size: 14px; 
+            color: white; transition: all 0.3s;
+        }
+        input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
+        
+        .btn { 
+            border: none; border-radius: 12px; padding: 14px; font-weight: 700; 
+            cursor: pointer; font-size: 13px; transition: all 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
 
-        .status-badge { padding: 4px 8px; border-radius: 20px; font-size: 10px; font-weight: bold; color: white; text-transform: uppercase; border: none; outline: none; }
-        .st-pendente { background: #64748b; }
+        .btn-importar { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+        .btn-gerar { background: linear-gradient(135deg, #6366f1, #a855f7); color: white; font-size: 16px; margin-top: 20px; box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4); }
+        .btn-nav { background: rgba(255,255,255,0.05); color: white; padding: 10px 18px; font-size: 12px; border: 1px solid rgba(255,255,255,0.1); }
+        
+        #area-cupom { 
+            width: 80mm; padding: 20px; background: #fff; color: #1a1a1a;
+            font-family: 'Courier New', monospace; border-radius: 2px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4); margin-bottom: 30px;
+        }
+        .empresa-nome { text-align: center; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 28px; font-weight: 900; color: #000; margin-bottom: 5px; }
+        .divisor { border-top: 1px dashed #000; margin: 10px 0; }
+
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
+        .modal-content { background: var(--card); margin: 5vh auto; padding: 30px; width: 90%; max-width: 650px; border-radius: 24px; position: relative; border: 1px solid rgba(255,255,255,0.1); color: white; }
+        .close { position: absolute; right: 25px; top: 20px; font-size: 24px; cursor: pointer; color: var(--text-muted); }
+
+        .nota-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 15px; padding: 18px; margin-bottom: 15px; }
+        
+        .status-badge { padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: white; border: none; cursor: pointer; }
+        .st-pendente { background: #475569; }
         .st-preparando { background: #3b82f6; }
         .st-rua { background: #f59e0b; }
         .st-entregue { background: #10b981; }
 
-        .product-folder { background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 10px; overflow: hidden; }
-        .folder-header { background: #f8fafc; padding: 12px; cursor: pointer; display: flex; justify-content: space-between; font-weight: bold; border-bottom: 1px solid #eee; }
-        .folder-content { padding: 12px; background: #fff; border-top: 1px solid #eee; }
-        .sub-folder { border-top: 1px solid #f1f5f9; padding: 5px 10px; font-size: 12px; }
-
-        #area-cupom, #area-etiqueta { 
-            width: 80mm; padding: 5mm; background: white; color: #000;
-            font-family: 'Courier New', Courier, monospace; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            border: 1px solid #ddd; margin-bottom: 20px;
-        }
-        #area-etiqueta { min-height: 50mm; display: none; border: 2px solid #000; }
-        .empresa-nome { text-align: center; font-family: 'Trebuchet MS', sans-serif; font-size: 26px; font-weight: 900; letter-spacing: 2px; margin-bottom: 2px; }
-        .divisor { border-top: 1px dashed #000; margin: 5px 0; }
-
-        .tipo-badge { text-align: center; font-weight: bold; padding: 6px; margin: 5px 0; font-size: 13px; text-transform: uppercase; }
-        .badge-mesa { background: #000; color: #fff; }
-        .badge-retirada { border: 2px dashed #000; color: #000; }
-
-        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); overflow-y: auto; }
-        .modal-content { background: white; margin: 2% auto; padding: 20px; width: 95%; max-width: 600px; border-radius: 12px; position: relative; }
-        .close { position: absolute; right: 20px; top: 10px; font-size: 28px; cursor: pointer; }
-
         @media print {
             body * { visibility: hidden; }
             #area-cupom, #area-cupom *, #area-etiqueta, #area-etiqueta * { visibility: visible; }
-            #area-cupom, #area-etiqueta { position: absolute; left: 0; top: 0; width: 100%; border: none; box-shadow: none; }
+            #area-cupom, #area-etiqueta { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; }
+        }
+
+        /* Ajuste para permitir a rolagem das notas no modal */
+        #lista-notas { 
+            max-height: 60vh; 
+            overflow-y: auto; 
+            padding-right: 10px;
+        }
+        #lista-notas::-webkit-scrollbar { width: 5px; }
+        #lista-notas::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+
+        /* Contador de cupons */
+        #contador-cupons {
+            background: var(--primary);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            margin-left: 10px;
         }
     </style>
 </head>
 <body onload="atualizarCupom()">
 
 <div class="main-wrapper">
-    <div class="top-bar">
-        <h2>PDV NUANCE</h2>
-        <div style="display:flex;">
-            <button class="btn btn-nav" onclick="abrirGestao()">📁 NOTAS</button>
-            <button class="btn btn-nav" onclick="abrirRankingClientes()">👤 CLIENTES</button>
-            <button class="btn btn-nav" style="background:#0ea5e9;" onclick="abrirRankingProdutos()">📦 PRODUTOS</button>
+    <header class="top-bar">
+        <div class="logo-area">
+            <h2>NUANCE <span style="font-weight: 300; font-size: 14px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; margin-left: 10px;">Control Center</span></h2>
         </div>
-    </div>
+        <nav style="display:flex; gap: 10px;">
+            <button class="btn btn-nav" onclick="abrirGestao()">📁 Histórico</button>
+            <button class="btn btn-nav" onclick="abrirRankingClientes()">👤 VIPs</button>
+            <button class="btn btn-nav" style="border-color: var(--primary);" onclick="abrirRankingProdutos()">📦 Estoque</button>
+        </nav>
+    </header>
 
-    <div class="pdv-container">
-        <div class="panel-left">
-            <div class="import-box" style="background: #fffbeb; border: 2px dashed #f59e0b; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                <label>📦 IMPORTAR PEDIDO:</label>
-                <textarea id="input-importacao" style="width: 100%; height: 100px; font-size: 13px; margin-bottom: 10px;" placeholder="Cole a mensagem aqui..."></textarea>
+    <main class="pdv-container">
+        <section class="panel-left">
+            <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05)); border: 1px solid rgba(245, 158, 11, 0.2); padding: 20px; border-radius: 15px; margin-bottom: 25px;">
+                <label style="color: #f59e0b; font-weight: 800;">🔥 IMPORTAÇÃO INTELIGENTE</label>
+                <textarea id="input-importacao" style="height: 80px; margin: 10px 0; background: rgba(0,0,0,0.3);" placeholder="Cole a mensagem do WhatsApp aqui..."></textarea>
                 <div class="grid">
-                    <button class="btn btn-importar" onclick="processarTexto()">Processar Mensagem</button>
-                    <button class="btn btn-maps" onclick="abrirGoogleMaps()">📍 Mapa Cliente</button>
-                </div>
-                <div class="grid">
-                    <button class="btn btn-wpp-entrega" onclick="enviarWppEntregador()">📲 Enviar Motoboy</button>
-                    <button class="btn btn-limpar" onclick="limparCampos()">🧹 Limpar Tudo</button>
+                    <button class="btn btn-importar" onclick="processarTexto()">🚀 Processar Dados</button>
+                    <button class="btn btn-nav" onclick="limparCampos()">🧹 Resetar</button>
                 </div>
             </div>
 
-            <div class="section-title">Dados da Nota</div>
+            <div class="section-title">Dados do Cliente</div>
             <div class="grid">
-                <div class="form-group"><label>Nome</label><input type="text" id="nome" oninput="atualizarCupom()"></div>
-                <div class="form-group"><label>Data/Hora</label><input type="text" id="data-hora" oninput="atualizarCupom()"></div>
-                <div class="form-group"><label>WhatsApp</label><input type="text" id="whatsapp" oninput="atualizarCupom()"></div>
-                <div class="form-group"><label>CPF / Ref</label><input type="text" id="CPF" oninput="atualizarCupom()"></div>
+                <div class="form-group"><label>Nome do Cliente</label><input type="text" id="nome" placeholder="Ex: João Silva" oninput="atualizarCupom()"></div>
+                <div class="form-group"><label>Data / Hora</label><input type="text" id="data-hora" oninput="atualizarCupom()"></div>
+                <div class="form-group"><label>WhatsApp</label><input type="text" id="whatsapp" placeholder="(00) 00000-0000" oninput="atualizarCupom()"></div>
+                <div class="form-group"><label>CPF ou Referência</label><input type="text" id="CPF" placeholder="Opcional" oninput="atualizarCupom()"></div>
             </div>
 
-            <div class="section-title">Endereço de Entrega</div>
+            <div class="section-title">Logística de Entrega</div>
             <div class="grid">
                 <div class="form-group"><label>Rua/Avenida</label><input type="text" id="rua" oninput="atualizarCupom()"></div>
-                <div class="form-group"><label>Nº/QD/LOTE</label><input type="text" id="numero" oninput="atualizarCupom()"></div>
+                <div class="form-group"><label>Número / QD</label><input type="text" id="numero" oninput="atualizarCupom()"></div>
                 <div class="form-group"><label>Bairro</label><input type="text" id="bairro" oninput="atualizarCupom()"></div>
                 <div class="form-group"><label>CEP</label><input type="text" id="cep" oninput="atualizarCupom()"></div>
             </div>
-            <div class="form-group"><label>Complemento</label><input type="text" id="complemento" oninput="atualizarCupom()"></div>
+            <div class="form-group"><label>Complemento / Ponto de Ref.</label><input type="text" id="complemento" oninput="atualizarCupom()"></div>
 
-            <div class="section-title">Pagamento e Produtos</div>
+            <div class="section-title">Itens e Pagamento</div>
             <div class="grid">
-                <div class="form-group"><label>Forma de Pagamento</label><input type="text" id="pagamento" oninput="atualizarCupom()"></div>
-                <div class="form-group"><label>Coleta</label><input type="text" id="coleta" oninput="atualizarCupom()"></div>
+                <div class="form-group"><label>Método de Pagamento</label><input type="text" id="pagamento" placeholder="Ex: Pix, Cartão" oninput="atualizarCupom()"></div>
+                <div class="form-group"><label>Modalidade (MESA/RETIRADA/DELIVERY)</label><input type="text" id="coleta" placeholder="Entrega / Retirada / Mesa" oninput="atualizarCupom()"></div>
             </div>
-            <div class="form-group"><label>Está Pago?</label><input type="text" id="esta-pago" placeholder="Ex: SIM / NÃO / PIX" oninput="atualizarCupom()"></div>
-            <div class="form-group"><label>Produtos (Ex: 2x Gin)</label><textarea id="produtos-texto" style="height: 80px;" oninput="atualizarCupom()"></textarea></div>
+            <div class="form-group"><label>Status do Pagamento</label><input type="text" id="esta-pago" placeholder="Ex: PAGO VIA PIX" oninput="atualizarCupom()"></div>
+            <div class="form-group"><label>Produtos Selecionados</label><textarea id="produtos-texto" style="height: 100px;" placeholder="2x Gin Tônica
+1x Combo Vodka" oninput="atualizarCupom()"></textarea></div>
+            
             <div class="grid">
-                <div class="form-group"><label>Total (R$)</label><input type="text" id="valor-total" oninput="atualizarCupom()"></div>
-                <div class="form-group"><label>Cupom de Desconto</label><input type="text" id="cupom-input" oninput="atualizarCupom()"></div>
+                <div class="form-group"><label>Valor Total (R$)</label><input type="text" id="valor-total" style="font-weight: 800; color: #4ade80;" oninput="atualizarCupom()"></div>
+                <div class="form-group"><label>Cupom Promocional</label><input type="text" id="cupom-input" placeholder="Ex: BLACK10" oninput="atualizarCupom()"></div>
             </div>
-            <div class="form-group"><label>Observações</label><input type="text" id="obs" oninput="atualizarCupom()"></div>
+            <div class="form-group"><label>Observações Internas</label><input type="text" id="obs" oninput="atualizarCupom()"></div>
 
-            <div class="section-title">💬 Mensagens Rápidas</div>
-            <div class="form-group">
-                <select id="select-mensagem">
-                    <option value="1">⚠️ Carrinho Abandonado</option>
-                    <option value="2">👨‍🍳 Pedido em Preparo</option>
-                    <option value="3">🚀 Saiu para Entrega</option>
-                    <option value="4">✅ Entregue / Feedback</option>
-                </select>
-                <button class="btn btn-crm" onclick="enviarMensagemRapida()">Enviar para Cliente</button>
-            </div>
+            <button class="btn btn-gerar" onclick="finalizarEGerar()">✅ FINALIZAR E SALVAR PEDIDO</button>
+        </section>
 
-            <button class="btn btn-gerar" onclick="finalizarEGerar()">FINALIZAR E SALVAR</button>
-        </div>
-
-        <div class="panel-right">
+        <section class="panel-right">
             <div id="area-cupom">
                 <div class="empresa-nome">NUANCE</div>
-                <div style="text-align: center; font-size: 12px; border-bottom: 1px dashed #000; margin-bottom: 5px;"><strong>COMPROVANTE DE PEDIDO</strong></div>
-                <div style="text-align: center; font-size: 12px; font-weight: bold; margin-bottom: 5px;">ID: <span id="view-id-cupom">---</span></div>
+                <div style="text-align: center; font-size: 11px; letter-spacing: 2px; border-bottom: 1px solid #000; padding-bottom: 5px; margin-bottom: 10px;">PREMIUM DRINKS</div>
+                <div style="text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 5px;">ORDEM: <span id="view-id-cupom">---</span></div>
+                
                 <div id="badge-container"></div>
-                <div style="font-size: 12px; margin: 10px 0; line-height: 1.4;">
-                    DATA: <span id="view-data"></span><br>
-                    CLIENTE: <span id="view-nome"></span><br>
-                    <div id="view-endereco-bloco">ENDEREÇO: <span id="view-endereco"></span><br></div>
-                    COLETA: <span id="view-coleta"></span><br>
-                    <div id="view-zap-bloco">ZAP: <span id="view-zap"></span><br></div>
-                    <div id="view-cpf-bloco">CPF/REF: <span id="view-cpf"></span><br></div>
-                    <div id="view-pag-bloco">PAGAMENTO: <span id="view-pag"></span></div>
+                
+                <div style="font-size: 12px; line-height: 1.5;">
+                    <b>DATA:</b> <span id="view-data"></span><br>
+                    <b>CLIENTE:</b> <span id="view-nome"></span><br>
+                    <div id="view-endereco-bloco"><b>ENDEREÇO:</b> <span id="view-endereco"></span><br></div>
+                    <b>COLETA:</b> <span id="view-coleta"></span><br>
+                    <div id="view-zap-bloco"><b>ZAP:</b> <span id="view-zap"></span><br></div>
+                    <div id="view-cpf-bloco"><b>REF:</b> <span id="view-cpf"></span><br></div>
+                    <div id="view-pag-bloco"><b>PAGAMENTO:</b> <span id="view-pag"></span></div>
                 </div>
+                
                 <div class="divisor"></div>
-                <div id="view-produtos" style="font-size: 12px; white-space: pre-wrap;"></div>
+                <div id="view-produtos" style="font-size: 12px; white-space: pre-wrap; font-weight: bold;"></div>
                 <div class="divisor"></div>
-                <div id="view-pago-bloco" style="text-align:center; font-weight:bold; font-size:13px; margin: 5px 0;">ESTÁ PAGO: <span id="view-pago-status"></span></div>
-                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 14px;"><span>TOTAL:</span><span id="view-total">R$ 0.00</span></div>
-                <div id="view-cupom-aplicado" style="font-size: 11px; margin-top: 8px; text-align: center; border: 1px dashed #000; padding: 4px; display:none;"></div>
-                <div id="view-obs" style="font-size: 11px; margin-top: 10px; white-space: pre-wrap;"></div>
-                <div id="view-versiculo" class="versiculo-box" style="margin-top: 15px; font-size: 11px; text-align: center; font-style: italic; border-top: 1px dashed #000; padding-top: 10px;"></div>
+                <div id="view-pago-bloco" style="text-align:center; font-weight:bold; font-size:13px; margin: 10px 0; border: 1px solid #000; padding: 4px;"> <span id="view-pago-status"></span></div>
+                <div style="display: flex; justify-content: space-between; font-weight: 900; font-size: 16px;">
+                    <span>TOTAL:</span>
+                    <span id="view-total">R$ 0.00</span>
+                </div>
+                <div id="view-cupom-aplicado" style="font-size: 11px; margin-top: 10px; text-align: center; background: #eee; padding: 5px; display:none;"></div>
+                <div id="view-obs" style="font-size: 11px; margin-top: 10px; font-style: italic;"></div>
+                <div id="view-versiculo" style="margin-top: 20px; font-size: 10px; text-align: center; color: #666; border-top: 1px dashed #ccc; padding-top: 10px;"></div>
             </div>
 
-            <div id="area-etiqueta">
-                <div style="text-align: center; border: 2px solid #000; padding: 5px;">
-                    <div style="font-weight: bold; font-size: 18px;">NUANCE DRINKS</div>
-                    <div class="divisor"></div>
-                    <div style="text-align: left; font-size: 14px;">
-                        <strong>CLIENTE:</strong> <span id="etiq-nome"></span><br>
-                        <strong>END:</strong> <span id="etiq-end"></span><br>
-                        <strong>OBS:</strong> <span id="etiq-obs"></span>
-                    </div>
-                    <div class="divisor"></div>
-                    <div id="etiq-prod" style="font-size: 14px; text-align: left; font-weight: bold;"></div>
-                </div>
+            <div style="width: 80mm; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <button class="btn btn-nav" style="background: #1e293b;" onclick="window.print()">🖨️ Imprimir</button>
+                <button class="btn btn-nav" style="background: #1e293b;" onclick="imprimirEtiqueta()">🏷️ Etiqueta</button>
+                <button class="btn btn-nav" style="background: #1e293b;" onclick="baixarPDF()">💾 Salvar PDF</button>
+                <button class="btn btn-nav" style="background: var(--danger); border: none;" onclick="limparCampos()">🧹 Limpar</button>
             </div>
+        </section>
+    </main>
+</div>
 
-            <div style="width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <button class="btn btn-print" onclick="window.print()">🖨️ Cupom</button>
-                <button class="btn btn-etiqueta" style="width:100%;" onclick="imprimirEtiqueta()">🏷️ Etiqueta</button>
-                <button class="btn btn-pdf" onclick="baixarPDF()">💾 PDF</button>
-                <button class="btn btn-limpar" style="width:100%;" onclick="limparCampos()">🧹 Limpar</button>
-            </div>
-        </div>
+<div id="area-etiqueta" style="display:none; width:80mm; padding:10px; border:2px solid #000; color:#000; background:#fff;">
+    <div style="text-align:center; font-weight:bold; font-size:18px;">NUANCE DRINKS</div>
+    <div class="divisor"></div>
+    <div style="font-size:14px;">
+        <strong>CLIENTE:</strong> <span id="etiq-nome"></span><br>
+        <strong>END:</strong> <span id="etiq-end"></span><br>
+        <strong>OBS:</strong> <span id="etiq-obs"></span>
     </div>
+    <div class="divisor"></div>
+    <div id="etiq-prod" style="font-size:14px; font-weight:bold;"></div>
 </div>
 
 <div id="modalGestao" class="modal">
     <div class="modal-content">
         <span class="close" onclick="fecharModal('modalGestao')">×</span>
-        <h3>Histórico e Status</h3>
-        <input type="text" id="busca-nota" placeholder="Busca: Nome * Zap * ID" onkeyup="filtrarNotas()" style="margin-bottom:15px;">
+        <h3 style="margin-top:0; display: flex; align-items: center;">
+            📁 Histórico de Vendas 
+            <span id="contador-cupons">0</span>
+        </h3>
+        <input type="text" id="busca-nota" placeholder="🔍 Pesquisar por Nome, WhatsApp ou ID..." onkeyup="filtrarNotas()" style="margin-bottom:20px; background: rgba(0,0,0,0.2);">
         <div id="lista-notas"></div>
     </div>
 </div>
 
-<div id="modalLancar" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="fecharModal('modalLancar')">×</span>
-        <h3>🚀 Realizar Lançamento</h3>
-        <p id="lancar-info-cliente" style="font-weight: bold; color: var(--primary);"></p>
-        <div id="lista-produtos-lancar"></div>
-        <button class="btn btn-gerar" onclick="confirmarLancamento()">CONFIRMAR VALORES</button>
-    </div>
+<div id="modalRankingClientes" class="modal">
+    <div class="modal-content"><span class="close" onclick="fecharModal('modalRankingClientes')">×</span><h3>👤 Ranking de Clientes VIP</h3><div id="lista-ranking-clientes"></div></div>
 </div>
 
 <div id="modalRankingProdutos" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="fecharModal('modalRankingProdutos')">×</span>
-        <h3>📦 Controle de Produtos</h3>
-        <div style="background:#0f172a; color:white; padding:15px; border-radius:8px; margin-bottom:15px;">
-            Total Lançado: <span id="fin-total-lucro" style="color:#4ade80; font-weight:bold;">R$ 0,00</span>
-        </div>
-        <div id="lista-ranking-produtos"></div>
-    </div>
+    <div class="modal-content"><span class="close" onclick="fecharModal('modalRankingProdutos')">×</span><h3>📦 Gestão de Produtos e Lucro</h3><div id="lista-ranking-produtos"></div></div>
 </div>
 
-<div id="modalRankingClientes" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="fecharModal('modalRankingClientes')">×</span>
-        <h3>Ranking Clientes</h3>
-        <div id="lista-ranking-clientes"></div>
-    </div>
+<div id="modalLancar" class="modal">
+    <div class="modal-content"><span class="close" onclick="fecharModal('modalLancar')">×</span><h3>🚀 Confirmar Valores</h3><div id="lista-produtos-lancar"></div><button class="btn btn-gerar" onclick="confirmarLancamento()">LANÇAR</button></div>
 </div>
 
 <script>
@@ -280,17 +303,17 @@
         const estaPago = document.getElementById('esta-pago').value.toUpperCase();
 
         const endFormatado = `${rua}${num ? ', ' + num : ''}${bairro ? ' - ' + bairro : ''}`;
-
         const badgeBox = document.getElementById('badge-container');
         const endBloco = document.getElementById('view-endereco-bloco');
+        
         badgeBox.innerHTML = '';
         endBloco.style.display = 'block';
 
         if(coleta.includes("MESA")) {
-            badgeBox.innerHTML = `<div class="tipo-badge badge-mesa">ATENDIMENTO EM MESA</div>`;
+            badgeBox.innerHTML = `<div style="background:#000; color:#fff; text-align:center; padding:5px; font-weight:bold; margin-bottom:10px;">ATENDIMENTO EM MESA</div>`;
             endBloco.style.display = 'none';
         } else if(coleta.includes("RETIRADA")) {
-            badgeBox.innerHTML = `<div class="tipo-badge badge-retirada">RETIRADA NO LOCAL</div>`;
+            badgeBox.innerHTML = `<div style="border:2px dashed #000; color:#000; text-align:center; padding:5px; font-weight:bold; margin-bottom:10px;">RETIRADA NO LOCAL</div>`;
             endBloco.style.display = 'none';
         }
 
@@ -324,12 +347,7 @@
     function processarTexto() {
         let texto = document.getElementById('input-importacao').value;
         if(!texto) return;
-        const map = { 
-            '0. DATA/HORA:': 'data-hora', '1. PEDIDO:': 'produtos-texto', '2. NOME:': 'nome', 
-            '3. WHATSAPP:': 'whatsapp', '4. CEP:': 'cep', '5. Nº/QD/LOTE:': 'numero',
-            '6. BAIRRO:': 'bairro', '7. RUA/AVENIDA:': 'rua', '8. COMPLEMENTO:': 'complemento',
-            '9. TIPO DE COLETA:': 'coleta', '10. VALOR PRODUTOS:': 'valor-total'
-        };
+        const map = { '0. DATA/HORA:': 'data-hora', '1. PEDIDO:': 'produtos-texto', '2. NOME:': 'nome', '3. WHATSAPP:': 'whatsapp', '4. CEP:': 'cep', '5. Nº/QD/LOTE:': 'numero', '6. BAIRRO:': 'bairro', '7. RUA/AVENIDA:': 'rua', '8. COMPLEMENTO:': 'complemento', '9. TIPO DE COLETA:': 'coleta', '10. VALOR PRODUTOS:': 'valor-total' };
         Object.keys(map).forEach(key => {
             const regex = new RegExp(key.replace(/\//g, '\\/') + "\\s*(.*)");
             const match = texto.match(regex);
@@ -342,259 +360,122 @@
         atualizarCupom();
     }
 
-    // NOVA FUNÇÃO PARA GARANTIR ID ÚNICO E BUSCAR NO "BANCO"
     function finalizarEGerar() {
         let notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
-        
-        // Geração do ID baseada no tempo (impossível repetir no mesmo dispositivo)
         const idTimestamp = Date.now();
         let shortId = "#" + idTimestamp.toString().slice(-6);
-
-        // Verificação extra: Se por algum milagre o ID existir, ele tenta o próximo milissegundo
-        while(notas.some(n => n.shortId === shortId)) {
-            shortId = "#" + (parseInt(shortId.replace('#','')) + 1).toString();
-        }
-
-        const dados = {
-            id: idTimestamp,
-            shortId: shortId,
-            nome: document.getElementById('nome').value,
-            data: document.getElementById('data-hora').value,
-            whatsapp: document.getElementById('whatsapp').value,
-            cpf: document.getElementById('CPF').value,
-            rua: document.getElementById('rua').value,
-            numero: document.getElementById('numero').value,
-            bairro: document.getElementById('bairro').value,
-            cep: document.getElementById('cep').value,
-            complemento: document.getElementById('complemento').value,
-            coleta: document.getElementById('coleta').value,
-            produtos: document.getElementById('produtos-texto').value,
-            total: document.getElementById('valor-total').value,
-            pagamento: document.getElementById('pagamento').value,
-            obs: document.getElementById('obs').value,
-            status: 'pendente'
-        };
-        
+        const cleanZap = document.getElementById('whatsapp').value.replace(/\D/g, '');
+        const dados = { id: idTimestamp, shortId: shortId, nome: document.getElementById('nome').value, data: document.getElementById('data-hora').value, whatsapp: cleanZap, cpf: document.getElementById('CPF').value, rua: document.getElementById('rua').value, numero: document.getElementById('numero').value, bairro: document.getElementById('bairro').value, cep: document.getElementById('cep').value, complemento: document.getElementById('complemento').value, coleta: document.getElementById('coleta').value, produtos: document.getElementById('produtos-texto').value, total: document.getElementById('valor-total').value, pagamento: document.getElementById('pagamento').value, obs: document.getElementById('obs').value, status: 'pendente' };
         notas.push(dados);
         localStorage.setItem('notas_nuance', JSON.stringify(notas));
         document.getElementById('view-id-cupom').innerText = shortId;
-        alert("Pedido Salvo com ID Exclusivo: " + shortId);
+        alert("Pedido Salvo com ID: " + shortId);
+        filtrarNotas();
+    }
+
+    function reabrirNota(id) {
+        const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        const n = notas.find(x => x.id === id);
+        if(n) {
+            document.getElementById('nome').value = n.nome || "";
+            document.getElementById('data-hora').value = n.data || "";
+            document.getElementById('whatsapp').value = n.whatsapp || "";
+            document.getElementById('CPF').value = n.cpf || "";
+            document.getElementById('rua').value = n.rua || "";
+            document.getElementById('numero').value = n.numero || "";
+            document.getElementById('bairro').value = n.bairro || "";
+            document.getElementById('cep').value = n.cep || "";
+            document.getElementById('complemento').value = n.complemento || "";
+            document.getElementById('coleta').value = n.coleta || "";
+            document.getElementById('produtos-texto').value = n.produtos || "";
+            document.getElementById('valor-total').value = n.total || "";
+            document.getElementById('pagamento').value = n.pagamento || "";
+            document.getElementById('obs').value = n.obs || "";
+            document.getElementById('view-id-cupom').innerText = n.shortId;
+            atualizarCupom();
+            fecharModal('modalGestao');
+        }
     }
 
     function filtrarNotas() {
         const busca = document.getElementById('busca-nota').value.toLowerCase();
         const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
         const lista = document.getElementById('lista-notas');
-        lista.innerHTML = notas.slice().reverse().filter(n => 
+        
+        const filtradas = notas.slice().reverse().filter(n => 
             (n.nome||"").toLowerCase().includes(busca) || 
-            (n.whatsapp||"").toLowerCase().includes(busca) ||
-            (n.shortId||"").toLowerCase().includes(busca) // AQUI ELE BUSCA PELO ID NO BANCO
-        ).map(n => `
+            (n.whatsapp||"").toLowerCase().includes(busca.replace(/\D/g, '')) || 
+            (n.shortId||"").toLowerCase().includes(busca)
+        );
+
+        // Atualiza o contador de cupons
+        document.getElementById('contador-cupons').innerText = filtradas.length;
+
+        lista.innerHTML = filtradas.map(n => `
             <div class="nota-card">
-                <div class="nota-header">
-                    <div class="nota-cliente-info">
-                        <b>${n.nome} <span style="color:#64748b; font-size:12px;">(${n.shortId || '#---'})</span></b>
-                        <span style="color:#2563eb; font-weight:bold; font-size:10px;">📌 ${ (n.coleta || "DELIVERY").toUpperCase() }</span>
-                        <span>💰 R$ ${n.total}</span>
-                    </div>
-                    <div class="nota-actions">
-                        <button class="btn btn-lancar" onclick="abrirModalLancar(${n.id})">🚀 LANÇAR</button>
-                        <button class="btn btn-reabrir" onclick="reabrirNota(${n.id})">👁️</button>
-                        <button class="btn btn-delete" onclick="excluirNota(${n.id})">🗑️</button>
-                    </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <div><b style="color:var(--primary);">${n.nome}</b><br><small>${n.shortId}</small></div>
+                    <div style="text-align:right;"><span style="color:var(--success); font-weight:800;">R$ ${n.total}</span></div>
                 </div>
-                <div class="nota-status-row">
+                <div style="margin-top:10px; display:flex; gap:10px;">
                     <select onchange="mudarStatus(${n.id}, this.value)" class="status-badge st-${n.status}">
                         <option value="pendente" ${n.status==='pendente'?'selected':''}>Pendente</option>
                         <option value="preparando" ${n.status==='preparando'?'selected':''}>Preparo</option>
                         <option value="rua" ${n.status==='rua'?'selected':''}>Na Rua</option>
                         <option value="entregue" ${n.status==='entregue'?'selected':''}>Entregue</option>
                     </select>
-                    <button onclick="enviarMensagemHistorico(${n.id})" class="btn-icon-wpp">📲 AVISAR</button>
+                    <button class="btn btn-nav" style="padding:4px 8px;" onclick="reabrirNota(${n.id})">👁️ Ver</button>
+                    <button class="btn btn-nav" style="background:var(--danger); padding:4px 8px;" onclick="excluirNota(${n.id})">🗑️</button>
                 </div>
             </div>
         `).join('');
     }
 
-    function mudarStatus(id, s) {
-        let n = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
-        const item = n.find(x => x.id === id);
-        if(item) { item.status = s; localStorage.setItem('notas_nuance', JSON.stringify(n)); filtrarNotas(); }
-    }
-
-    function abrirModalLancar(id) {
-        const nota = JSON.parse(localStorage.getItem('notas_nuance') || '[]').find(x => x.id === id);
-        if(!nota) return;
-        document.getElementById('lancar-info-cliente').innerText = `Pedido: ${nota.nome}`;
-        const lista = document.getElementById('lista-produtos-lancar');
-        const valoresSalvos = JSON.parse(localStorage.getItem('nuance_valores_individuais') || '{}');
-        let html = ""; let itemIndex = 0;
-        nota.produtos.split('\n').forEach(linha => {
-            const m = linha.match(/(\d+)x\s*(.*)/i);
-            if(m) {
-                const qtd = parseInt(m[1]); const nomeProd = m[2].trim().toUpperCase();
-                for(let i=0; i<qtd; i++) {
-                    const chave = `${nomeProd}_${nota.id}_${itemIndex}`;
-                    html += `<div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                        <span>${nomeProd}</span>
-                        <input type="number" class="input-valor-lancar" data-chave="${chave}" value="${valoresSalvos[chave]||0}" style="width:80px;">
-                    </div>`;
-                    itemIndex++;
-                }
-            }
-        });
-        lista.innerHTML = html;
-        document.getElementById('modalLancar').style.display = 'block';
-    }
-
-    function confirmarLancamento() {
-        let valores = JSON.parse(localStorage.getItem('nuance_valores_individuais') || '{}');
-        document.querySelectorAll('.input-valor-lancar').forEach(input => {
-            valores[input.getAttribute('data-chave')] = parseFloat(input.value) || 0;
-        });
-        localStorage.setItem('nuance_valores_individuais', JSON.stringify(valores));
-        fecharModal('modalLancar'); alert("Lançado!");
-    }
-
-    function abrirRankingProdutos() {
-        const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
-        const valoresSalvos = JSON.parse(localStorage.getItem('nuance_valores_individuais') || '{}');
-        const pastas = {}; let totalGeral = 0;
-        notas.forEach(nota => {
-            let itemIndex = 0;
-            if(nota.produtos) nota.produtos.split('\n').forEach(linha => {
-                const m = linha.match(/(\d+)x\s*(.*)/i);
-                if(m) {
-                    const nomeProd = m[2].trim().toUpperCase();
-                    if(!pastas[nomeProd]) pastas[nomeProd] = [];
-                    for(let i=0; i<parseInt(m[1]); i++) {
-                        const chave = `${nomeProd}_${nota.id}_${itemIndex}`;
-                        const v = valoresSalvos[chave] || 0;
-                        pastas[nomeProd].push({ cliente: nota.nome, valor: v });
-                        totalGeral += parseFloat(v); itemIndex++;
-                    }
-                }
-            });
-        });
-        document.getElementById('fin-total-lucro').innerText = "R$ " + totalGeral.toFixed(2);
-        document.getElementById('lista-ranking-produtos').innerHTML = Object.entries(pastas).map(([nome, itens]) => `
-            <div class="product-folder">
-                <div class="folder-header" onclick="togglePasta(this)"><span>📁 ${nome}</span> <span>${itens.length} un</span></div>
-                <div class="folder-content" style="display:none;">
-                    ${itens.map(it => `<div class="sub-folder">${it.cliente}: R$ ${parseFloat(it.valor).toFixed(2)}</div>`).join('')}
-                </div>
-            </div>
-        `).join('');
-        document.getElementById('modalRankingProdutos').style.display = 'block';
-    }
-
-    function abrirRankingClientes() {
-        const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
-        const clientes = {};
-        const fones = {};
-        
-        notas.forEach(n => { 
-            if(n.nome) {
-                clientes[n.nome] = (clientes[n.nome] || 0) + 1;
-                if(n.whatsapp) fones[n.nome] = n.whatsapp;
-            }
-        });
-        
-        document.getElementById('lista-ranking-clientes').innerHTML = Object.entries(clientes).sort((a,b)=>b[1]-a[1]).map(([nome, q]) => {
-            let botaoLimite = "";
-            if (q >= 10) {
-                const tel = fones[nome] || "";
-                botaoLimite = `<button class="btn btn-crm" style="width:auto; display:inline-block; margin-left:10px; padding:4px 8px;" onclick="enviarMensagemLimite('${tel}', '${nome}')">📲 Enviar Mensagem</button>`;
-            }
-            return `
-            <div style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
-                <div><strong>${nome}</strong>: ${q} pedidos</div>
-                ${botaoLimite}
-            </div>`;
-        }).join('');
-        document.getElementById('modalRankingClientes').style.display = 'block';
-    }
-
-    function enviarMensagemLimite(tel, nome) {
-        if(!tel) { alert("Cliente sem telefone cadastrado."); return; }
-        const pNome = nome.split(' ')[0];
-        const msg = `Olá, ${pNome}! 🥳 Notamos que você já realizou 10 pedidos conosco! Ficamos muito felizes com sua fidelidade. Entre em contato conosco para garantir um presente especial! 🥂`;
-        window.open(`https://api.whatsapp.com/send?phone=55${tel.replace(/\D/g, '')}&text=${encodeURIComponent(msg)}`, '_blank');
-    }
-
-    function enviarMensagemRapida() {
-        const tel = document.getElementById('whatsapp').value.replace(/\D/g, '');
-        const tipo = document.getElementById('select-mensagem').value;
-        const nomeCompleto = document.getElementById('nome').value;
-        const prods = document.getElementById('produtos-texto').value;
-        dispararWhatsApp(tel, tipo, nomeCompleto, prods);
-    }
-
-    function enviarMensagemHistorico(id) {
-        const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
-        const n = notas.find(x => x.id === id);
-        if(n && n.whatsapp) {
-            let tipoMsg = "1";
-            if(n.status === "preparando") tipoMsg = "2";
-            if(n.status === "rua") tipoMsg = "3";
-            if(n.status === "entregue") tipoMsg = "4";
-            dispararWhatsApp(n.whatsapp, tipoMsg, n.nome, n.produtos);
-        } else {
-            alert("WhatsApp não cadastrado para esta nota.");
-        }
-    }
-
-    function dispararWhatsApp(tel, tipo, nomeFull, prods) {
-        let msg = "";
-        const telLimpo = tel.replace(/\D/g, '');
-        const pNome = (nomeFull || "Cliente").split(' ')[0];
-        const hora = new Date().getHours();
-        let saudacao = "Olá";
-        if (hora >= 5 && hora < 12) saudacao = "Bom dia";
-        else if (hora >= 12 && hora < 18) saudacao = "Boa tarde";
-        else saudacao = "Boa noite";
-        
-        if(tipo=="1") {
-            msg = `Olá, ${pNome}, ${saudacao}! Percebemos que você deixou seu carrinho cheio 👇:\n\n${prods || "Não especificado"}\n\nQue tal finalizar essa compra com esse cupom: FRETEGRATIS\n\n Nosso site Oficial 👇\n https://seguromj.github.io/Nuance-/`;
-        } else if(tipo=="2") {
-            msg = `${saudacao}, ${pNome}! 🤗 Seu pedido já entrou em preparo!\n Estamos dando os últimos toque final para sua experiência ser inesquecível 😍\n\n Assim que o motoboy saí para a entrega, nós o avisaremos.`;
-        } else if(tipo=="3") {
-            msg = `${pNome}! 🤗 Seu pedido acabou de sair para entrega! 🚀 Logo o motoboy chegará aí!`;
-        } else if(tipo=="4") {
-            msg = `${pNome}! Acabamos de ser notificado que seu *Pedido foi Entregue*! O que achou da experiência?\n Sua avaliação nos ajuda muito!\n\n Saúde!!! 😉🥂`;
-        }
-        
-        if(telLimpo) {
-            window.open(`https://api.whatsapp.com/send?phone=55${telLimpo}&text=${encodeURIComponent(msg)}`, '_blank');
-        } else {
-            alert("Número de WhatsApp inválido.");
-        }
-    }
-
-    function reabrirNota(id) {
-        const n = JSON.parse(localStorage.getItem('notas_nuance') || '[]').find(x => x.id === id);
-        if(n) {
-            document.getElementById('nome').value = n.nome||""; document.getElementById('data-hora').value = n.data||"";
-            document.getElementById('whatsapp').value = n.whatsapp||""; document.getElementById('CPF').value = n.cpf||"";
-            document.getElementById('rua').value = n.rua||""; document.getElementById('numero').value = n.numero||"";
-            document.getElementById('bairro').value = n.bairro||""; document.getElementById('cep').value = n.cep||"";
-            document.getElementById('coleta').value = n.coleta||""; document.getElementById('produtos-texto').value = n.produtos||"";
-            document.getElementById('valor-total').value = n.total||""; document.getElementById('pagamento').value = n.pagamento||"";
-            document.getElementById('obs').value = n.obs||"";
-            document.getElementById('view-id-cupom').innerText = n.shortId || "#---";
-            atualizarCupom(); fecharModal('modalGestao');
-        }
-    }
-
-    function togglePasta(e) { const c = e.nextElementSibling; c.style.display = c.style.display==='none'?'block':'none'; }
+    function mudarStatus(id, s) { let n = JSON.parse(localStorage.getItem('notas_nuance') || '[]'); const item = n.find(x => x.id === id); if(item) { item.status = s; localStorage.setItem('notas_nuance', JSON.stringify(n)); filtrarNotas(); } }
     function fecharModal(id) { document.getElementById(id).style.display='none'; }
     function abrirGestao() { document.getElementById('modalGestao').style.display='block'; filtrarNotas(); }
     function limparCampos() { document.querySelectorAll('input, textarea').forEach(i => i.value = ""); document.getElementById('view-id-cupom').innerText = "---"; atualizarCupom(); }
     function baixarPDF() { html2pdf().from(document.getElementById('area-cupom')).save(); }
     function imprimirEtiqueta() { document.getElementById('area-cupom').style.display='none'; document.getElementById('area-etiqueta').style.display='block'; window.print(); setTimeout(()=> {document.getElementById('area-cupom').style.display='block'; document.getElementById('area-etiqueta').style.display='none';}, 1000); }
-    function excluirNota(id) { if(confirm("Excluir?")) { let n = JSON.parse(localStorage.getItem('notas_nuance') || '[]').filter(x=>x.id!==id); localStorage.setItem('notas_nuance', JSON.stringify(n)); filtrarNotas(); } }
-    function abrirGoogleMaps() { const end = `${document.getElementById('rua').value}, ${document.getElementById('numero').value}`; window.open("https://www.google.com/maps/search/" + encodeURIComponent(end)); }
-    function enviarWppEntregador() { const msg = `🚀 ENTREGA\n👤 ${document.getElementById('nome').value}\n📍 ${document.getElementById('rua').value}`; window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`); }
+    function excluirNota(id) { if(confirm("Excluir nota?")) { let n = JSON.parse(localStorage.getItem('notas_nuance') || '[]').filter(x=>x.id!==id); localStorage.setItem('notas_nuance', JSON.stringify(n)); filtrarNotas(); } }
+
+    function abrirRankingClientes() {
+        const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        const clientes = {}; const fones = {};
+        notas.forEach(n => { 
+            const key = n.whatsapp || n.nome;
+            if(key) { clientes[key] = (clientes[key] || 0) + 1; fones[key] = { zap: n.whatsapp, nome: n.nome }; }
+        });
+        document.getElementById('lista-ranking-clientes').innerHTML = Object.entries(clientes).sort((a,b)=>b[1]-a[1]).map(([key, q]) => `
+            <div style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; align-items:center;">
+                <div><b style="color:var(--primary);">${fones[key].nome}</b><br><small>${key}</small></div>
+                <div style="font-weight:800;">${q} pedidos</div>
+            </div>`).join('');
+        document.getElementById('modalRankingClientes').style.display = 'block';
+    }
+
+    function abrirRankingProdutos() {
+        const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        const pastas = {};
+        notas.forEach(nota => {
+            if(nota.produtos) nota.produtos.split('\n').forEach(linha => {
+                const m = linha.match(/(\d+)x\s*(.*)/i);
+                if(m) {
+                    const nome = m[2].trim().toUpperCase();
+                    if(!pastas[nome]) pastas[nome] = [];
+                    pastas[nome].push(nota.nome);
+                }
+            });
+        });
+        document.getElementById('lista-ranking-produtos').innerHTML = Object.entries(pastas).map(([nome, itens]) => `
+            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:12px; margin-bottom:10px;">
+                <div style="padding:15px; display:flex; justify-content:space-between;">
+                    <span>📦 ${nome}</span>
+                    <span style="color:var(--primary); font-weight:bold;">${itens.length} vendidos</span>
+                </div>
+            </div>`).join('');
+        document.getElementById('modalRankingProdutos').style.display = 'block';
+    }
 </script>
 </body>
 </html>
