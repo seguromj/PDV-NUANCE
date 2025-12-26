@@ -88,6 +88,7 @@
             width: 100%; padding: 12px 15px; background: #0f172a; 
             border: 1px solid #334155; border-radius: 10px; font-size: 14px; 
             color: white; transition: all 0.3s;
+            box-sizing: border-box;
         }
         input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
         
@@ -112,7 +113,7 @@
 
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
         .modal-content { background: var(--card); margin: 5vh auto; padding: 30px; width: 90%; max-width: 650px; border-radius: 24px; position: relative; border: 1px solid rgba(255,255,255,0.1); color: white; }
-        .close { position: absolute; right: 25px; top: 20px; font-size: 24px; cursor: pointer; color: var(--text-muted); }
+        .close { position: absolute; right: 25px; top: 15px; font-size: 28px; cursor: pointer; color: var(--text-muted); z-index: 2001; }
 
         .nota-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 15px; padding: 18px; margin-bottom: 15px; }
         
@@ -264,7 +265,11 @@
 </div>
 
 <div id="modalRankingClientes" class="modal">
-    <div class="modal-content"><span class="close" onclick="fecharModal('modalRankingClientes')">×</span><h3>👤 Ranking de Clientes VIP</h3><div id="lista-ranking-clientes"></div></div>
+    <div class="modal-content">
+        <span class="close" onclick="fecharModal('modalRankingClientes')">×</span>
+        <h3>👤 Ranking de Clientes VIP</h3>
+        <div id="lista-ranking-clientes"></div>
+    </div>
 </div>
 
 <div id="modalRankingProdutos" class="modal">
@@ -350,7 +355,7 @@
         const cep = document.getElementById('cep').value;
         if(rua) {
             const endereco = `${rua}, ${num}, ${bairro}, ${cep}`;
-            window.open("http://googleusercontent.com/maps.google.com/5" + encodeURIComponent(endereco));
+            window.open("http://googleusercontent.com/maps.google.com/6" + encodeURIComponent(endereco));
         } else { alert("Preencha o endereço primeiro!"); }
     }
 
@@ -416,7 +421,7 @@
         const site = "https://seguromj.github.io/Nuance-/";
         switch(n.status) {
             case 'pendente':
-                msg = `Olá, *${primeiroNome}*! ✨ %0A%0AIdentificamos que você deixou alguns itens incríveis no seu carrinho na *Nuance* e não finalizou sua compra. 🛒💨 %0A%0ANão deixe seus drinks favoritos esperando! Clique no link abaixo para voltar e garantir seu pedido com esse cupom: CINCO5: %0A%0A🔗 ${site} %0A%0AQualquer dúvida, estou à disposição! 🍸`;
+                msg = `Olá, *${primeiroNome}*! ✨ %0A%0AIdentificamos que você deixou alguns itens incríveis no seu carrinho na *Nuance* e não finalizou sua compra. 🛒💨 %0A%0ANão deixe seus drinks favoritos esperando! Clique no link abaixo para voltar e garantir seu pedido: %0A%0A🔗 ${site} %0A%0AQualquer dúvida, estou à disposição! 🍸`;
                 break;
             case 'preparando':
                 msg = `Ótimas notícias, *${primeiroNome}*! 🎉 %0A%0ASeu pedido *${n.shortId}* já está na bancada e nossos especialistas estão preparando seus drinks com todo carinho. 🍸✨ %0A%0AEm breve ele estará pronto para seguir até você!`;
@@ -469,12 +474,29 @@
     function abrirRankingClientes() {
         const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
         const clientes = {}; const fones = {};
-        notas.forEach(n => { const key = n.whatsapp || n.nome; if(key) { clientes[key] = (clientes[key] || 0) + 1; fones[key] = { zap: n.whatsapp, nome: n.nome }; } });
-        document.getElementById('lista-ranking-clientes').innerHTML = Object.entries(clientes).sort((a,b)=>b[1]-a[1]).map(([key, q]) => `
-            <div style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; align-items:center;">
-                <div><b style="color:var(--primary);">${fones[key].nome}</b><br><small>${key}</small></div>
-                <div style="font-weight:800;">${q} pedidos</div>
-            </div>`).join('');
+        
+        notas.forEach(n => { 
+            const key = n.whatsapp ? n.whatsapp.replace(/\D/g, '') : n.nome; 
+            if(key) { 
+                clientes[key] = (clientes[key] || 0) + 1; 
+                fones[key] = { zap: n.whatsapp, nome: n.nome }; 
+            } 
+        });
+
+        document.getElementById('lista-ranking-clientes').innerHTML = Object.entries(clientes).sort((a,b)=>b[1]-a[1]).map(([key, q]) => {
+            const isFidelidade = q >= 10;
+            return `
+            <div style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; align-items:center; background: ${isFidelidade ? 'rgba(16, 185, 129, 0.1)' : 'transparent'};">
+                <div>
+                    <b style="color: ${isFidelidade ? 'var(--success)' : 'var(--primary)'};">${fones[key].nome} ${isFidelidade ? '⭐' : ''}</b><br>
+                    <small style="color: var(--text-muted);">${fones[key].zap || 'Sem Whats'}</small>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-weight:800; font-size: 16px;">${q} pedidos</div>
+                    ${isFidelidade ? '<span style="font-size: 10px; background: var(--success); color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;">FIDELIDADE 10+</span>' : ''}
+                </div>
+            </div>`;
+        }).join('');
         document.getElementById('modalRankingClientes').style.display = 'block';
     }
 
@@ -503,7 +525,6 @@
                         const qtd = parseInt(m[1]);
                         const nomeProd = m[2].trim().toUpperCase();
                         if(!produtosAgrupados[nomeProd]) produtosAgrupados[nomeProd] = [];
-                        // Para cada unidade do produto no cupom, criamos uma entrada
                         for(let i=0; i<qtd; i++) {
                             produtosAgrupados[nomeProd].push({ cupom: nota.shortId, id: nota.id });
                         }
