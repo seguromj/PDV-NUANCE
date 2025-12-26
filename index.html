@@ -339,7 +339,7 @@
         const cep = document.getElementById('cep').value;
         if(rua) {
             const endereco = `${rua}, ${num}, ${bairro}, ${cep}`;
-            window.open("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(endereco));
+            window.open("http://googleusercontent.com/maps.google.com/3" + encodeURIComponent(endereco));
         } else { alert("Preencha o endereço primeiro!"); }
     }
 
@@ -401,21 +401,24 @@
         const n = notas.find(x => x.id === id);
         if(!n || !n.whatsapp) return;
 
+        // Pega apenas o primeiro nome
+        const primeiroNome = n.nome ? n.nome.split(' ')[0] : "Cliente";
+        
         let msg = "";
         const site = "https://seguromj.github.io/Nuance-/";
 
         switch(n.status) {
             case 'pendente':
-                msg = `Olá, *${n.nome}*! ✨ %0A%0AIdentificamos que você deixou alguns itens incríveis no seu carrinho na *Nuance* e não finalizou sua compra. 🛒💨 %0A%0ANão deixe seus drinks favoritos esperando! Clique no link abaixo para voltar e garantir seu pedido: %0A%0A🔗 ${site} %0A%0AQualquer dúvida, estou à disposição! 🍸`;
+                msg = `Olá, *${primeiroNome}*! ✨ %0A%0AIdentificamos que você deixou alguns itens incríveis no seu carrinho na *Nuance* e não finalizou sua compra. 🛒💨 %0A%0ANão deixe seus drinks favoritos esperando! Clique no link abaixo para voltar e garantir seu pedido: %0A%0A🔗 ${site} %0A%0AQualquer dúvida, estou à disposição! 🍸`;
                 break;
             case 'preparando':
-                msg = `Ótimas notícias, *${n.nome}*! 🎉 %0A%0ASeu pedido *${n.shortId}* já está na bancada e nossos especialistas estão preparando seus drinks com todo carinho. 🍸✨ %0A%0AEm breve ele estará pronto para seguir até você!`;
+                msg = `Ótimas notícias, *${primeiroNome}*! 🎉 %0A%0ASeu pedido *${n.shortId}* já está na bancada e nossos especialistas estão preparando seus drinks com todo carinho. 🍸✨ %0A%0AEm breve ele estará pronto para seguir até você!`;
                 break;
             case 'rua':
-                msg = `Prepare o brinde, *${n.nome}*! 🥂 %0A%0ASeu pedido acaba de sair para entrega e já está a caminho. 🛵💨 %0A%0AEm instantes a felicidade bate à sua porta!`;
+                msg = `Prepare o brinde, *${primeiroNome}*! 🥂 %0A%0ASeu pedido acaba de sair para entrega e já está a caminho. 🛵💨 %0A%0AEm instantes a felicidade bate à sua porta!`;
                 break;
             case 'entregue':
-                msg = `Pedido entregue! ✅ %0A%0AOlá *${n.nome}*, esperamos que aproveite cada gole do seu pedido. Muito obrigado por escolher a *Nuance*! ✨ %0A%0AQuando puder, visite nosso site para novidades: %0A🔗 ${site}`;
+                msg = `Pedido entregue! ✅ %0A%0AOlá *${primeiroNome}*, esperamos que aproveite cada gole do seu pedido. Muito obrigado por escolher a *Nuance*! ✨ %0A%0AQuando puder, visite nosso site para novidades: %0A🔗 ${site}`;
                 break;
         }
 
