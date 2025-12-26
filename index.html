@@ -158,8 +158,9 @@
                     <button class="btn btn-importar" onclick="processarTexto()">🚀 Processar Dados</button>
                     <button class="btn btn-nav" onclick="limparCampos()">🧹 Resetar</button>
                 </div>
-                <div style="margin-top:10px;">
-                    <button class="btn" style="background: #4285F4; color:white; width:100%;" onclick="abrirGoogleMaps()">📍 Ver Localização do Cliente</button>
+                <div style="margin-top:10px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <button class="btn" style="background: #4285F4; color:white;" onclick="abrirGoogleMaps()">🌐 Google Maps</button>
+                    <button class="btn" style="background: #0ea5e9; color:white;" onclick="verRotaDiretaCorrente()">🗺️ Rota no Modal</button>
                 </div>
             </div>
 
@@ -291,10 +292,10 @@
 </div>
 
 <div id="modalMapa" class="modal">
-    <div class="modal-content" style="max-width: 800px; height: 80vh;">
+    <div class="modal-content" style="max-width: 850px; height: 85vh; padding: 20px;">
         <span class="close" onclick="fecharModal('modalMapa')">×</span>
-        <h3 id="titulo-mapa" style="margin-top:0;">📍 Localização da Entrega</h3>
-        <iframe id="iframe-mapa" width="100%" height="90%" frameborder="0" style="border:0; border-radius:15px;" allowfullscreen></iframe>
+        <h3 id="titulo-mapa" style="margin-top:0; color: var(--text);">📍 Localização da Entrega</h3>
+        <iframe id="iframe-mapa" width="100%" height="90%" frameborder="0" style="border:0; border-radius:15px; background: #eee;" allowfullscreen></iframe>
     </div>
 </div>
 
@@ -367,14 +368,29 @@
         const cep = document.getElementById('cep').value;
         if(rua) {
             const endereco = `${rua}, ${num}, ${bairro}, ${cep}`;
-            window.open("https://www.google.com/maps/search/" + encodeURIComponent(endereco));
+            window.open("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(endereco));
         } else { alert("Preencha o endereço primeiro!"); }
+    }
+
+    function verRotaDiretaCorrente() {
+        const rua = document.getElementById('rua').value;
+        const num = document.getElementById('numero').value;
+        const bairro = document.getElementById('bairro').value;
+        const cep = document.getElementById('cep').value;
+        const nome = document.getElementById('nome').value || "Cliente";
+        
+        if(!rua) return alert("Preencha o endereço no formulário primeiro!");
+        
+        const endereco = `${rua}, ${num}, ${bairro}, ${cep}`;
+        document.getElementById('titulo-mapa').innerText = "📍 Rota: " + nome;
+        document.getElementById('iframe-mapa').src = `https://www.google.com/maps?q=${encodeURIComponent(endereco)}&output=embed`;
+        document.getElementById('modalMapa').style.display = 'block';
     }
 
     function verRotaModal(id) {
         const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
         const n = notas.find(x => x.id === id);
-        if(!n || !n.rua) return alert("Endereço não disponível!");
+        if(!n || !n.rua) return alert("Endereço não disponível neste pedido!");
         
         const endereco = `${n.rua}, ${n.numero}, ${n.bairro}, ${n.cep}`;
         document.getElementById('titulo-mapa').innerText = "📍 Entrega: " + n.nome;
@@ -488,7 +504,7 @@
                         <option value="entregue" ${n.status==='entregue'?'selected':''}>Entregue</option>
                     </select>
                     <button class="btn btn-nav" style="padding:4px 8px;" onclick="reabrirNota(${n.id})">👁️ Ver</button>
-                    <button class="btn btn-nav" style="background:#4285F4; padding:4px 8px; border:none;" onclick="verRotaModal(${n.id})">🗺️ Rota</button>
+                    <button class="btn btn-nav" style="background:#0ea5e9; padding:4px 8px; border:none;" onclick="verRotaModal(${n.id})">🗺️ Rota</button>
                     <button class="btn btn-nav" style="background:var(--whatsapp); padding:4px 8px; border:none;" onclick="enviarZapDireto(${n.id})">📱 Status</button>
                     <button class="btn btn-nav" style="background:#f59e0b; padding:4px 8px; border:none;" onclick="pedirFeedback(${n.id})">⭐ Feedback</button>
                     <button class="btn btn-nav" style="background:var(--danger); padding:4px 8px;" onclick="excluirNota(${n.id})">🗑️</button>
