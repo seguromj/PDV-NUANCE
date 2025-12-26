@@ -267,8 +267,12 @@
 <div id="modalRankingClientes" class="modal">
     <div class="modal-content">
         <span class="close" onclick="fecharModal('modalRankingClientes')">×</span>
-        <h3>👤 Ranking de Clientes VIP</h3>
+        <div style="display:flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin:0;">👤 Ranking de Clientes VIP</h3>
+            <button class="btn btn-nav" style="padding: 5px 10px; font-size: 10px;" onclick="mostrarRankingBairros()">📍 Ver Bairros</button>
+        </div>
         <div id="lista-ranking-clientes"></div>
+        <div id="lista-ranking-bairros" style="display:none; margin-top:20px;"></div>
     </div>
 </div>
 
@@ -355,7 +359,7 @@
         const cep = document.getElementById('cep').value;
         if(rua) {
             const endereco = `${rua}, ${num}, ${bairro}, ${cep}`;
-            window.open("http://googleusercontent.com/maps.google.com/6" + encodeURIComponent(endereco));
+            window.open("https://www.google.com/maps/search/" + encodeURIComponent(endereco));
         } else { alert("Preencha o endereço primeiro!"); }
     }
 
@@ -436,6 +440,15 @@
         window.open(`https://api.whatsapp.com/send?phone=55${n.whatsapp}&text=${msg}`);
     }
 
+    function pedirFeedback(id) {
+        const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        const n = notas.find(x => x.id === id);
+        if(!n || !n.whatsapp) return;
+        const primeiroNome = n.nome ? n.nome.split(' ')[0] : "Cliente";
+        const msg = `Olá *${primeiroNome}*! 🍸%0A%0APassando para saber: o que achou dos seus drinks da *Nuance*? %0A%0ASua opinião é muito importante para nós! Se puder avaliar, ficaremos muito felizes. ✨`;
+        window.open(`https://api.whatsapp.com/send?phone=55${n.whatsapp}&text=${msg}`);
+    }
+
     function filtrarNotas() {
         const busca = document.getElementById('busca-nota').value.toLowerCase();
         const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
@@ -448,7 +461,7 @@
                     <div><b style="color:var(--primary);">${n.nome}</b><br><small>${n.shortId}</small></div>
                     <div style="text-align:right;"><span style="color:var(--success); font-weight:800;">R$ ${n.total}</span></div>
                 </div>
-                <div style="margin-top:10px; display:flex; gap:10px;">
+                <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:8px;">
                     <select onchange="mudarStatus(${n.id}, this.value)" class="status-badge st-${n.status}">
                         <option value="pendente" ${n.status==='pendente'?'selected':''}>Pendente</option>
                         <option value="preparando" ${n.status==='preparando'?'selected':''}>Preparo</option>
@@ -456,7 +469,8 @@
                         <option value="entregue" ${n.status==='entregue'?'selected':''}>Entregue</option>
                     </select>
                     <button class="btn btn-nav" style="padding:4px 8px;" onclick="reabrirNota(${n.id})">👁️ Ver</button>
-                    <button class="btn btn-nav" style="background:var(--whatsapp); padding:4px 8px; border:none;" onclick="enviarZapDireto(${n.id})">📱 Zap</button>
+                    <button class="btn btn-nav" style="background:var(--whatsapp); padding:4px 8px; border:none;" onclick="enviarZapDireto(${n.id})">📱 Status</button>
+                    <button class="btn btn-nav" style="background:#f59e0b; padding:4px 8px; border:none;" onclick="pedirFeedback(${n.id})">⭐ Feedback</button>
                     <button class="btn btn-nav" style="background:var(--danger); padding:4px 8px;" onclick="excluirNota(${n.id})">🗑️</button>
                 </div>
             </div>
@@ -472,6 +486,9 @@
     function excluirNota(id) { if(confirm("Excluir?")) { let n = JSON.parse(localStorage.getItem('notas_nuance') || '[]').filter(x=>x.id!==id); localStorage.setItem('notas_nuance', JSON.stringify(n)); filtrarNotas(); } }
 
     function abrirRankingClientes() {
+        document.getElementById('lista-ranking-clientes').style.display = 'block';
+        document.getElementById('lista-ranking-bairros').style.display = 'none';
+        
         const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
         const clientes = {}; const fones = {};
         
@@ -498,6 +515,30 @@
             </div>`;
         }).join('');
         document.getElementById('modalRankingClientes').style.display = 'block';
+    }
+
+    function mostrarRankingBairros() {
+        const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        const bairros = {};
+        
+        notas.forEach(n => {
+            const b = (n.bairro || "Não Informado").trim().toUpperCase();
+            bairros[b] = (bairros[b] || 0) + 1;
+        });
+
+        document.getElementById('lista-ranking-clientes').style.display = 'none';
+        const listaB = document.getElementById('lista-ranking-bairros');
+        listaB.style.display = 'block';
+        
+        listaB.innerHTML = `
+            <div style="margin-bottom:15px;"><button class="btn btn-nav" onclick="abrirRankingClientes()" style="font-size:10px;">← Voltar para Clientes</button></div>
+            <h4 style="margin-bottom:15px; color:var(--accent);">📍 Mapa de Calor (Bairros)</h4>
+            ` + Object.entries(bairros).sort((a,b)=>b[1]-a[1]).map(([nome, total]) => `
+            <div style="padding:12px; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between;">
+                <span>${nome}</span>
+                <b style="color:var(--primary);">${total} entregas</b>
+            </div>
+        `).join('');
     }
 
     function aplicarValorEstoque() {
@@ -562,3 +603,4 @@
 </script>
 </body>
 </html>
+a
