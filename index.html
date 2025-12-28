@@ -346,10 +346,10 @@
         document.getElementById('view-produtos').innerText = prod || "Nenhum produto";
         document.getElementById('view-total').innerText = "R$ " + (document.getElementById('valor-total').value || "0.00");
         document.getElementById('view-obs').innerText = obs ? "OBS: " + obs : "";
-        document.getElementById('view-pago-status').innerText = estaPago || "Pegue o Cupom e Ultilie em sua próxima Compraa";
+        document.getElementById('view-pago-status').innerText = estaPago || "---";
 
         const vC = document.getElementById('view-cupom-aplicado');
-        if(cupomV) { vC.style.display = "block"; vC.innerText = "CUPOM para sua próxima Compraw: " + cupomV.toUpperCase(); }
+        if(cupomV) { vC.style.display = "block"; vC.innerText = "CUPOM para sua próxima Compra: " + cupomV.toUpperCase(); }
         else vC.style.display = "none";
 
         document.getElementById('etiq-nome').innerText = nome;
