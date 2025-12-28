@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nuance PDV | Premium System</title>
+    <title>Nuance PDV | 2.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     
@@ -165,7 +165,7 @@
 <div class="main-wrapper">
     <header class="top-bar">
         <div class="logo-area">
-            <h2>NUANCE <span style="font-weight: 300; font-size: 14px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; margin-left: 10px;">Control Center</span></h2>
+            <h2>NUANCE <span style="font-weight: 300; font-size: 14px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; margin-left: 10px;">2.1</span></h2>
         </div>
         <nav style="display:flex; gap: 10px;">
             <button class="btn btn-nav" onclick="abrirGestao()">📁 Histórico</button>
@@ -179,12 +179,6 @@
             <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05)); border: 1px solid rgba(245, 158, 11, 0.2); padding: 20px; border-radius: 15px; margin-bottom: 25px;">
                 <label style="color: #f59e0b; font-weight: 800;">Colar mensagem do Telegram</label>
                 <textarea id="input-importacao" style="height: 80px; margin: 10px 0; background: rgba(0,0,0,0.3);" placeholder="Cole a mensagem do Telegram aqui..."></textarea>
-                
-                <div class="form-group" style="margin-top: 10px;">
-                    <label style="color: var(--accent);">Prefixo da Ordem (Ex: M-)</label>
-                    <input type="text" id="prefixo-ordem" placeholder="Digite Letra ou Nome..." value="M-" style="border-color: var(--accent);">
-                </div>
-
                 <div class="grid">
                     <button class="btn btn-importar" onclick="processarTexto()">Processar Mensagem</button>
                     <button class="btn btn-nav" onclick="limparCampos()">🧹 Resetar</button>
@@ -226,6 +220,11 @@
                 <div class="form-group"><label>Cupom Promocional</label><input type="text" id="cupom-input" placeholder="Ex: BLACK10" oninput="atualizarCupom()"></div>
             </div>
             <div class="form-group"><label>Observações Internas</label><input type="text" id="obs" oninput="atualizarCupom()"></div>
+
+            <div class="form-group" style="margin-top: 20px;">
+                <label style="color: var(--primary); font-weight: 800;">Prefixo da Ordem</label>
+                <input type="text" id="prefixo-ordem" placeholder="Digite o prefixo..." style="border: 2px solid var(--primary);">
+            </div>
 
             <button class="btn btn-gerar" onclick="finalizarEGerar()">✅ FINALIZAR E SALVAR PEDIDO</button>
         </section>
@@ -362,11 +361,10 @@
 <script>
     const versiculos = ["Filipenses 4:6:\n Não vos inquieteis com nada, mas em toda necessidade apresentai a Deus vossos pedidos com orações, súplicas e ações de graças.",
                         "Salmos 136:1:\n Deem graças ao Senhor, porque ele é bom. O seu amor dura para sempre!",
-                        "Salmos 100:4:\n wEntrai por suas portas dando graças, e em seus átrios com hinos de louvor, louvai-o, bendizei seu nome", 
-                        "Romanos 12:12\n Alegrai-vos na esperança, sede pacientes na tribulação, perseverai na oração.", 
-                        "Filipenses 4:13:\n Tudo posso naquele que me fortalece",
-                        "Salmos 23:1-2:\n O Senhor é o meu pastor; nada me faltará. Ele me faz repousar em pastos verdes, guia-me em águas tranquilas",
-                        "Coríntios 12:9:\n A minha graça te basta, porque o meu poder se aperfeiçoa na fraqueza"];
+                        "Salmos 100:4:\n Entrai por suas portas dando graças, e em seus átrios com hinos de louvor, louvai-o, bendizei seu nome", 
+                        "O Senhor te abençoe e te guarde.", 
+                        "O amor nunca falha.",
+                        "Confia no Senhor de todo o teu coração."];
 
     function atualizarCupom() {
         const nome = document.getElementById('nome').value.toUpperCase();
@@ -424,6 +422,7 @@
         document.getElementById('etiq-obs').innerText = obs;
         document.getElementById('etiq-prod').innerText = prod;
 
+        // Versículo aleatório no HTML do cupom
         document.getElementById('view-versiculo').innerText = versiculos[Math.floor(Math.random() * versiculos.length)];
     }
 
@@ -483,8 +482,9 @@
     function finalizarEGerar() {
         let notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
         const idTimestamp = Date.now();
-        const prefixo = document.getElementById('prefixo-ordem').value || ""; // Pega o prefixo digitado
-        let shortId = prefixo + "#" + idTimestamp.toString().slice(-6); // Junta o prefixo com o código
+        const prefixoDigitado = document.getElementById('prefixo-ordem').value || "ORDEM";
+        let shortId = prefixoDigitado + "-" + idTimestamp.toString().slice(-6);
+        
         const cleanZap = document.getElementById('whatsapp').value.replace(/\D/g, '');
         const dados = { id: idTimestamp, shortId: shortId, nome: document.getElementById('nome').value, data: document.getElementById('data-hora').value, whatsapp: cleanZap, cpf: document.getElementById('CPF').value, rua: document.getElementById('rua').value, numero: document.getElementById('numero').value, bairro: document.getElementById('bairro').value, cep: document.getElementById('cep').value, complemento: document.getElementById('complemento').value, coleta: document.getElementById('coleta').value, produtos: document.getElementById('produtos-texto').value, total: document.getElementById('valor-total').value, pagamento: document.getElementById('pagamento').value, obs: document.getElementById('obs').value, status: 'pendente' };
         notas.push(dados);
@@ -544,7 +544,7 @@
 
     function pedirFeedback(id) {
         const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
-        const n = notas.find(x => x.id === id);
+        const n = Ricciardi = notas.find(x => x.id === id);
         if(!n || !n.whatsapp) return;
         const primeiroNome = n.nome ? n.nome.split(' ')[0] : "Cliente";
         const msg = `Olá *${primeiroNome}*! 🍸%0A%0APassando para saber: o que achou dos seus drinks da *Nuance*? %0A%0ASua opinião é muito importante para nós! Se puder avaliar, ficaremos muito felizes. ✨`;
@@ -553,7 +553,7 @@
 
     function filtrarNotas() {
         const busca = document.getElementById('busca-nota').value.toLowerCase();
-        const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        const notas = Ricciardi = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
         const lista = document.getElementById('lista-notas');
         const filtradas = notas.slice().reverse().filter(n => (n.nome||"").toLowerCase().includes(busca) || (n.whatsapp||"").toLowerCase().includes(busca.replace(/\D/g, '')) || (n.shortId||"").toLowerCase().includes(busca));
         document.getElementById('contador-cupons').innerText = filtradas.length;
@@ -592,10 +592,10 @@
         document.getElementById('lista-ranking-clientes').style.display = 'block';
         document.getElementById('lista-ranking-bairros').style.display = 'none';
         
-        const Gabriel = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
         const clientes = {}; const fones = {};
         
-        Gabriel.forEach(n => { 
+        notas.forEach(n => { 
             const key = n.whatsapp ? n.whatsapp.replace(/\D/g, '') : n.nome; 
             if(key) { 
                 clientes[key] = (clientes[key] || 0) + 1; 
@@ -624,10 +624,10 @@
     }
 
     function mostrarRankingBairros() {
-        const Gabriel = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
         const bairros = {};
         
-        Gabriel.forEach(n => {
+        notas.forEach(n => {
             const b = (n.bairro || "Não Informado").trim().toUpperCase();
             bairros[b] = (bairros[b] || 0) + 1;
         });
@@ -661,10 +661,10 @@
     }
 
     function abrirRankingProdutos() {
-        const Gabriel = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
         const produtosAgrupados = {};
 
-        Gabriel.forEach(nota => {
+        notas.forEach(nota => {
             if(nota.produtos) {
                 nota.produtos.split('\n').forEach(linha => {
                     const m = linha.match(/(\d+)x\s*(.*)/i);
