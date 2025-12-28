@@ -371,6 +371,10 @@
                     <span>TOTAL:</span>
                     <span id="view-total">R$ 0.00</span>
                 </div>
+                <div id="view-atendente-container" style="display:none; font-size: 10px; margin-top: 10px; border-top: 1px solid #eee; padding-top: 5px; color: #555;">
+                    <b>ATENDENTE:</b> <span id="view-atendente-nome"></span>
+                </div>
+
                 <div id="view-cupom-aplicado" style="font-size: 11px; margin-top: 10px; text-align: center; background: #eee; padding: 5px; display:none;"></div>
                 <div id="view-obs" style="font-size: 11px; margin-top: 10px; font-style: italic;"></div>
                 <div id="view-versiculo" style="margin-top: 20px; font-size: 10px; text-align: center; color: #666; border-top: 1px dashed #ccc; padding-top: 10px;"></div>
@@ -735,10 +739,11 @@
         const rua = document.getElementById('rua').value;
         const num = document.getElementById('numero').value;
         const bairro = document.getElementById('bairro').value;
+        const cupomV = document.getElementById('cupom-input').value;
         const cep = document.getElementById('cep').value;
         if(rua) {
             const endereco = `${rua}, ${num}, ${bairro}, ${cep}`;
-            window.open("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(endereco));
+            window.open("https://www.google.com/maps/search/" + encodeURIComponent(endereco));
         } else { alert("Preencha o endereço primeiro!"); }
     }
 
@@ -753,9 +758,7 @@
         
         const endereco = `${rua}, ${num}, ${bairro}, ${cep}`;
         document.getElementById('titulo-mapa').innerText = "📍 Rota: " + nome;
-        document.getElementById('iframe-mapa').src = `https://www.google.com/maps/embed/v1/place?key=SUA_API_KEY_AQUI&q=${encodeURIComponent(endereco)}`;
-        // Nota: O embed do Google requer uma API Key válida. Se não tiver, use a URL de busca:
-        document.getElementById('iframe-mapa').src = `https://maps.google.com/maps?q=${encodeURIComponent(endereco)}&output=embed`;
+        document.getElementById('iframe-mapa').src = `https://www.google.com/maps?q=${encodeURIComponent(endereco)}&output=embed`;
         document.getElementById('modalMapa').style.display = 'block';
     }
 
@@ -766,7 +769,7 @@
         
         const endereco = `${n.rua}, ${n.numero}, ${n.bairro}, ${n.cep}`;
         document.getElementById('titulo-mapa').innerText = "📍 Entrega: " + n.nome;
-        document.getElementById('iframe-mapa').src = `https://maps.google.com/maps?q=${encodeURIComponent(endereco)}&output=embed`;
+        document.getElementById('iframe-mapa').src = `https://www.google.com/maps?q=${encodeURIComponent(endereco)}&output=embed`;
         document.getElementById('modalMapa').style.display = 'block';
     }
 
@@ -845,7 +848,7 @@
 
     function enviarZapDireto(id) {
         const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
-        const n = notas.find(x => x.id === id);
+        const n =淹otas.find(x => x.id === id);
         if(!n || !n.whatsapp) return;
         const primeiroNome = n.nome ? n.nome.split(' ')[0] : "Cliente";
         let msg = "";
@@ -924,7 +927,27 @@
         atualizarCupom(); 
     }
 
-    function baixarPDF() { html2pdf().from(document.getElementById('area-cupom')).save(); }
+    function baixarPDF() { 
+        // Preenche o campo de atendente antes de gerar
+        const atendenteDiv = document.getElementById('view-atendente-container');
+        document.getElementById('view-atendente-nome').innerText = nomeUsuarioLogado.toUpperCase();
+        
+        // Torna visível para o html2pdf capturar
+        atendenteDiv.style.display = 'block';
+        
+        const opt = {
+            margin: 5,
+            filename: `Pedido_${document.getElementById('view-id-cupom').innerText}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opt).from(document.getElementById('area-cupom')).save().then(() => {
+            // Oculta novamente no dashboard após o download
+            atendenteDiv.style.display = 'none';
+        });
+    }
     
     function imprimirEtiqueta() { 
         document.getElementById('area-cupom').style.display='none'; 
@@ -1111,4 +1134,40 @@
     }
 
     function exportarCSV() {
-        let宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣
+        let notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        const minhasNotas = notas.filter(n => n.atendente === usuarioLogado);
+        
+        if (minhasNotas.length === 0) {
+            alert("Você não possui pedidos salvos para exportar.");
+            return;
+        }
+
+        const cabecalho = ["ID", "Data", "Cliente", "WhatsApp", "Endereço", "Total", "Pagamento", "Produtos"];
+        const linhas = minhasNotas.map(n => [
+            n.shortId,
+            n.data,
+            n.nome,
+            n.whatsapp,
+            `${n.rua}, ${n.numero} - ${n.bairro}`,
+            n.total,
+            n.pagamento,
+            n.produtos.replace(/\n/g, " | ")
+        ]);
+
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+        csvContent += cabecalho.join(";") + "\n";
+        linhas.forEach(row => {
+            csvContent += row.join(";") + "\n";
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `Relatorio_${nomeUsuarioLogado.replace(/\s+/g, '_')}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+</body>
+</html>
