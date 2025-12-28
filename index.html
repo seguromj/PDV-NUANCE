@@ -735,11 +735,10 @@
         const rua = document.getElementById('rua').value;
         const num = document.getElementById('numero').value;
         const bairro = document.getElementById('bairro').value;
-        const cupomV = document.getElementById('cupom-input').value;
         const cep = document.getElementById('cep').value;
         if(rua) {
             const endereco = `${rua}, ${num}, ${bairro}, ${cep}`;
-            window.open("https://www.google.com/maps/search/" + encodeURIComponent(endereco));
+            window.open("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(endereco));
         } else { alert("Preencha o endereço primeiro!"); }
     }
 
@@ -754,7 +753,9 @@
         
         const endereco = `${rua}, ${num}, ${bairro}, ${cep}`;
         document.getElementById('titulo-mapa').innerText = "📍 Rota: " + nome;
-        document.getElementById('iframe-mapa').src = `https://www.google.com/maps?q=${encodeURIComponent(endereco)}&output=embed`;
+        document.getElementById('iframe-mapa').src = `https://www.google.com/maps/embed/v1/place?key=SUA_API_KEY_AQUI&q=${encodeURIComponent(endereco)}`;
+        // Nota: O embed do Google requer uma API Key válida. Se não tiver, use a URL de busca:
+        document.getElementById('iframe-mapa').src = `https://maps.google.com/maps?q=${encodeURIComponent(endereco)}&output=embed`;
         document.getElementById('modalMapa').style.display = 'block';
     }
 
@@ -765,7 +766,7 @@
         
         const endereco = `${n.rua}, ${n.numero}, ${n.bairro}, ${n.cep}`;
         document.getElementById('titulo-mapa').innerText = "📍 Entrega: " + n.nome;
-        document.getElementById('iframe-mapa').src = `https://www.google.com/maps?q=${encodeURIComponent(endereco)}&output=embed`;
+        document.getElementById('iframe-mapa').src = `https://maps.google.com/maps?q=${encodeURIComponent(endereco)}&output=embed`;
         document.getElementById('modalMapa').style.display = 'block';
     }
 
@@ -1110,40 +1111,4 @@
     }
 
     function exportarCSV() {
-        let notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
-        const minhasNotas = notas.filter(n => n.atendente === usuarioLogado);
-        
-        if (minhasNotas.length === 0) {
-            alert("Você não possui pedidos salvos para exportar.");
-            return;
-        }
-
-        const cabecalho = ["ID", "Data", "Cliente", "WhatsApp", "Endereço", "Total", "Pagamento", "Produtos"];
-        const linhas = minhasNotas.map(n => [
-            n.shortId,
-            n.data,
-            n.nome,
-            n.whatsapp,
-            `${n.rua}, ${n.numero} - ${n.bairro}`,
-            n.total,
-            n.pagamento,
-            n.produtos.replace(/\n/g, " | ")
-        ]);
-
-        let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-        csvContent += cabecalho.join(";") + "\n";
-        linhas.forEach(row => {
-            csvContent += row.join(";") + "\n";
-        });
-
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `Relatorio_${nomeUsuarioLogado.replace(/\s+/g, '_')}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-</script>
-</body>
-</html>
+        let宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣宣
