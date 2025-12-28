@@ -186,7 +186,7 @@
         /* ESTILOS DO JOGO DE DADOS */
         .scene { width: var(--face-size); height: var(--face-size); perspective: 600px; margin: 20px auto; }
         .dice { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 2s cubic-bezier(0.17, 0.67, 0.1, 1); }
-        .face { position: absolute; width: var(--face-size); height: var(--face-size); background: white; border: 2px solid #ccc; border-radius: 15px; display: grid; grid-template: repeat(3, 1fr) / repeat(3, 1fr); padding: 10px; box-sizing: border-box; }
+        .face { position: absolute; width: var(--face-size); height: var(--face-size); background: white; border: 2px solid #ccc; border-radius: 15px; display: grid; grid-template: repeat(3, 1fr) / repeat(3, 1fr) ; padding: 10px; box-sizing: border-box; }
         .dot { background-color: #333; border-radius: 50%; width: var(--dot-size); height: var(--dot-size); align-self: center; justify-self: center; }
         .face-1 { transform: rotateY(0deg) translateZ(calc(var(--face-size) / 2)); }
         .face-2 { transform: rotateY(90deg) translateZ(calc(var(--face-size) / 2)); }
@@ -804,7 +804,14 @@
         localStorage.setItem('notas_nuance', JSON.stringify(notas));
         
         document.getElementById('view-id-cupom').innerText = shortId;
-        alert("Pedido Salvo com sucesso no Histórico, VIPs e Estoque!");
+
+        // VERIFICAÇÃO DO JOGO DO DADO (10 COMPRAS)
+        const totalCompras = notas.filter(n => (n.whatsapp && n.whatsapp === cleanZap) || (n.nome && n.nome === document.getElementById('nome').value)).length;
+        if (totalCompras % 10 === 0 && totalCompras > 0) {
+            abrirSorteio();
+        } else {
+            alert("Pedido Salvo com sucesso no Histórico, VIPs e Estoque!");
+        }
         
         if(document.getElementById('modalGestao').style.display === 'block') filtrarNotas();
     }
@@ -1057,6 +1064,10 @@
         aplicarValorEstoque();
     }
 
+    function abrirSorteio() {
+        document.getElementById('modalSorteio').style.display = 'block';
+    }
+
     function rollDice() {
         const dice = document.getElementById('dice');
         const scene = document.getElementById('scene');
@@ -1082,6 +1093,18 @@
         const finalY = rotations[result].y + extraSpinY;
 
         dice.style.transform = `rotateX(${finalX}deg) rotateY(${finalY}deg)`;
+        
+        setTimeout(() => {
+            const premios = {
+                1: "10% de desconto",
+                2: "Não Foi dessa vez",
+                3: "4% de desconto",
+                4: "100% de desconto para um Drink só",
+                5: "7% de desconto",
+                6: "Frete Gratis"
+            };
+            alert("O dado caiu em " + result + "! Prêmio: " + premios[result]);
+        }, 2100);
     }
 </script>
 </body>
