@@ -756,11 +756,10 @@
         const rua = document.getElementById('rua').value;
         const num = document.getElementById('numero').value;
         const bairro = document.getElementById('bairro').value;
-        const cupomV = document.getElementById('cupom-input').value;
         const cep = document.getElementById('cep').value;
         if(rua) {
             const endereco = `${rua}, ${num}, ${bairro}, ${cep}`;
-            window.open("https://www.google.com/maps/search/" + encodeURIComponent(endereco));
+            window.open("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(endereco));
         } else { alert("Preencha o endereço primeiro!"); }
     }
 
@@ -775,7 +774,7 @@
         
         const endereco = `${rua}, ${num}, ${bairro}, ${cep}`;
         document.getElementById('titulo-mapa').innerText = "📍 Rota: " + nome;
-        document.getElementById('iframe-mapa').src = `https://www.google.com/maps?q=${encodeURIComponent(endereco)}&output=embed`;
+        document.getElementById('iframe-mapa').src = `https://maps.google.com/maps?q=${encodeURIComponent(endereco)}&output=embed`;
         document.getElementById('modalMapa').style.display = 'block';
     }
 
@@ -786,7 +785,7 @@
         
         const endereco = `${n.rua}, ${n.numero}, ${n.bairro}, ${n.cep}`;
         document.getElementById('titulo-mapa').innerText = "📍 Entrega: " + n.nome;
-        document.getElementById('iframe-mapa').src = `https://www.google.com/maps?q=${encodeURIComponent(endereco)}&output=embed`;
+        document.getElementById('iframe-mapa').src = `https://maps.google.com/maps?q=${encodeURIComponent(endereco)}&output=embed`;
         document.getElementById('modalMapa').style.display = 'block';
     }
 
@@ -945,11 +944,8 @@
     }
 
     function baixarPDF() { 
-        // Preenche o campo de atendente antes de gerar
         const atendenteDiv = document.getElementById('view-atendente-container');
         document.getElementById('view-atendente-nome').innerText = nomeUsuarioLogado.toUpperCase();
-        
-        // Torna visível para o html2pdf capturar
         atendenteDiv.style.display = 'block';
         
         const opt = {
@@ -961,7 +957,6 @@
         };
 
         html2pdf().set(opt).from(document.getElementById('area-cupom')).save().then(() => {
-            // Oculta novamente no dashboard após o download
             atendenteDiv.style.display = 'none';
         });
     }
