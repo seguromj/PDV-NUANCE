@@ -20,6 +20,9 @@
             --text: #f8fafc;
             --text-muted: #94a3b8;
             --glass: rgba(30, 41, 59, 0.7);
+            /* Variáveis do Jogo */
+            --face-size: 80px;
+            --dot-size: 14px;
         }
 
         body { 
@@ -128,6 +131,28 @@
         #lista-notas::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
         #contador-cupons { background: var(--primary); padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; margin-left: 10px; }
 
+        /* ESTILOS DO JOGO DE DADOS */
+        .scene { width: var(--face-size); height: var(--face-size); perspective: 600px; margin: 20px auto; }
+        .dice { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 2s cubic-bezier(0.17, 0.67, 0.1, 1); }
+        .face { position: absolute; width: var(--face-size); height: var(--face-size); background: white; border: 2px solid #ccc; border-radius: 15px; display: grid; grid-template: repeat(3, 1fr) / repeat(3, 1fr); padding: 10px; box-sizing: border-box; }
+        .dot { background-color: #333; border-radius: 50%; width: var(--dot-size); height: var(--dot-size); align-self: center; justify-self: center; }
+        .face-1 { transform: rotateY(0deg) translateZ(calc(var(--face-size) / 2)); }
+        .face-2 { transform: rotateY(90deg) translateZ(calc(var(--face-size) / 2)); }
+        .face-3 { transform: rotateY(180deg) translateZ(calc(var(--face-size) / 2)); }
+        .face-4 { transform: rotateY(-90deg) translateZ(calc(var(--face-size) / 2)); }
+        .face-5 { transform: rotateX(90deg) translateZ(calc(var(--face-size) / 2)); }
+        .face-6 { transform: rotateX(-90deg) translateZ(calc(var(--face-size) / 2)); }
+        .face-1 .dot:nth-child(1) { grid-area: 2/2; }
+        .face-2 .dot:nth-child(1) { grid-area: 1/1; } .face-2 .dot:nth-child(2) { grid-area: 3/3; }
+        .face-3 .dot:nth-child(1) { grid-area: 1/1; } .face-3 .dot:nth-child(2) { grid-area: 2/2; } .face-3 .dot:nth-child(3) { grid-area: 3/3; }
+        .face-4 .dot:nth-child(1) { grid-area: 1/1; } .face-4 .dot:nth-child(2) { grid-area: 1/3; } .face-4 .dot:nth-child(3) { grid-area: 3/1; } .face-4 .dot:nth-child(4) { grid-area: 3/3; }
+        .face-5 .dot:nth-child(1) { grid-area: 1/1; } .face-5 .dot:nth-child(2) { grid-area: 1/3; } .face-5 .dot:nth-child(3) { grid-area: 2/2; } .face-5 .dot:nth-child(4) { grid-area: 3/1; } .face-5 .dot:nth-child(5) { grid-area: 3/3; }
+        .face-6 .dot:nth-child(1) { grid-area: 1/1; } .face-6 .dot:nth-child(2) { grid-area: 2/1; } .face-6 .dot:nth-child(3) { grid-area: 3/1; } .face-6 .dot:nth-child(4) { grid-area: 1/3; } .face-6 .dot:nth-child(5) { grid-area: 2/3; } .face-6 .dot:nth-child(6) { grid-area: 3/3; }
+        @keyframes jump { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-80px); } }
+        .jumping { animation: jump 2s ease-in-out; }
+        .coupon-item { background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 12px; border-left: 4px solid var(--primary); display: flex; flex-direction: column; margin-bottom: 8px; }
+        .discount-text { color: #00ff88; font-size: 0.85rem; font-weight: bold; }
+
         @media print {
             body * { visibility: hidden; }
             #area-cupom, #area-cupom *, #area-etiqueta, #area-etiqueta * { visibility: visible; }
@@ -152,10 +177,10 @@
     <main class="pdv-container">
         <section class="panel-left">
             <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05)); border: 1px solid rgba(245, 158, 11, 0.2); padding: 20px; border-radius: 15px; margin-bottom: 25px;">
-                <label style="color: #f59e0b; font-weight: 800;">🔥 IMPORTAÇÃO INTELIGENTE</label>
-                <textarea id="input-importacao" style="height: 80px; margin: 10px 0; background: rgba(0,0,0,0.3);" placeholder="Cole a mensagem do WhatsApp aqui..."></textarea>
+                <label style="color: #f59e0b; font-weight: 800;">Colar mensagem do Telegram</label>
+                <textarea id="input-importacao" style="height: 80px; margin: 10px 0; background: rgba(0,0,0,0.3);" placeholder="Cole a mensagem do Telegram aqui..."></textarea>
                 <div class="grid">
-                    <button class="btn btn-importar" onclick="processarTexto()">🚀 Processar Dados</button>
+                    <button class="btn btn-importar" onclick="processarTexto()">Processar Mensagem</button>
                     <button class="btn btn-nav" onclick="limparCampos()">🧹 Resetar</button>
                 </div>
                 <div style="margin-top:10px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -217,7 +242,7 @@
                     <b>COLETA:</b> <span id="view-coleta"></span><br>
                     <div id="view-zap-bloco"><b>ZAP:</b> <span id="view-zap"></span><br></div>
                     <div id="view-cpf-bloco"><b>REF:</b> <span id="view-cpf"></span><br></div>
-                    <div id="view-pag-bloco"><b>PAGAMENTO:</b> <span id="view-pag"></span></div>
+                    <div id="view-pag-bloco"><b>Pago Por:</b> <span id="view-pag"></span></div>
                 </div>
                 
                 <div class="divisor"></div>
@@ -283,7 +308,6 @@
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 15px;">
             <h3 style="margin:0;">📦 Pastas de Estoque</h3>
             <div style="text-align: right;">
-                <span style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Total Calculado</span><br>
                 <span id="valor-total-estoque" style="font-size: 20px; font-weight: 800; color: var(--success);">R$ 0,00</span>
             </div>
         </div>
@@ -299,8 +323,43 @@
     </div>
 </div>
 
+<div id="modalSorteio" class="modal">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+        <span class="close" onclick="fecharModal('modalSorteio')">×</span>
+        <h2 style="color: var(--primary); margin-bottom: 10px;">Nuance</h2>
+        <p style="font-size: 14px; color: var(--text-muted);">Sorteio de Descontos para VIPs</p>
+        
+        <div class="scene" id="scene">
+            <div class="dice" id="dice">
+                <div class="face face-1"><div class="dot"></div></div>
+                <div class="face face-2"><div class="dot"></div><div class="dot"></div></div>
+                <div class="face face-3"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                <div class="face face-4"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                <div class="face face-5"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                <div class="face face-6"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+            </div>
+        </div>
+
+        <button class="btn btn-gerar" style="width:100%; margin: 20px 0;" onclick="rollDice()">🎲 LANÇAR DADO!</button>
+
+        <div style="text-align: left; margin-top: 20px;">
+            <div class="coupon-item"><span class="discount-text">10% de desconto</span><span>Número 1</span></div>
+            <div class="coupon-item"><span class="discount-text">9% de desconto</span><span>Número 2</span></div>
+            <div class="coupon-item"><span class="discount-text">4% de desconto</span><span>Número 3</span></div>
+            <div class="coupon-item"><span class="discount-text">100% de desconto</span><span>Número 4</span></div>
+            <div class="coupon-item"><span class="discount-text">7% de desconto</span><span>Número 5</span></div>
+            <div class="coupon-item"><span class="discount-text">Frete Gratis</span><span>Número 6</span></div>
+        </div>
+    </div>
+</div>
+
 <script>
-    const versiculos = ["O Senhor é o meu pastor, nada me faltará.", "Tudo posso naquele que me fortalece.", "O Senhor te abençoe e te guarde.", "O amor nunca falha.", "Confia no Senhor de todo o teu coração."];
+    const versiculos = ["Filipenses 4:6:\n Não vos inquieteis com nada, mas em toda necessidade apresentai a Deus vossos pedidos com orações, súplicas e ações de graças.",
+                        "Salmos 136:1:\n Deem graças ao Senhor, porque ele é bom. O seu amor dura para sempre!",
+                        "Salmos 100:4:\n wEntrai por suas portas dando graças, e em seus átrios com hinos de louvor, louvai-o, bendizei seu nome", 
+                        "O Senhor te abençoe e te guarde.", 
+                        "O amor nunca falha.",
+                        "Confia no Senhor de todo o teu coração."];
 
     function atualizarCupom() {
         const nome = document.getElementById('nome').value.toUpperCase();
@@ -346,7 +405,7 @@
         document.getElementById('view-produtos').innerText = prod || "Nenhum produto";
         document.getElementById('view-total').innerText = "R$ " + (document.getElementById('valor-total').value || "0.00");
         document.getElementById('view-obs').innerText = obs ? "OBS: " + obs : "";
-        document.getElementById('view-pago-status').innerText = estaPago || "Valor: ";
+        document.getElementById('view-pago-status').innerText = estaPago || "-💱-";
 
         const vC = document.getElementById('view-cupom-aplicado');
         if(cupomV) { vC.style.display = "block"; vC.innerText = "CUPOM para sua próxima Compra: " + cupomV.toUpperCase(); }
@@ -544,9 +603,12 @@
                     <b style="color: ${isFidelidade ? 'var(--success)' : 'var(--primary)'};">${fones[key].nome} ${isFidelidade ? '⭐' : ''}</b><br>
                     <small style="color: var(--text-muted);">${fones[key].zap || 'Sem Whats'}</small>
                 </div>
-                <div style="text-align: right;">
+                <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 5px;">
                     <div style="font-weight:800; font-size: 16px;">${q} pedidos</div>
-                    ${isFidelidade ? '<span style="font-size: 10px; background: var(--success); color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;">FIDELIDADE 10+</span>' : ''}
+                    ${isFidelidade ? `
+                        <span style="font-size: 10px; background: var(--success); color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;">FIDELIDADE 10+</span>
+                        <button class="btn" style="background: var(--accent); color: white; padding: 4px 8px; font-size: 10px;" onclick="abrirSorteio()">🎁 SORTEAR DESCONTO</button>
+                    ` : ''}
                 </div>
             </div>`;
         }).join('');
@@ -635,6 +697,38 @@
         document.getElementById('lista-ranking-produtos').innerHTML = html || "<p style='text-align:center; color:var(--text-muted);'>Nenhum produto em estoque.</p>";
         document.getElementById('modalRankingProdutos').style.display = 'block';
         aplicarValorEstoque();
+    }
+
+    // FUNÇÕES DO JOGO DE DADOS
+    function abrirSorteio() {
+        document.getElementById('modalSorteio').style.display = 'block';
+    }
+
+    function rollDice() {
+        const dice = document.getElementById('dice');
+        const scene = document.getElementById('scene');
+        let result;
+        do { result = Math.floor(Math.random() * 6) + 1; } while (result === 4);
+        
+        scene.classList.remove('jumping');
+        void scene.offsetWidth; 
+        scene.classList.add('jumping');
+
+        const rotations = {
+            1: { x: 0, y: 0 },
+            2: { x: 0, y: -90 },
+            3: { x: 0, y: -180 },
+            4: { x: 0, y: 90 },
+            5: { x: -90, y: 0 },
+            6: { x: 90, y: 0 }
+        };
+
+        const extraSpinX = (Math.floor(Math.random() * 6) + 10) * 360;
+        const extraSpinY = (Math.floor(Math.random() * 6) + 10) * 360;
+        const finalX = rotations[result].x + extraSpinX;
+        const finalY = rotations[result].y + extraSpinY;
+
+        dice.style.transform = `rotateX(${finalX}deg) rotateY(${finalY}deg)`;
     }
 </script>
 </body>
