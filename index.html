@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nuance PDV | 2.1</title>
+    <title>Nuance PDV | 7.1.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     
@@ -34,8 +34,42 @@
             background-image: radial-gradient(circle at top right, #1e1b4b, #0f172a);
             min-height: 100vh;
         }
+
+        /* ESTILOS DA TELA DE LOGIN E CADASTRO */
+        #tela-bloqueio {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg);
+            z-index: 5000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image: radial-gradient(circle at top right, #1e1b4b, #0f172a);
+        }
+
+        .auth-container {
+            background: var(--card);
+            padding: 40px;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+
+        .auth-logo {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 30px;
+            background: linear-gradient(to right, #818cf8, #d8b4fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        #main-app { display: none; } /* Esconde o PDV até o login */
         
-        .main-wrapper { display: flex; flex-direction: column; height: 100vh; }
+        .main-wrapper { display: flex; flex-direction: column; min-height: 100vh; }
         
         .top-bar { 
             background: var(--glass);
@@ -56,24 +90,42 @@
             letter-spacing: -1px;
         }
         
-        .pdv-container { display: flex; flex: 1; overflow: hidden; padding: 25px; gap: 25px; }
+        .pdv-container { 
+            display: flex; 
+            flex: 1; 
+            padding: 25px; 
+            gap: 25px; 
+            max-width: 1600px; 
+            margin: 0 auto; 
+            width: 100%; 
+            box-sizing: border-box;
+        }
         
         .panel-left { 
             flex: 1.2; background: var(--card); border-radius: 20px; padding: 25px; 
-            overflow-y: auto; border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.05);
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
         }
         
         .panel-right { 
             flex: 0.8; background: rgba(15, 23, 42, 0.4); border-radius: 24px; padding: 25px; 
-            display: flex; flex-direction: column; align-items: center; overflow-y: auto; 
+            display: flex; flex-direction: column; align-items: center; 
             border: 2px dashed rgba(255,255,255,0.1);
+            position: sticky; top: 100px; height: fit-content;
         }
 
-        @media (max-width: 1024px) {
-            .pdv-container { flex-direction: column; height: auto; overflow: visible; }
-            .panel-left, .panel-right { flex: none; width: 100%; box-sizing: border-box; }
-            .main-wrapper { height: auto; }
+        /* RESPONSIVIDADE PROFISSIONAL */
+        @media (max-width: 1100px) {
+            .pdv-container { flex-direction: column; padding: 15px; }
+            .panel-left, .panel-right { flex: none; width: 100%; position: static; }
+            .top-bar { flex-direction: column; gap: 15px; padding: 15px; }
+            .top-bar nav { flex-wrap: wrap; justify-content: center; }
+        }
+
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: 1fr; }
+            .auth-container { padding: 20px; }
+            .btn-nav { font-size: 10px; padding: 8px 12px; }
         }
 
         .section-title { 
@@ -114,9 +166,9 @@
         .empresa-nome { text-align: center; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 28px; font-weight: 900; color: #000; margin-bottom: 5px; }
         .divisor { border-top: 1px dashed #000; margin: 10px 0; }
 
-        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
-        .modal-content { background: var(--card); margin: 5vh auto; padding: 30px; width: 90%; max-width: 650px; border-radius: 24px; position: relative; border: 1px solid rgba(255,255,255,0.1); color: white; }
-        .close { position: absolute; right: 25px; top: 15px; font-size: 28px; cursor: pointer; color: var(--text-muted); z-index: 2001; }
+        .modal { display: none; position: fixed; z-index: 6000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
+        .modal-content { background: var(--card); margin: 5vh auto; padding: 30px; width: 90%; max-width: 650px; border-radius: 24px; position: relative; border: 1px solid rgba(255,255,255,0.1); color: white; overflow-y: auto; max-height: 90vh; }
+        .close { position: absolute; right: 25px; top: 15px; font-size: 28px; cursor: pointer; color: var(--text-muted); z-index: 6001; }
 
         .nota-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 15px; padding: 18px; margin-bottom: 15px; }
         
@@ -160,17 +212,78 @@
         }
     </style>
 </head>
-<body onload="atualizarCupom()">
+<body onload="verificarSessao()">
 
-<div class="main-wrapper">
+<div id="tela-bloqueio">
+    <div id="auth-login" class="auth-container">
+        <div class="auth-logo">NUANCE</div>
+        <p id="auth-title" style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Acesso ao Sistema PDV</p>
+        <div class="form-group">
+            <label>E-mail</label>
+            <input type="email" id="login-email" placeholder="seu@email.com">
+        </div>
+        <div class="form-group">
+            <label>Senha</label>
+            <input type="password" id="login-senha" placeholder="••••••••">
+        </div>
+        <button class="btn btn-gerar" style="width:100%" onclick="fazerLogin()">ENTRAR</button>
+        <p style="text-align: center; margin-top: 20px; font-size: 12px;">
+            <a href="#" onclick="alternarAuth(true)" style="color: var(--accent);">Esqueci a senha</a> | 
+            <a href="#" onclick="abrirModalCadastro(true)" style="color: var(--accent);">Redefinir senha</a> | 
+            <a href="#" onclick="abrirModalCadastro(false)" style="color: var(--primary);">Criar Cadastro</a>
+        </p>
+    </div>
+
+    <div id="auth-recuperar" class="auth-container" style="display:none;">
+        <div class="auth-logo">Recuperar</div>
+        <div class="form-group">
+            <label>Digite seu e-mail cadastrado</label>
+            <input type="email" id="email-recuperar" placeholder="seu@email.com">
+        </div>
+        <button class="btn btn-importar" style="width:100%" onclick="recuperarSenha()">ENVIAR SENHA POR E-MAIL</button>
+        <button class="btn btn-nav" style="width:100%; margin-top:10px;" onclick="alternarAuth(false)">VOLTAR</button>
+    </div>
+</div>
+
+<div id="modalNovoAtendente" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+        <span class="close" onclick="fecharModal('modalNovoAtendente')">×</span>
+        <h3 id="modal-cadastro-titulo" style="margin-top:0">Configuração de Cadastro</h3>
+        <div class="form-group">
+            <label>Nome do Atendente</label>
+            <input type="text" id="cad-nome" placeholder="Nome Completo">
+        </div>
+        <div class="form-group">
+            <label>E-mail do Atendente</label>
+            <input type="email" id="cad-email">
+        </div>
+        <div class="form-group">
+            <label>Crie uma Senha</label>
+            <input type="password" id="cad-senha">
+        </div>
+        <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin: 20px 0;">
+        <div class="form-group">
+            <label style="color: var(--danger); font-weight: 800;">CHAVE MASTER DE LIBERAÇÃO</label>
+            <input type="password" id="cad-master" placeholder="Digite a chave para autorizar">
+        </div>
+        <button class="btn btn-success" style="width:100%; background: var(--success); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer; margin-bottom: 10px;" onclick="processarCadastro()">CRIAR OU ATUALIZAR ACESSO</button>
+    </div>
+</div>
+
+<div id="main-app" class="main-wrapper">
     <header class="top-bar">
         <div class="logo-area">
             <h2>NUANCE <span style="font-weight: 300; font-size: 14px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; margin-left: 10px;">2.1</span></h2>
         </div>
-        <nav style="display:flex; gap: 10px;">
+        <nav style="display:flex; gap: 10px; align-items: center;">
+            <span id="user-display" style="font-size: 11px; color: var(--accent); font-weight: bold; margin-right: 10px;"></span>
+        </nav>
+        <nav style="display: flex; gap: 10px; align-items: center;">
             <button class="btn btn-nav" onclick="abrirGestao()">📁 Histórico</button>
             <button class="btn btn-nav" onclick="abrirRankingClientes()">👤 VIPs</button>
             <button class="btn btn-nav" style="border-color: var(--primary);" onclick="abrirRankingProdutos()">📦 Estoque</button>
+            <button class="btn btn-nav" style="background: #334155; border: none;" onclick="limparHD()">💾 Limpar HD</button>
+            <button class="btn btn-nav" style="background: var(--danger); border: none;" onclick="logout()">🚪 Sair</button>
         </nav>
     </header>
 
@@ -181,7 +294,7 @@
                 <textarea id="input-importacao" style="height: 80px; margin: 10px 0; background: rgba(0,0,0,0.3);" placeholder="Cole a mensagem do Telegram aqui..."></textarea>
                 <div class="grid">
                     <button class="btn btn-importar" onclick="processarTexto()">Processar Mensagem</button>
-                    <button class="btn btn-nav" onclick="limparCampos()">🧹 Resetar</button>
+                    <button class="btn btn-nav" onclick="limparCampoImportacao()">🧹 Limpar Tudo</button>
                 </div>
                 <div style="margin-top:10px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <button class="btn" style="background: #4285F4; color:white;" onclick="abrirGoogleMaps()">🌐 Google Maps</button>
@@ -191,39 +304,39 @@
 
             <div class="section-title">Dados do Cliente</div>
             <div class="grid">
-                <div class="form-group"><label>Nome do Cliente</label><input type="text" id="nome" placeholder="Ex: João Silva" oninput="atualizarCupom()"></div>
-                <div class="form-group"><label>Data / Hora</label><input type="text" id="data-hora" oninput="atualizarCupom()"></div>
-                <div class="form-group"><label>WhatsApp</label><input type="text" id="whatsapp" placeholder="(00) 00000-0000" oninput="atualizarCupom()"></div>
-                <div class="form-group"><label>CPF ou Referência</label><input type="text" id="CPF" placeholder="Opcional" oninput="atualizarCupom()"></div>
+                <div class="form-group"><label>Nome do Cliente</label><input type="text" id="nome" placeholder="Ex: João Silva" oninput="salvarProgresso(); atualizarCupom()"></div>
+                <div class="form-group"><label>Data / Hora</label><input type="text" id="data-hora" oninput="salvarProgresso(); atualizarCupom()"></div>
+                <div class="form-group"><label>WhatsApp</label><input type="text" id="whatsapp" placeholder="(00) 00000-0000" oninput="salvarProgresso(); atualizarCupom()"></div>
+                <div class="form-group"><label>CPF ou Referência</label><input type="text" id="CPF" placeholder="Opcional" oninput="salvarProgresso(); atualizarCupom()"></div>
             </div>
 
             <div class="section-title">Logística de Entrega</div>
             <div class="grid">
-                <div class="form-group"><label>Rua/Avenida</label><input type="text" id="rua" oninput="atualizarCupom()"></div>
-                <div class="form-group"><label>Número / QD</label><input type="text" id="numero" oninput="atualizarCupom()"></div>
-                <div class="form-group"><label>Bairro</label><input type="text" id="bairro" oninput="atualizarCupom()"></div>
-                <div class="form-group"><label>CEP</label><input type="text" id="cep" oninput="atualizarCupom()"></div>
+                <div class="form-group"><label>Rua/Avenida</label><input type="text" id="rua" oninput="salvarProgresso(); atualizarCupom()"></div>
+                <div class="form-group"><label>Número / QD</label><input type="text" id="numero" oninput="salvarProgresso(); atualizarCupom()"></div>
+                <div class="form-group"><label>Bairro</label><input type="text" id="bairro" oninput="salvarProgresso(); atualizarCupom()"></div>
+                <div class="form-group"><label>CEP</label><input type="text" id="cep" oninput="salvarProgresso(); atualizarCupom()"></div>
             </div>
-            <div class="form-group"><label>Complemento / Ponto de Ref.</label><input type="text" id="complemento" oninput="atualizarCupom()"></div>
+            <div class="form-group"><label>Complemento / Ponto de Ref.</label><input type="text" id="complemento" oninput="salvarProgresso(); atualizarCupom()"></div>
 
             <div class="section-title">Itens e Pagamento</div>
             <div class="grid">
-                <div class="form-group"><label>Método de Pagamento</label><input type="text" id="pagamento" placeholder="Ex: Pix, Cartão" oninput="atualizarCupom()"></div>
-                <div class="form-group"><label>Modalidade (MESA/RETIRADA/DELIVERY)</label><input type="text" id="coleta" placeholder="Entrega / Retirada / Mesa" oninput="atualizarCupom()"></div>
+                <div class="form-group"><label>Método de Pagamento</label><input type="text" id="pagamento" placeholder="Ex: Pix, Cartão" oninput="salvarProgresso(); atualizarCupom()"></div>
+                <div class="form-group"><label>Modalidade (MESA/RETIRADA/DELIVERY)</label><input type="text" id="coleta" placeholder="Entrega / Retirada / Mesa" oninput="salvarProgresso(); atualizarCupom()"></div>
             </div>
-            <div class="form-group"><label>Status do Pagamento</label><input type="text" id="esta-pago" placeholder="Ex: PAGO VIA PIX" oninput="atualizarCupom()"></div>
+            <div class="form-group"><label>Status do Pagamento</label><input type="text" id="esta-pago" placeholder="Ex: PAGO VIA PIX" oninput="salvarProgresso(); atualizarCupom()"></div>
             <div class="form-group"><label>Produtos Selecionados</label><textarea id="produtos-texto" style="height: 100px;" placeholder="2x Gin Tônica
-1x Combo Vodka" oninput="atualizarCupom()"></textarea></div>
+1x Combo Vodka" oninput="salvarProgresso(); atualizarCupom()"></textarea></div>
             
             <div class="grid">
-                <div class="form-group"><label>Valor Total (R$)</label><input type="text" id="valor-total" style="font-weight: 800; color: #4ade80;" oninput="atualizarCupom()"></div>
-                <div class="form-group"><label>Cupom Promocional</label><input type="text" id="cupom-input" placeholder="Ex: BLACK10" oninput="atualizarCupom()"></div>
+                <div class="form-group"><label>Valor Total (R$)</label><input type="text" id="valor-total" style="font-weight: 800; color: #4ade80;" oninput="salvarProgresso(); atualizarCupom()"></div>
+                <div class="form-group"><label>Cupom Promocional</label><input type="text" id="cupom-input" placeholder="Ex: BLACK10" oninput="salvarProgresso(); atualizarCupom()"></div>
             </div>
-            <div class="form-group"><label>Observações Internas</label><input type="text" id="obs" oninput="atualizarCupom()"></div>
+            <div class="form-group"><label>Observações Internas</label><input type="text" id="obs" oninput="salvarProgresso(); atualizarCupom()"></div>
 
             <div class="form-group" style="margin-top: 20px;">
                 <label style="color: var(--primary); font-weight: 800;">Prefixo da Ordem</label>
-                <input type="text" id="prefixo-ordem" placeholder="Digite o prefixo..." style="border: 2px solid var(--primary);">
+                <input type="text" id="prefixo-ordem" placeholder="Digite o prefixo..." style="border: 2px solid var(--primary);" oninput="salvarProgresso()">
             </div>
 
             <button class="btn btn-gerar" onclick="finalizarEGerar()">✅ FINALIZAR E SALVAR PEDIDO</button>
@@ -271,6 +384,18 @@
             </div>
         </section>
     </main>
+</div>
+
+<div id="modalConfirmarLimpeza" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+        <span class="close" onclick="fecharModal('modalConfirmarLimpeza')">×</span>
+        <h3 style="color: var(--danger)">⚠️ Limpeza Geral</h3>
+        <p>Isso apagará todos os dados do formulário atual. Para confirmar, digite sua senha:</p>
+        <div class="form-group">
+            <input type="password" id="senha-limpeza" placeholder="Sua senha de acesso">
+        </div>
+        <button class="btn" style="background: var(--danger); color:white; width: 100%;" onclick="executarLimpezaGeral()">APAGAR DEFINITIVAMENTE</button>
+    </div>
 </div>
 
 <div id="area-etiqueta" style="display:none; width:80mm; padding:10px; border:2px solid #000; color:#000; background:#fff;">
@@ -349,9 +474,9 @@
 
         <div style="text-align: left; margin-top: 20px;">
             <div class="coupon-item"><span class="discount-text">10% de desconto</span><span>Número 1</span></div>
-            <div class="coupon-item"><span class="discount-text">9% de desconto</span><span>Número 2</span></div>
+            <div class="coupon-item"><span class="discount-text">Não Foi dessa vez</span><span>Número 2</span></div>
             <div class="coupon-item"><span class="discount-text">4% de desconto</span><span>Número 3</span></div>
-            <div class="coupon-item"><span class="discount-text">100% de desconto</span><span>Número 4</span></div>
+            <div class="coupon-item"><span class="discount-text">100% de desconto para um Drink só</span><span>Número 4</span></div>
             <div class="coupon-item"><span class="discount-text">7% de desconto</span><span>Número 5</span></div>
             <div class="coupon-item"><span class="discount-text">Frete Gratis</span><span>Número 6</span></div>
         </div>
@@ -359,6 +484,192 @@
 </div>
 
 <script>
+    // LÓGICA DE LOGIN E ISOLAMENTO DE DADOS
+    let usuarioLogado = null;
+    let nomeUsuarioLogado = "";
+
+    function verificarSessao() {
+        const sessionEmail = localStorage.getItem('nuance_session');
+        const sessionNome = localStorage.getItem('nuance_session_nome');
+        if (sessionEmail) {
+            usuarioLogado = sessionEmail;
+            nomeUsuarioLogado = sessionNome || sessionEmail;
+            mostrarApp();
+            carregarProgresso();
+        } else {
+            document.getElementById('tela-bloqueio').style.display = 'flex';
+            document.getElementById('main-app').style.display = 'none';
+        }
+        atualizarCupom();
+    }
+
+    function mostrarApp() {
+        document.getElementById('tela-bloqueio').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
+        document.getElementById('user-display').innerText = "ATENDENTE: " + nomeUsuarioLogado.toUpperCase();
+    }
+
+    function fazerLogin() {
+        const email = document.getElementById('login-email').value;
+        const senha = document.getElementById('login-senha').value;
+        const users = JSON.parse(localStorage.getItem('nuance_users') || '[]');
+        
+        const user = users.find(u => u.email === email && u.senha === senha);
+        if (user) {
+            usuarioLogado = email;
+            nomeUsuarioLogado = user.nome || email;
+            localStorage.setItem('nuance_session', email);
+            localStorage.setItem('nuance_session_nome', nomeUsuarioLogado);
+            mostrarApp();
+            carregarProgresso();
+        } else {
+            alert("E-mail ou Senha incorretos.");
+        }
+    }
+
+    function logout() {
+        salvarProgresso();
+        localStorage.removeItem('nuance_session');
+        localStorage.removeItem('nuance_session_nome');
+        location.reload();
+    }
+
+    function limparHD() {
+        const email = prompt("Para limpar o HD, digite seu E-mail:");
+        const senha = prompt("Agora digite sua Senha:");
+        
+        const users = JSON.parse(localStorage.getItem('nuance_users') || '[]');
+        const user = users.find(u => u.email === email && u.senha === senha);
+        
+        if (user && email === usuarioLogado) {
+            if (confirm("ATENÇÃO: Isso apagará todos os seus pedidos salvos e progresso. Continuar?")) {
+                localStorage.removeItem('nuance_progresso_' + usuarioLogado);
+                localStorage.removeItem('notas_nuance');
+                alert("HD Limpo com sucesso!");
+                location.reload();
+            }
+        } else {
+            alert("Credenciais incorretas ou não pertencem ao usuário logado!");
+        }
+    }
+
+    function abrirModalCadastro(isRedefinir = false) {
+        // Solicita senha para liberar acesso ao cadastro
+        const acessoSenha = prompt("Digite a senha para liberar o cadastro:");
+        if (acessoSenha !== "DeD-NUANCE") {
+            return alert("Senha incorreta! Acesso negado.");
+        }
+
+        if(isRedefinir) {
+            document.getElementById('modal-cadastro-titulo').innerText = "🔑 🚨Digite seu email e senha para trocar de Senha 🚨🔑";
+        } else {
+            document.getElementById('modal-cadastro-titulo').innerText = "Configuração de Cadastro";
+            // Limpa os campos para um novo cadastro
+            document.getElementById('cad-nome').value = "";
+            document.getElementById('cad-email').value = "";
+            document.getElementById('cad-senha').value = "";
+            document.getElementById('cad-master').value = "";
+        }
+        document.getElementById('modalNovoAtendente').style.display = 'block';
+    }
+
+    function fecharModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    function processarCadastro() {
+        const nome = document.getElementById('cad-nome').value;
+        const email = document.getElementById('cad-email').value;
+        const senha = document.getElementById('cad-senha').value;
+        const master = document.getElementById('cad-master').value;
+
+        if (master !== "MJ-NUANCE") {
+            return alert("Chave Master Incorreta! Acesso Negado.");
+        }
+        if (!nome || !email || !senha) {
+            return alert("Preencha todos os campos: Nome, E-mail e Senha.");
+        }
+
+        let users = JSON.parse(localStorage.getItem('nuance_users') || '[]');
+        const index = users.findIndex(u => u.email === email);
+        
+        if (index !== -1) {
+            // Se já existe, atualiza (Redefinição de Senha)
+            users[index] = { nome, email, senha };
+            alert("Dados de acesso atualizados com sucesso!");
+        } else {
+            // Se não existe, cria novo
+            users.push({ nome, email, senha });
+            alert("Cadastro realizado com sucesso! Agora você pode logar.");
+        }
+
+        localStorage.setItem('nuance_users', JSON.stringify(users));
+        fecharModal('modalNovoAtendente');
+    }
+
+    function alternarAuth(recuperar) {
+        document.getElementById('auth-login').style.display = recuperar ? 'none' : 'block';
+        document.getElementById('auth-recuperar').style.display = recuperar ? 'block' : 'none';
+    }
+
+    function recuperarSenha() {
+        const email = document.getElementById('email-recuperar').value;
+        const users = JSON.parse(localStorage.getItem('nuance_users') || '[]');
+        const user = users.find(u => u.email === email);
+        
+        if (user) {
+            alert(`Instruções de recuperação: Sua senha atual é [ ${user.senha} ]. Guarde com segurança.`);
+            alternarAuth(false);
+        } else {
+            alert("E-mail não encontrado.");
+        }
+    }
+
+    // NOVAS FUNÇÕES DE PERSISTÊNCIA POR USUÁRIO
+    function salvarProgresso() {
+        if (!usuarioLogado) return;
+        const campos = ['nome', 'data-hora', 'whatsapp', 'CPF', 'rua', 'numero', 'bairro', 'cep', 'complemento', 'pagamento', 'coleta', 'esta-pago', 'produtos-texto', 'valor-total', 'cupom-input', 'obs', 'prefixo-ordem'];
+        const dados = {};
+        campos.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) dados[id] = el.value;
+        });
+        localStorage.setItem('nuance_progresso_' + usuarioLogado, JSON.stringify(dados));
+    }
+
+    function carregarProgresso() {
+        if (!usuarioLogado) return;
+        const salvo = localStorage.getItem('nuance_progresso_' + usuarioLogado);
+        if (salvo) {
+            const dados = JSON.parse(salvo);
+            Object.keys(dados).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = dados[id];
+            });
+            atualizarCupom();
+        }
+    }
+
+    function confirmarLimpezaGeral() {
+        document.getElementById('modalConfirmarLimpeza').style.display = 'block';
+    }
+
+    function executarLimpezaGeral() {
+        const senha = document.getElementById('senha-limpeza').value;
+        const users = JSON.parse(localStorage.getItem('nuance_users') || '[]');
+        const user = users.find(u => u.email === usuarioLogado);
+
+        if (user && user.senha === senha) {
+            limparCampos();
+            localStorage.removeItem('nuance_progresso_' + usuarioLogado);
+            document.getElementById('senha-limpeza').value = "";
+            fecharModal('modalConfirmarLimpeza');
+            alert("Sistema limpo com sucesso!");
+        } else {
+            alert("Senha incorreta!");
+        }
+    }
+
     const versiculos = ["Filipenses 4:6:\n Não vos inquieteis com nada, mas em toda necessidade apresentai a Deus vossos pedidos com orações, súplicas e ações de graças.",
                         "Salmos 136:1:\n Deem graças ao Senhor, porque ele é bom. O seu amor dura para sempre!",
                         "Salmos 100:4:\n Entrai por suas portas dando graças, e em seus átrios com hinos de louvor, louvai-o, bendizei seu nome", 
@@ -371,15 +682,9 @@
         const rua = document.getElementById('rua').value;
         const num = document.getElementById('numero').value;
         const bairro = document.getElementById('bairro').value;
-        const cep = document.getElementById('cep').value;
-        const zap = document.getElementById('whatsapp').value;
-        const cpf = document.getElementById('CPF').value;
-        const pag = document.getElementById('pagamento').value;
-        const coleta = (document.getElementById('coleta').value || "").toUpperCase();
-        const prod = document.getElementById('produtos-texto').value;
-        const obs = document.getElementById('obs').value;
         const cupomV = document.getElementById('cupom-input').value;
         const estaPago = document.getElementById('esta-pago').value.toUpperCase();
+        const coletaVal = document.getElementById('coleta').value.toUpperCase();
 
         const endFormatado = `${rua}${num ? ', ' + num : ''}${bairro ? ' - ' + bairro : ''}`;
         const badgeBox = document.getElementById('badge-container');
@@ -388,10 +693,10 @@
         badgeBox.innerHTML = '';
         endBloco.style.display = 'block';
 
-        if(coleta.includes("MESA")) {
+        if(coletaVal.includes("MESA")) {
             badgeBox.innerHTML = `<div style="background:#000; color:#fff; text-align:center; padding:5px; font-weight:bold; margin-bottom:10px;">ATENDIMENTO EM MESA</div>`;
             endBloco.style.display = 'none';
-        } else if(coleta.includes("RETIRADA")) {
+        } else if(coletaVal.includes("RETIRADA")) {
             badgeBox.innerHTML = `<div style="border:2px dashed #000; color:#000; text-align:center; padding:5px; font-weight:bold; margin-bottom:10px;">RETIRADA NO LOCAL</div>`;
             endBloco.style.display = 'none';
         }
@@ -399,17 +704,17 @@
         document.getElementById('view-nome').innerText = nome || "...";
         document.getElementById('view-data').innerText = document.getElementById('data-hora').value || "...";
         document.getElementById('view-endereco').innerText = endFormatado || "...";
-        document.getElementById('view-cep-cupom').innerText = cep || "...";
-        document.getElementById('view-coleta').innerText = coleta || "...";
-        document.getElementById('view-zap').innerText = zap || "";
-        document.getElementById('view-zap-bloco').style.display = zap ? 'block' : 'none';
-        document.getElementById('view-cpf').innerText = cpf || "";
-        document.getElementById('view-cpf-bloco').style.display = cpf ? 'block' : 'none';
-        document.getElementById('view-pag').innerText = pag.toUpperCase() || "";
-        document.getElementById('view-pag-bloco').style.display = pag ? 'block' : 'none';
-        document.getElementById('view-produtos').innerText = prod || "Nenhum produto";
+        document.getElementById('view-cep-cupom').innerText = document.getElementById('cep').value || "...";
+        document.getElementById('view-coleta').innerText = document.getElementById('coleta').value || "...";
+        document.getElementById('view-zap').innerText = document.getElementById('whatsapp').value || "";
+        document.getElementById('view-zap-bloco').style.display = document.getElementById('whatsapp').value ? 'block' : 'none';
+        document.getElementById('view-cpf').innerText = document.getElementById('CPF').value || "";
+        document.getElementById('view-cpf-bloco').style.display = document.getElementById('CPF').value ? 'block' : 'none';
+        document.getElementById('view-pag').innerText = document.getElementById('pagamento').value.toUpperCase() || "";
+        document.getElementById('view-pag-bloco').style.display = document.getElementById('pagamento').value ? 'block' : 'none';
+        document.getElementById('view-produtos').innerText = document.getElementById('produtos-texto').value || "Nenhum produto";
         document.getElementById('view-total').innerText = "R$ " + (document.getElementById('valor-total').value || "0.00");
-        document.getElementById('view-obs').innerText = obs ? "OBS: " + obs : "";
+        document.getElementById('view-obs').innerText = document.getElementById('obs').value ? "OBS: " + document.getElementById('obs').value : "";
         document.getElementById('view-pago-status').innerText = estaPago || "-💱-";
 
         const vC = document.getElementById('view-cupom-aplicado');
@@ -417,12 +722,11 @@
         else vC.style.display = "none";
 
         document.getElementById('etiq-nome').innerText = nome;
-        document.getElementById('etiq-end').innerText = (coleta.includes("MESA") || coleta.includes("RETIRADA")) ? coleta : endFormatado;
-        document.getElementById('etiq-cep').innerText = cep;
-        document.getElementById('etiq-obs').innerText = obs;
-        document.getElementById('etiq-prod').innerText = prod;
+        document.getElementById('etiq-end').innerText = (document.getElementById('coleta').value.toUpperCase().includes("MESA") || document.getElementById('coleta').value.toUpperCase().includes("RETIRADA")) ? document.getElementById('coleta').value : endFormatado;
+        document.getElementById('etiq-cep').innerText = document.getElementById('cep').value;
+        document.getElementById('etiq-obs').innerText = document.getElementById('obs').value;
+        document.getElementById('etiq-prod').innerText = document.getElementById('produtos-texto').value;
 
-        // Versículo aleatório no HTML do cupom
         document.getElementById('view-versiculo').innerText = versiculos[Math.floor(Math.random() * versiculos.length)];
     }
 
@@ -433,7 +737,7 @@
         const cep = document.getElementById('cep').value;
         if(rua) {
             const endereco = `${rua}, ${num}, ${bairro}, ${cep}`;
-            window.open("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(endereco));
+            window.open("https://www.google.com/maps/search/" + encodeURIComponent(endereco));
         } else { alert("Preencha o endereço primeiro!"); }
     }
 
@@ -476,7 +780,12 @@
                 document.getElementById(map[key]).value = val;
             }
         });
+        salvarProgresso();
         atualizarCupom();
+    }
+
+    function limparCampoImportacao() {
+        document.getElementById('input-importacao').value = "";
     }
 
     function finalizarEGerar() {
@@ -486,12 +795,18 @@
         let shortId = prefixoDigitado + "-" + idTimestamp.toString().slice(-6);
         
         const cleanZap = document.getElementById('whatsapp').value.replace(/\D/g, '');
-        const dados = { id: idTimestamp, shortId: shortId, nome: document.getElementById('nome').value, data: document.getElementById('data-hora').value, whatsapp: cleanZap, cpf: document.getElementById('CPF').value, rua: document.getElementById('rua').value, numero: document.getElementById('numero').value, bairro: document.getElementById('bairro').value, cep: document.getElementById('cep').value, complemento: document.getElementById('complemento').value, coleta: document.getElementById('coleta').value, produtos: document.getElementById('produtos-texto').value, total: document.getElementById('valor-total').value, pagamento: document.getElementById('pagamento').value, obs: document.getElementById('obs').value, status: 'pendente' };
+        const dados = { 
+            atendente: usuarioLogado,
+            id: idTimestamp, shortId: shortId, nome: document.getElementById('nome').value, data: document.getElementById('data-hora').value, whatsapp: cleanZap, cpf: document.getElementById('CPF').value, rua: document.getElementById('rua').value, numero: document.getElementById('numero').value, bairro: document.getElementById('bairro').value, cep: document.getElementById('cep').value, complemento: document.getElementById('complemento').value, coleta: document.getElementById('coleta').value, produtos: document.getElementById('produtos-texto').value, total: document.getElementById('valor-total').value, pagamento: document.getElementById('pagamento').value, obs: document.getElementById('obs').value, status: 'pendente' 
+        };
+        
         notas.push(dados);
         localStorage.setItem('notas_nuance', JSON.stringify(notas));
+        
         document.getElementById('view-id-cupom').innerText = shortId;
-        alert("Pedido Salvo: " + shortId);
-        filtrarNotas();
+        alert("Pedido Salvo com sucesso no Histórico, VIPs e Estoque!");
+        
+        if(document.getElementById('modalGestao').style.display === 'block') filtrarNotas();
     }
 
     function reabrirNota(id) {
@@ -544,7 +859,7 @@
 
     function pedirFeedback(id) {
         const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
-        const n = Ricciardi = notas.find(x => x.id === id);
+        const n = notas.find(x => x.id === id);
         if(!n || !n.whatsapp) return;
         const primeiroNome = n.nome ? n.nome.split(' ')[0] : "Cliente";
         const msg = `Olá *${primeiroNome}*! 🍸%0A%0APassando para saber: o que achou dos seus drinks da *Nuance*? %0A%0ASua opinião é muito importante para nós! Se puder avaliar, ficaremos muito felizes. ✨`;
@@ -553,7 +868,8 @@
 
     function filtrarNotas() {
         const busca = document.getElementById('busca-nota').value.toLowerCase();
-        const notas = Ricciardi = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        let notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        notas = notas.filter(n => n.atendente === usuarioLogado);
         const lista = document.getElementById('lista-notas');
         const filtradas = notas.slice().reverse().filter(n => (n.nome||"").toLowerCase().includes(busca) || (n.whatsapp||"").toLowerCase().includes(busca.replace(/\D/g, '')) || (n.shortId||"").toLowerCase().includes(busca));
         document.getElementById('contador-cupons').innerText = filtradas.length;
@@ -580,22 +896,54 @@
         `).join('');
     }
 
-    function mudarStatus(id, s) { let n = JSON.parse(localStorage.getItem('notas_nuance') || '[]'); const item = n.find(x => x.id === id); if(item) { item.status = s; localStorage.setItem('notas_nuance', JSON.stringify(n)); filtrarNotas(); } }
-    function fecharModal(id) { document.getElementById(id).style.display='none'; }
+    function mudarStatus(id, s) { 
+        let n = JSON.parse(localStorage.getItem('notas_nuance') || '[]'); 
+        const item = n.find(x => x.id === id); 
+        if(item) { 
+            item.status = s; 
+            localStorage.setItem('notas_nuance', JSON.stringify(n)); 
+            filtrarNotas(); 
+        } 
+    }
+
     function abrirGestao() { document.getElementById('modalGestao').style.display='block'; filtrarNotas(); }
-    function limparCampos() { document.querySelectorAll('input, textarea').forEach(i => i.value = ""); document.getElementById('view-id-cupom').innerText = "---"; atualizarCupom(); }
+    
+    function limparCampos() { 
+        document.querySelectorAll('input, textarea').forEach(i => i.value = ""); 
+        document.getElementById('view-id-cupom').innerText = "---"; 
+        atualizarCupom(); 
+    }
+
     function baixarPDF() { html2pdf().from(document.getElementById('area-cupom')).save(); }
-    function imprimirEtiqueta() { document.getElementById('area-cupom').style.display='none'; document.getElementById('area-etiqueta').style.display='block'; window.print(); setTimeout(()=> {document.getElementById('area-cupom').style.display='block'; document.getElementById('area-etiqueta').style.display='none';}, 1000); }
-    function excluirNota(id) { if(confirm("Excluir?")) { let n = JSON.parse(localStorage.getItem('notas_nuance') || '[]').filter(x=>x.id!==id); localStorage.setItem('notas_nuance', JSON.stringify(n)); filtrarNotas(); } }
+    
+    function imprimirEtiqueta() { 
+        document.getElementById('area-cupom').style.display='none'; 
+        document.getElementById('area-etiqueta').style.display='block'; 
+        window.print(); 
+        setTimeout(()=> {
+            document.getElementById('area-cupom').style.display='block'; 
+            document.getElementById('area-etiqueta').style.display='none';
+        }, 1000); 
+    }
+
+    function excluirNota(id) { 
+        if(confirm("Excluir?")) { 
+            let n = JSON.parse(localStorage.getItem('notas_nuance') || '[]').filter(x=>x.id!==id); 
+            localStorage.setItem('notas_nuance', JSON.stringify(n)); 
+            filtrarNotas(); 
+        } 
+    }
 
     function abrirRankingClientes() {
         document.getElementById('lista-ranking-clientes').style.display = 'block';
         document.getElementById('lista-ranking-bairros').style.display = 'none';
         
-        const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        let FlexibleNotas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        FlexibleNotas = FlexibleNotas.filter(n => n.atendente === usuarioLogado);
+
         const clientes = {}; const fones = {};
         
-        notas.forEach(n => { 
+        FlexibleNotas.forEach(n => { 
             const key = n.whatsapp ? n.whatsapp.replace(/\D/g, '') : n.nome; 
             if(key) { 
                 clientes[key] = (clientes[key] || 0) + 1; 
@@ -624,10 +972,11 @@
     }
 
     function mostrarRankingBairros() {
-        const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        let nRankingBairros = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        nRankingBairros = nRankingBairros.filter(n => n.atendente === usuarioLogado);
         const bairros = {};
         
-        notas.forEach(n => {
+        nRankingBairros.forEach(n => {
             const b = (n.bairro || "Não Informado").trim().toUpperCase();
             bairros[b] = (bairros[b] || 0) + 1;
         });
@@ -661,10 +1010,11 @@
     }
 
     function abrirRankingProdutos() {
-        const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        let nRankingProdutos = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        nRankingProdutos = nRankingProdutos.filter(n => n.atendente === usuarioLogado);
         const produtosAgrupados = {};
 
-        notas.forEach(nota => {
+        nRankingProdutos.forEach(nota => {
             if(nota.produtos) {
                 nota.produtos.split('\n').forEach(linha => {
                     const m = linha.match(/(\d+)x\s*(.*)/i);
@@ -705,11 +1055,6 @@
         document.getElementById('lista-ranking-produtos').innerHTML = html || "<p style='text-align:center; color:var(--text-muted);'>Nenhum produto em estoque.</p>";
         document.getElementById('modalRankingProdutos').style.display = 'block';
         aplicarValorEstoque();
-    }
-
-    // FUNÇÕES DO JOGO DE DADOS
-    function abrirSorteio() {
-        document.getElementById('modalSorteio').style.display = 'block';
     }
 
     function rollDice() {
