@@ -346,7 +346,7 @@
         document.getElementById('view-produtos').innerText = prod || "Nenhum produto";
         document.getElementById('view-total').innerText = "R$ " + (document.getElementById('valor-total').value || "0.00");
         document.getElementById('view-obs').innerText = obs ? "OBS: " + obs : "";
-        document.getElementById('view-pago-status').innerText = estaPago || "---";
+        document.getElementById('view-pago-status').innerText = estaPago || "Valor: ";
 
         const vC = document.getElementById('view-cupom-aplicado');
         if(cupomV) { vC.style.display = "block"; vC.innerText = "CUPOM para sua próxima Compra: " + cupomV.toUpperCase(); }
