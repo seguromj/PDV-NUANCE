@@ -179,6 +179,12 @@
             <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05)); border: 1px solid rgba(245, 158, 11, 0.2); padding: 20px; border-radius: 15px; margin-bottom: 25px;">
                 <label style="color: #f59e0b; font-weight: 800;">Colar mensagem do Telegram</label>
                 <textarea id="input-importacao" style="height: 80px; margin: 10px 0; background: rgba(0,0,0,0.3);" placeholder="Cole a mensagem do Telegram aqui..."></textarea>
+                
+                <div class="form-group" style="margin-top: 10px;">
+                    <label style="color: var(--accent);">Prefixo da Ordem (Ex: M-)</label>
+                    <input type="text" id="prefixo-ordem" placeholder="Digite Letra ou Nome..." value="M-" style="border-color: var(--accent);">
+                </div>
+
                 <div class="grid">
                     <button class="btn btn-importar" onclick="processarTexto()">Processar Mensagem</button>
                     <button class="btn btn-nav" onclick="limparCampos()">🧹 Resetar</button>
@@ -357,9 +363,10 @@
     const versiculos = ["Filipenses 4:6:\n Não vos inquieteis com nada, mas em toda necessidade apresentai a Deus vossos pedidos com orações, súplicas e ações de graças.",
                         "Salmos 136:1:\n Deem graças ao Senhor, porque ele é bom. O seu amor dura para sempre!",
                         "Salmos 100:4:\n wEntrai por suas portas dando graças, e em seus átrios com hinos de louvor, louvai-o, bendizei seu nome", 
-                        "O Senhor te abençoe e te guarde.", 
-                        "O amor nunca falha.",
-                        "Confia no Senhor de todo o teu coração."];
+                        "Romanos 12:12\n Alegrai-vos na esperança, sede pacientes na tribulação, perseverai na oração.", 
+                        "Filipenses 4:13:\n Tudo posso naquele que me fortalece",
+                        "Salmos 23:1-2:\n O Senhor é o meu pastor; nada me faltará. Ele me faz repousar em pastos verdes, guia-me em águas tranquilas",
+                        "Coríntios 12:9:\n A minha graça te basta, porque o meu poder se aperfeiçoa na fraqueza"];
 
     function atualizarCupom() {
         const nome = document.getElementById('nome').value.toUpperCase();
@@ -417,7 +424,7 @@
         document.getElementById('etiq-obs').innerText = obs;
         document.getElementById('etiq-prod').innerText = prod;
 
-        if(!document.getElementById('view-versiculo').innerText) document.getElementById('view-versiculo').innerText = versiculos[Math.floor(Math.random() * versiculos.length)];
+        document.getElementById('view-versiculo').innerText = versiculos[Math.floor(Math.random() * versiculos.length)];
     }
 
     function abrirGoogleMaps() {
@@ -476,7 +483,8 @@
     function finalizarEGerar() {
         let notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
         const idTimestamp = Date.now();
-        let shortId = "#" + idTimestamp.toString().slice(-6);
+        const prefixo = document.getElementById('prefixo-ordem').value || ""; // Pega o prefixo digitado
+        let shortId = prefixo + "#" + idTimestamp.toString().slice(-6); // Junta o prefixo com o código
         const cleanZap = document.getElementById('whatsapp').value.replace(/\D/g, '');
         const dados = { id: idTimestamp, shortId: shortId, nome: document.getElementById('nome').value, data: document.getElementById('data-hora').value, whatsapp: cleanZap, cpf: document.getElementById('CPF').value, rua: document.getElementById('rua').value, numero: document.getElementById('numero').value, bairro: document.getElementById('bairro').value, cep: document.getElementById('cep').value, complemento: document.getElementById('complemento').value, coleta: document.getElementById('coleta').value, produtos: document.getElementById('produtos-texto').value, total: document.getElementById('valor-total').value, pagamento: document.getElementById('pagamento').value, obs: document.getElementById('obs').value, status: 'pendente' };
         notas.push(dados);
@@ -584,10 +592,10 @@
         document.getElementById('lista-ranking-clientes').style.display = 'block';
         document.getElementById('lista-ranking-bairros').style.display = 'none';
         
-        const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        const Gabriel = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
         const clientes = {}; const fones = {};
         
-        notas.forEach(n => { 
+        Gabriel.forEach(n => { 
             const key = n.whatsapp ? n.whatsapp.replace(/\D/g, '') : n.nome; 
             if(key) { 
                 clientes[key] = (clientes[key] || 0) + 1; 
@@ -616,10 +624,10 @@
     }
 
     function mostrarRankingBairros() {
-        const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        const Gabriel = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
         const bairros = {};
         
-        notas.forEach(n => {
+        Gabriel.forEach(n => {
             const b = (n.bairro || "Não Informado").trim().toUpperCase();
             bairros[b] = (bairros[b] || 0) + 1;
         });
@@ -653,10 +661,10 @@
     }
 
     function abrirRankingProdutos() {
-        const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        const Gabriel = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
         const produtosAgrupados = {};
 
-        notas.forEach(nota => {
+        Gabriel.forEach(nota => {
             if(nota.produtos) {
                 nota.produtos.split('\n').forEach(linha => {
                     const m = linha.match(/(\d+)x\s*(.*)/i);
