@@ -206,9 +206,21 @@
         .discount-text { color: #00ff88; font-size: 0.85rem; font-weight: bold; }
 
         @media print {
+            @page { margin: 0; }
+            body { background: white !important; margin: 0; padding: 0; }
             body * { visibility: hidden; }
             #area-cupom, #area-cupom *, #area-etiqueta, #area-etiqueta * { visibility: visible; }
-            #area-cupom, #area-etiqueta { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; }
+            #area-cupom, #area-etiqueta { 
+                position: absolute; 
+                left: 0; 
+                top: 0; 
+                width: 80mm; 
+                box-shadow: none; 
+                padding: 5mm;
+                background: white !important;
+                color: black !important;
+            }
+            .btn, .top-bar, .panel-left, #tela-bloqueio, .modal { display: none !important; }
         }
     </style>
 </head>
@@ -378,6 +390,11 @@
                 <div id="view-cupom-aplicado" style="font-size: 11px; margin-top: 10px; text-align: center; background: #eee; padding: 5px; display:none;"></div>
                 <div id="view-obs" style="font-size: 11px; margin-top: 10px; font-style: italic;"></div>
                 <div id="view-versiculo" style="margin-top: 20px; font-size: 10px; text-align: center; color: #666; border-top: 1px dashed #ccc; padding-top: 10px;"></div>
+                
+                <div id="qr-code-area" style="text-align: center; margin-top: 15px;">
+                    <img id="qr-code-img" src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=https://seguromj.github.io/Nuance-/&choe=UTF-8" style="width: 100px; height: 100px;">
+                    <p style="font-size: 9px; margin-top: 5px;">ACESSE NOSSO MENU</p>
+                </div>
             </div>
 
             <div style="width: 80mm; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -848,7 +865,7 @@
 
     function enviarZapDireto(id) {
         const notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
-        const n =淹otas.find(x => x.id === id);
+        const n = notas.find(x => x.id === id);
         if(!n || !n.whatsapp) return;
         const primeiroNome = n.nome ? n.nome.split(' ')[0] : "Cliente";
         let msg = "";
@@ -980,7 +997,7 @@
             const key = n.whatsapp ? n.whatsapp.replace(/\D/g, '') : n.nome; 
             if(key) { 
                 clientes[key] = (clientes[key] || 0) + 1; 
-                fones[key] = { zap: n.whatsapp, nome: n.nome }; 
+                fones[key] = { zap: n.whatsapp, name: n.nome }; 
             } 
         });
 
@@ -989,7 +1006,7 @@
             return `
             <div style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; align-items:center; background: ${isFidelidade ? 'rgba(16, 185, 129, 0.1)' : 'transparent'};">
                 <div>
-                    <b style="color: ${isFidelidade ? 'var(--success)' : 'var(--primary)'};">${fones[key].nome} ${isFidelidade ? '⭐' : ''}</b><br>
+                    <b style="color: ${isFidelidade ? 'var(--success)' : 'var(--primary)'};">${fones[key].name} ${isFidelidade ? '⭐' : ''}</b><br>
                     <small style="color: var(--text-muted);">${fones[key].zap || 'Sem Whats'}</small>
                 </div>
                 <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 5px;">
