@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -295,6 +296,7 @@
             <button class="btn btn-nav" onclick="abrirRankingClientes()">👤 VIPs</button>
             <button class="btn btn-nav" style="border-color: var(--primary);" onclick="abrirRankingProdutos()">📦 Estoque</button>
             <button class="btn btn-nav" style="background: #334155; border: none;" onclick="limparHD()">💾 Limpar HD</button>
+            <button class="btn btn-nav" style="background: #f59e0b; border: none;" onclick="abrirLoginAdmin()">🔑 Admin</button>
             <button class="btn btn-nav" style="background: var(--danger); border: none;" onclick="logout()">🚪 Sair</button>
         </nav>
     </header>
@@ -502,6 +504,42 @@
             <div class="coupon-item"><span class="discount-text">7% de desconto</span><span>Número 5</span></div>
             <div class="coupon-item"><span class="discount-text">Frete Gratis</span><span>Número 6</span></div>
         </div>
+    </div>
+</div>
+
+<div id="modalLoginAdmin" class="modal">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+        <span class="close" onclick="fecharModal('modalLoginAdmin')">×</span>
+        <h3 style="color: var(--accent);">Acesso Restrito Admin</h3>
+        <p style="font-size: 14px; color: var(--text-muted);">Digite a senha de segurança</p>
+        <div class="form-group">
+            <input type="password" id="senha-admin" placeholder="Sua senha master">
+        </div>
+        <button class="btn btn-gerar" style="width:100%;" onclick="verificarLoginAdmin()">LIBERAR ACESSO</button>
+    </div>
+</div>
+
+<div id="modalAdminForm" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <span class="close" onclick="fecharModal('modalAdminForm')">×</span>
+        <h3 style="margin-top:0; color: var(--primary);">Alterar Produto</h3>
+        <div class="form-group">
+            <label>Digite o ID do Produto</label>
+            <input type="text" id="admin-campo1" placeholder="Digite aqui...">
+        </div>
+        <div class="form-group">
+            <label>Digite o Nome</label>
+            <input type="text" id="admin-campo2" placeholder="Digite aqui...">
+        </div>
+        <div class="form-group">
+            <label>Digite o Valor</label>
+            <input type="text" id="admin-campo3" placeholder="Digite aqui...">
+        </div>
+        <div class="form-group">
+            <label>Cole a URL da imagem do Produto</label>
+            <input type="text" id="admin-campo4" placeholder="Digite aqui...">
+        </div>
+        <button class="btn btn-gerar" style="width:100%; background: var(--success);" onclick="enviarFormAdmin()">Salvar alteração no Produto</button>
     </div>
 </div>
 
@@ -774,7 +812,9 @@
         
         const endereco = `${rua}, ${num}, ${bairro}, ${cep}`;
         document.getElementById('titulo-mapa').innerText = "📍 Rota: " + nome;
-        document.getElementById('iframe-mapa').src = `https://maps.google.com/maps?q=${encodeURIComponent(endereco)}&output=embed`;
+        document.getElementById('iframe-mapa').src = `https://www.google.com/maps/embed/v1/search?key=SEU_API_KEY_AQUI&q=${encodeURIComponent(endereco)}`;
+        // Nota: O embed do Google requer API Key. Caso não tenha, usa-se a URL de visualização:
+        document.getElementById('iframe-mapa').src = `https://maps.google.com/maps?q=${encodeURIComponent(endereco)}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
         document.getElementById('modalMapa').style.display = 'block';
     }
 
@@ -785,7 +825,7 @@
         
         const endereco = `${n.rua}, ${n.numero}, ${n.bairro}, ${n.cep}`;
         document.getElementById('titulo-mapa').innerText = "📍 Entrega: " + n.nome;
-        document.getElementById('iframe-mapa').src = `https://maps.google.com/maps?q=${encodeURIComponent(endereco)}&output=embed`;
+        document.getElementById('iframe-mapa').src = `https://maps.google.com/maps?q=${encodeURIComponent(endereco)}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
         document.getElementById('modalMapa').style.display = 'block';
     }
 
@@ -1179,6 +1219,51 @@
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    }
+
+    // --- FUNÇÕES NOVAS ADMIN ---
+    function abrirLoginAdmin() {
+        document.getElementById('modalLoginAdmin').style.display = 'block';
+    }
+
+    function verificarLoginAdmin() {
+        const senha = document.getElementById('senha-admin').value;
+        if (senha === "MJ-NUANCE") {
+            fecharModal('modalLoginAdmin');
+            document.getElementById('senha-admin').value = "";
+            document.getElementById('modalAdminForm').style.display = 'block';
+        } else {
+            alert("Senha Incorreta!");
+        }
+    }
+
+    function enviarFormAdmin() {
+        const c1 = document.getElementById('admin-campo1').value;
+        const c2 = document.getElementById('admin-campo2').value;
+        const c3 = document.getElementById('admin-campo3').value;
+        const c4 = document.getElementById('admin-campo4').value;
+
+        if(!c1 || !c2 || !c3 || !c4) return alert("Preencha todos os campos!");
+
+        // CONFIGURAÇÃO DO GOOGLE FORMS
+        const formURL = "https://docs.google.com/forms/d/e/1FAIpQLSfHpe7Idb8cekKYPyOOs8xn5sSfCQhWLKqUYwF4uXaz4QBX9w/formResponse";
+        const entry1 = "entry.1183639703"; // ID
+        const entry2 = "entry.1305746237"; // Nome
+        const entry3 = "entry.204413255"; // Valor
+        const entry4 = "entry.1752078996"; // Imagem
+
+        const fullURL = `${formURL}?${entry1}=${encodeURIComponent(c1)}&${entry2}=${encodeURIComponent(c2)}&${entry3}=${encodeURIComponent(c3)}&${entry4}=${encodeURIComponent(c4)}`;
+
+        fetch(fullURL, { mode: 'no-cors' })
+        .then(() => {
+            alert("Dados enviados com sucesso para a planilha!");
+            fecharModal('modalAdminForm');
+            document.getElementById('admin-campo1').value = "";
+            document.getElementById('admin-campo2').value = "";
+            document.getElementById('admin-campo3').value = "";
+            document.getElementById('admin-campo4').value = "";
+        })
+        .catch(err => alert("Erro ao enviar: " + err));
     }
 </script>
 </body>
