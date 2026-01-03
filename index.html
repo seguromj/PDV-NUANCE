@@ -383,8 +383,7 @@
                 <div class="form-group"><label>Modalidade (MESA/RETIRADA/DELIVERY)</label><input type="text" id="coleta" placeholder="Entrega / Retirada / Mesa" oninput="salvarProgresso(); atualizarCupom()"></div>
             </div>
             <div class="form-group"><label>Status do Pagamento</label><input type="text" id="esta-pago" placeholder="Ex: PAGO VIA PIX" oninput="salvarProgresso(); atualizarCupom()"></div>
-            <div class="form-group"><label>Produtos Selecionados</label><textarea id="produtos-texto" style="height: 100px;" placeholder="2x Gin Tônica
-1x Combo Vodka" oninput="salvarProgresso(); atualizarCupom()"></textarea></div>
+            <div class="form-group"><label>Produtos Selecionados</label><textarea id="produtos-texto" style="height: 100px;" placeholder="2x Gin Tônica 1x Combo Vodka" oninput="salvarProgresso(); atualizarCupom()"></textarea></div>
             
             <div class="grid">
                 <div class="form-group"><label>Valor Total (R$)</label><input type="text" id="valor-total" style="font-weight: 800; color: #4ade80;" oninput="salvarProgresso(); atualizarCupom()"></div>
@@ -1338,18 +1337,19 @@
         document.getElementById('preview-flavors-text').innerText = "Sabores: " + sabores;
     }
 
-    function enviarFormAdmin() {
+        function enviarFormAdmin() {
         const c1 = document.getElementById('admin-campo1').value;
         const c2 = document.getElementById('admin-campo2').value;
         const c3 = document.getElementById('admin-campo3').value;
         const c4 = document.getElementById('admin-campo4').value;
         const c5 = document.getElementById('admin-campo5').value;
 
-        if(!c1 || !c2 || !c3 || !c4 || !c5) return alert("Preencha todos os campos!");
+        // Modificado: c5 (Sabores) removido da validação obrigatória
+        if(!c1 || !c2 || !c3 || !c4) return alert("Preencha todos os campos obrigatórios (ID, Nome, Valor e Imagem)!");
 
         // SALVAR LOCALMENTE PARA O CARROSSEL (PERSISTÊNCIA)
         let produtosSalvos = JSON.parse(localStorage.getItem('nuance_catalogo') || '[]');
-        const novoProduto = { id: parseInt(c1), nome: c2, preco: c3, img: c4, sabores: c5 };
+        const novoProduto = { id: parseInt(c1), nome: c2, preco: c3, img: c4, sabores: c5 || "---" };
         
         const index = produtosSalvos.findIndex(p => p.id === novoProduto.id);
         if(index !== -1) produtosSalvos[index] = novoProduto;
@@ -1376,80 +1376,107 @@
         .catch(err => alert("Erro ao enviar: " + err));
     }
 
-    // --- FUNÇÕES DOS CARROSSÉIS ---
-    function carregarCardsSalvos() {
-        const produtos = JSON.parse(localStorage.getItem('nuance_catalogo') || '[]');
-        const containers = [
-            document.getElementById('carousel-1'),
-            document.getElementById('carousel-2'),
-            document.getElementById('carousel-3'),
-            document.getElementById('carousel-4')
-        ];
 
-        containers.forEach(c => c.innerHTML = "");
 
-        produtos.sort((a,b) => a.id - b.id).forEach(p => {
-            const cardHTML = `
-                <div class="preview-product-card" onclick="adicionarAoPedido('${p.nome}', '${p.preco}')">
-                    <img class="preview-product-img" src="${p.img}" alt="${p.nome}">
-                    <div class="preview-content">
-                        <span class="preview-id">ID: ${p.id}</span>
-                        <div class="preview-name">${p.nome}</div>
-                        <div class="preview-price">R$ ${p.preco}</div>
-                        <div class="preview-flavors">Sabores: ${p.sabores}</div>
-                    </div>
+        
+ //=========================       
+        
+        
+   // --- FUNÇÕES DOS CARROSSÉIS E INTERAÇÃO ---
+
+function carregarCardsSalvos() {
+    const produtos = JSON.parse(localStorage.getItem('nuance_catalogo') || '[]');
+    const containers = [
+        document.getElementById('carousel-1'),
+        document.getElementById('carousel-2'),
+        document.getElementById('carousel-3'),
+        document.getElementById('carousel-4')
+    ];
+
+    // Limpa os containers antes de renderizar
+    containers.forEach(c => { if(c) c.innerHTML = ""; });
+
+    if (produtos.length === 0) {
+        containers.forEach(c => { if(c) c.innerHTML = "<p style='padding:20px; color:var(--text-muted);'>Nenhum produto cadastrado nesta categoria.</p>"; });
+        return;
+    }
+
+    produtos.sort((a,b) => a.id - b.id).forEach(p => {
+        const cardHTML = `
+            <div class="preview-product-card" onclick="adicionarAoPedido('${p.nome}', '${p.preco}')" style="cursor:pointer; flex: 0 0 200px;">
+                <img class="preview-product-img" src="${p.img || 'https://placehold.co/400x400?text=Nuance'}" alt="${p.nome}">
+                <div class="preview-content">
+                    <span class="preview-id">ID: ${p.id}</span>
+                    <div class="preview-name">${p.nome}</div>
+                    <div class="preview-price">R$ ${p.preco}</div>
+                    <div class="preview-flavors">Sabores: ${p.sabores}</div>
                 </div>
-            `;
+            </div>
+        `;
 
-            if (p.id >= 1 && p.id <= 99) containers[0].innerHTML += cardHTML;
-            else if (p.id >= 100 && p.id <= 199) containers[1].innerHTML += cardHTML;
-            else if (p.id >= 200 && p.id <= 299) containers[2].innerHTML += cardHTML;
-            else if (p.id >= 300 && p.id <= 399) containers[3].innerHTML += cardHTML;
-        });
+        // Distribui nos containers baseados no ID
+        if (p.id >= 1 && p.id <= 99 && containers[0]) containers[0].innerHTML += cardHTML;
+        else if (p.id >= 100 && p.id <= 199 && containers[1]) containers[1].innerHTML += cardHTML;
+        else if (p.id >= 200 && p.id <= 299 && containers[2]) containers[2].innerHTML += cardHTML;
+        else if (p.id >= 300 && p.id <= 399 && containers[3]) containers[3].innerHTML += cardHTML;
+    });
 
-        containers.forEach(setupDraggable);
-    }
+    // Ativa o arraste lateral com o mouse
+    containers.forEach(setupDraggable);
+}
 
-    function setupDraggable(el) {
-        let isDown = false;
-        let startX;
-        let scrollLeft;
+// Função para permitir arrastar o carrossel com o mouse (Desktop)
+function setupDraggable(el) {
+    if(!el) return;
+    let isDown = false;
+    let startX;
+    let scrollLeft;
 
-        el.addEventListener('mousedown', (e) => {
-            isDown = true;
-            el.classList.add('active');
-            startX = e.pageX - el.offsetLeft;
-            scrollLeft = el.scrollLeft;
-        });
-        el.addEventListener('mouseleave', () => {
-            isDown = false;
-        });
-        el.addEventListener('mouseup', () => {
-            isDown = false;
-        });
-        el.addEventListener('mousemove', (e) => {
-            if (!isDown) return;
-            e.preventDefault();
-            const x = e.pageX - el.offsetLeft;
-            const walk = (x - startX) * 2; 
-            el.scrollLeft = scrollLeft - walk;
-        });
-    }
+    el.addEventListener('mousedown', (e) => {
+        isDown = true;
+        el.style.cursor = 'grabbing';
+        startX = e.pageX - el.offsetLeft;
+        scrollLeft = el.scrollLeft;
+    });
+    el.addEventListener('mouseleave', () => {
+        isDown = false;
+        el.style.cursor = 'grab';
+    });
+    el.addEventListener('mouseup', () => {
+        isDown = false;
+        el.style.cursor = 'grab';
+    });
+    el.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - el.offsetLeft;
+        const walk = (x - startX) * 2; 
+        el.scrollLeft = scrollLeft - walk;
+    });
+}
 
-    function adicionarAoPedido(nome, preco) {
-        const areaProd = document.getElementById('produtos-texto');
-        const valorTotal = document.getElementById('valor-total');
+// Função que o card chama ao ser clicado
+function adicionarAoPedido(nome, preco) {
+    const areaProd = document.getElementById('produtos-texto');
+    const valorTotal = document.getElementById('valor-total');
+    
+    // Adiciona o texto do produto
+    const quebra = areaProd.value ? "\n" : "";
+    areaProd.value += quebra + "1x " + nome;
+    
+    // Soma o valor (ajustando vírgula por ponto para o cálculo)
+    let totalAtual = parseFloat(valorTotal.value.replace(',', '.')) || 0;
+    let novoPreco = parseFloat(preco.toString().replace(',', '.')) || 0;
+    valorTotal.value = (totalAtual + novoPreco).toFixed(2);
+    
+    salvarProgresso();
+    atualizarCupom();
+    
+    // Pequeno feedback visual ou sonoro opcional
+    console.log("Adicionado: " + nome);
+}
+     
         
-        areaProd.value += (areaProd.value ? "\n" : "") + "1x " + nome;
-        
-        let totalAtual = parseFloat(valorTotal.value) || 0;
-        let novoPreco = parseFloat(preco.replace(',', '.')) || 0;
-        valorTotal.value = (totalAtual + novoPreco).toFixed(2);
-        
-        salvarProgresso();
-        atualizarCupom();
-        alert(nome + " adicionado ao pedido!");
-    }
 
 </script>
 </body>
