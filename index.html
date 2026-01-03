@@ -217,7 +217,11 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             text-align: left;
             flex: 0 0 200px; /* Largura fixa para o carrossel */
+            transition: transform 0.2s;
+            position: relative;
         }
+        .preview-product-card:active { transform: scale(0.95); }
+        
         .preview-product-img {
             width: 100%;
             height: 150px; /* Ajustado para caber melhor no carrossel */
@@ -231,6 +235,27 @@
         .preview-name { font-weight: 800; font-size: 14px; margin: 3px 0; color: #000; }
         .preview-price { color: var(--success); font-weight: 900; font-size: 16px; }
         .preview-flavors { font-size: 10px; color: #555; margin-top: 5px; padding-top: 5px; border-top: 1px solid #eee; }
+
+        /* Botão de Excluir no Card */
+        .btn-excluir-produto {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+        .btn-excluir-produto:hover { transform: scale(1.1); background: #ef4444; }
 
         /* ESTILOS DO CARROSSEL */
         .carousel-container {
@@ -391,28 +416,6 @@
             </div>
             <div class="form-group"><label>Observações Internas</label><input type="text" id="obs" oninput="salvarProgresso(); atualizarCupom()"></div>
 
-            <div class="section-title">🛒 Catálogo de Produtos</div>
-            
-            <div class="carousel-wrapper">
-                <div class="carousel-title">PRODUTOS (ID 01-99)</div>
-                <div id="carousel-1" class="carousel-container"></div>
-            </div>
-
-            <div class="carousel-wrapper">
-                <div class="carousel-title">PRODUTOS (ID 100-199)</div>
-                <div id="carousel-2" class="carousel-container"></div>
-            </div>
-
-            <div class="carousel-wrapper">
-                <div class="carousel-title">PRODUTOS (ID 200-299)</div>
-                <div id="carousel-3" class="carousel-container"></div>
-            </div>
-
-            <div class="carousel-wrapper">
-                <div class="carousel-title">PRODUTOS (ID 300-399)</div>
-                <div id="carousel-4" class="carousel-container"></div>
-            </div>
-
             <div class="form-group" style="margin-top: 20px;">
                 <label style="color: var(--primary); font-weight: 800;">Prefixo da Ordem</label>
                 <input type="text" id="prefixo-ordem" placeholder="Digite o prefixo..." style="border: 2px solid var(--primary);" oninput="salvarProgresso()">
@@ -487,17 +490,15 @@
     </div>
 </div>
 
-<div id="area-etiqueta" style="display:none; width:80mm; padding:10px; border:2px solid #000; color:#000; background:#fff;">
-    <div style="text-align:center; font-weight:bold; font-size:18px;">NUANCE DRINKS</div>
-    <div class="divisor"></div>
-    <div style="font-size:14px;">
-        <strong>CLIENTE:</strong> <span id="etiq-nome"></span><br>
-        <strong>END:</strong> <span id="etiq-end"></span><br>
-        <strong>CEP:</strong> <span id="etiq-cep"></span><br>
-        <strong>OBS:</strong> <span id="etiq-obs"></span>
+<div id="modalConfirmarExclusaoProduto" class="modal" style="z-index: 7000;">
+    <div class="modal-content" style="max-width: 300px; text-align: center; margin-top: 20vh;">
+        <h3 style="color: var(--danger); margin-top: 0;">Excluir Produto?</h3>
+        <p style="font-size: 14px;">Tem certeza que deseja remover este item do catálogo?</p>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button class="btn" style="flex: 1; background: #475569; color: white;" onclick="fecharModal('modalConfirmarExclusaoProduto')">NÃO</button>
+            <button class="btn" style="flex: 1; background: var(--danger); color: white;" onclick="confirmarExclusaoProduto()">SIM</button>
+        </div>
     </div>
-    <div class="divisor"></div>
-    <div id="etiq-prod" style="font-size:14px; font-weight:bold;"></div>
 </div>
 
 <div id="modalGestao" class="modal">
@@ -584,55 +585,63 @@
     </div>
 </div>
 
-<div id="modalAdminForm" class="modal">
-    <div class="modal-content" style="max-width: 500px;">
-        <span class="close" onclick="fecharModal('modalAdminForm')">×</span>
+<div id="modalAdminForm" class="modal" onclick="event.stopPropagation()">
+    <div class="modal-content" style="max-width: 650px;">
         <h3 style="margin-top:0; color: var(--primary);">Alterar Produto</h3>
         
         <div class="form-group">
             <label>Digite o ID do Produto</label>
-            <input type="number" id="admin-campo1" placeholder="Ex: 1" oninput="atualizarPreviewAdmin()">
+            <input type="number" id="admin-campo1" placeholder="Ex: 1">
         </div>
         <div class="form-group">
             <label>Digite o Nome</label>
-            <input type="text" id="admin-campo2" placeholder="Ex: Gin Tônica Tanqueray" oninput="atualizarPreviewAdmin()">
+            <input type="text" id="admin-campo2" placeholder="Ex: Gin Tônica Tanqueray">
         </div>
         <div class="form-group">
             <label>Digite o Valor</label>
-            <input type="text" id="admin-campo3" placeholder="Ex: 25.00" oninput="atualizarPreviewAdmin()">
+            <input type="text" id="admin-campo3" placeholder="Ex: 25.00">
         </div>
         <div class="form-group">
             <label>Cole a URL da imagem do Produto</label>
-            <input type="text" id="admin-campo4" placeholder="URL da imagem..." oninput="atualizarPreviewAdmin()">
+            <input type="text" id="admin-campo4" placeholder="URL da imagem...">
         </div>
         <div class="form-group">
             <label>Sabores do Produto se tiver</label>
-            <input type="text" id="admin-campo5" placeholder="Ex: Limão, Morango, Tradicional" oninput="atualizarPreviewAdmin()">
+            <input type="text" id="admin-campo5" placeholder="Ex: Limão, Morango, Tradicional">
         </div>
 
-        <div id="admin-preview-container" style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 15px; margin: 20px 0;">
-            <p style="font-size: 10px; text-align: center; color: var(--text-muted); margin-bottom: 10px;">PRÉ-VISUALIZAÇÃO DO PRODUTO</p>
-            <div id="preview-card-admin" class="preview-product-card">
-                <img id="preview-img" class="preview-product-img" src="" alt="Produto">
-                <div class="preview-content">
-                    <span id="preview-id-text" class="preview-id">ID: ---</span>
-                    <div id="preview-name-text" class="preview-name">Nome do Produto</div>
-                    <div id="preview-price-text" class="preview-price">R$ 0.00</div>
-                    <div id="preview-flavors-text" class="preview-flavors">Sabores: ---</div>
-                </div>
-            </div>
-        </div>
-
-        <button class="btn btn-gerar" style="width:100%; background: var(--success);" onclick="enviarFormAdmin()">Salvar alteração no Produto</button>
+        <button class="btn btn-gerar" style="width:100%; background: var(--success);" onclick="enviarFormAdmin()">Salvar alteração no Catálogo</button>
         <button class="btn btn-nav" style="width:100%; margin-top:10px; background: var(--danger); border: none;" onclick="fecharModal('modalAdminForm')">SAIR DO ADMIN</button>
+
+        <div class="section-title">🛒 Catálogo de Produtos</div>
+        
+        <div class="carousel-wrapper">
+            <div class="carousel-title">Drinks Com Álcool (ID do 01-99)</div>
+            <div id="carousel-1" class="carousel-container"></div>
+        </div>
+
+        <div class="carousel-wrapper">
+            <div class="carousel-title">Drinks Sem Álcool (ID do 100-199)</div>
+            <div id="carousel-2" class="carousel-container"></div>
+        </div>
+
+        <div class="carousel-wrapper">
+            <div class="carousel-title">COPÃO (ID do 200-299)</div>
+            <div id="carousel-3" class="carousel-container"></div>
+        </div>
+
+        <div class="carousel-wrapper">
+            <div class="carousel-title">COMBOS (ID do 300-399)</div>
+            <div id="carousel-4" class="carousel-container"></div>
+        </div>
     </div>
 </div>
-
 
 <script>
     // LÓGICA DE LOGIN E ISOLAMENTO DE DADOS
     let usuarioLogado = null;
     let nomeUsuarioLogado = "";
+    let idProdutoParaExcluir = null;
 
     function verificarSessao() {
         const sessionEmail = localStorage.getItem('nuance_session');
@@ -866,12 +875,6 @@
         const vC = document.getElementById('view-cupom-aplicado');
         if(cupomV) { vC.style.display = "block"; vC.innerText = "CUPOM para sua próxima Compra: " + cupomV.toUpperCase(); }
         else vC.style.display = "none";
-
-        document.getElementById('etiq-nome').innerText = nome;
-        document.getElementById('etiq-end').innerText = (document.getElementById('coleta').value.toUpperCase().includes("MESA") || document.getElementById('coleta').value.toUpperCase().includes("RETIRADA")) ? document.getElementById('coleta').value : endFormatado;
-        document.getElementById('etiq-cep').innerText = document.getElementById('cep').value;
-        document.getElementById('etiq-obs').innerText = document.getElementById('obs').value;
-        document.getElementById('etiq-prod').innerText = document.getElementById('produtos-texto').value;
 
         document.getElementById('view-versiculo').innerText = versiculos[Math.floor(Math.random() * versiculos.length)];
     }
@@ -1305,7 +1308,7 @@
         document.body.removeChild(link);
     }
 
-    // --- FUNÇÕES NOVAS ADMIN ---
+    // --- FUNÇÕES ADMIN E CATÁLOGO ---
     function abrirLoginAdmin() {
         document.getElementById('modalLoginAdmin').style.display = 'block';
     }
@@ -1316,38 +1319,20 @@
             fecharModal('modalLoginAdmin');
             document.getElementById('senha-admin').value = "";
             document.getElementById('modalAdminForm').style.display = 'block';
-            atualizarPreviewAdmin();
         } else {
             alert("Senha Incorreta!");
         }
     }
 
-    // Função para atualizar o Card de visualização no Admin
-    function atualizarPreviewAdmin() {
-        const id = document.getElementById('admin-campo1').value || "---";
-        const nome = document.getElementById('admin-campo2').value || "Nome do Produto";
-        const valor = document.getElementById('admin-campo3').value || "0.00";
-        const img = document.getElementById('admin-campo4').value || "https://placehold.co/400x400?text=Nuance+Drinks";
-        const sabores = document.getElementById('admin-campo5').value || "---";
-
-        document.getElementById('preview-id-text').innerText = "ID: " + id;
-        document.getElementById('preview-name-text').innerText = nome;
-        document.getElementById('preview-price-text').innerText = "R$ " + valor;
-        document.getElementById('preview-img').src = img;
-        document.getElementById('preview-flavors-text').innerText = "Sabores: " + sabores;
-    }
-
-        function enviarFormAdmin() {
+    function enviarFormAdmin() {
         const c1 = document.getElementById('admin-campo1').value;
         const c2 = document.getElementById('admin-campo2').value;
         const c3 = document.getElementById('admin-campo3').value;
         const c4 = document.getElementById('admin-campo4').value;
         const c5 = document.getElementById('admin-campo5').value;
 
-        // Modificado: c5 (Sabores) removido da validação obrigatória
         if(!c1 || !c2 || !c3 || !c4) return alert("Preencha todos os campos obrigatórios (ID, Nome, Valor e Imagem)!");
 
-        // SALVAR LOCALMENTE PARA O CARROSSEL (PERSISTÊNCIA)
         let produtosSalvos = JSON.parse(localStorage.getItem('nuance_catalogo') || '[]');
         const novoProduto = { id: parseInt(c1), nome: c2, preco: c3, img: c4, sabores: c5 || "---" };
         
@@ -1358,7 +1343,6 @@
         localStorage.setItem('nuance_catalogo', JSON.stringify(produtosSalvos));
         carregarCardsSalvos();
 
-        // CONFIGURAÇÃO DO GOOGLE FORMS
         const formURL = "https://docs.google.com/forms/d/e/1FAIpQLSfHpe7Idb8cekKYPyOOs8xn5sSfCQhWLKqUYwF4uXaz4QBX9w/formResponse";
         const entry1 = "entry.1183639703"; 
         const entry2 = "entry.1305746237"; 
@@ -1370,113 +1354,99 @@
 
         fetch(fullURL, { mode: 'no-cors' })
         .then(() => {
-            alert("Alteração salva com sucesso!");
-            // MANTÉM O MODAL ABERTO E OS CAMPOS PREENCHIDOS CONFORME SOLICITADO
+            alert("Produto salvo com sucesso no sistema!");
+            // Não fecha o modal aqui para permitir ver o catálogo atualizado
         })
         .catch(err => alert("Erro ao enviar: " + err));
     }
 
+    function carregarCardsSalvos() {
+        const produtos = JSON.parse(localStorage.getItem('nuance_catalogo') || '[]');
+        const containers = [
+            document.getElementById('carousel-1'),
+            document.getElementById('carousel-2'),
+            document.getElementById('carousel-3'),
+            document.getElementById('carousel-4')
+        ];
 
+        containers.forEach(c => { if(c) c.innerHTML = ""; });
 
-        
- //=========================       
-        
-        
-   // --- FUNÇÕES DOS CARROSSÉIS E INTERAÇÃO ---
+        if (produtos.length === 0) return;
 
-function carregarCardsSalvos() {
-    const produtos = JSON.parse(localStorage.getItem('nuance_catalogo') || '[]');
-    const containers = [
-        document.getElementById('carousel-1'),
-        document.getElementById('carousel-2'),
-        document.getElementById('carousel-3'),
-        document.getElementById('carousel-4')
-    ];
+        produtos.sort((a,b) => a.id - b.id).forEach(p => {
+            const cardHTML = `
+                <div class="preview-product-card" onclick="adicionarAoPedido('${p.nome}', '${p.preco}')">
+                    <button class="btn-excluir-produto" onclick="prepararExclusaoProduto(event, ${p.id})">🗑️</button>
+                    <img class="preview-product-img" src="${p.img || 'https://placehold.co/400x400?text=Nuance'}" alt="${p.nome}">
+                    <div class="preview-content">
+                        <span class="preview-id">ID: ${p.id}</span>
+                        <div class="preview-name">${p.nome}</div>
+                        <div class="preview-price">R$ ${p.preco}</div>
+                        <div class="preview-flavors">Sabores: ${p.sabores}</div>
+                    </div>
+                </div>
+            `;
 
-    // Limpa os containers antes de renderizar
-    containers.forEach(c => { if(c) c.innerHTML = ""; });
+            if (p.id >= 1 && p.id <= 99 && containers[0]) containers[0].innerHTML += cardHTML;
+            else if (p.id >= 100 && p.id <= 199 && containers[1]) containers[1].innerHTML += cardHTML;
+            else if (p.id >= 200 && p.id <= 299 && containers[2]) containers[2].innerHTML += cardHTML;
+            else if (p.id >= 300 && p.id <= 399 && containers[3]) containers[3].innerHTML += cardHTML;
+        });
 
-    if (produtos.length === 0) {
-        containers.forEach(c => { if(c) c.innerHTML = "<p style='padding:20px; color:var(--text-muted);'>Nenhum produto cadastrado nesta categoria.</p>"; });
-        return;
+        containers.forEach(setupDraggable);
     }
 
-    produtos.sort((a,b) => a.id - b.id).forEach(p => {
-        const cardHTML = `
-            <div class="preview-product-card" onclick="adicionarAoPedido('${p.nome}', '${p.preco}')" style="cursor:pointer; flex: 0 0 200px;">
-                <img class="preview-product-img" src="${p.img || 'https://placehold.co/400x400?text=Nuance'}" alt="${p.nome}">
-                <div class="preview-content">
-                    <span class="preview-id">ID: ${p.id}</span>
-                    <div class="preview-name">${p.nome}</div>
-                    <div class="preview-price">R$ ${p.preco}</div>
-                    <div class="preview-flavors">Sabores: ${p.sabores}</div>
-                </div>
-            </div>
-        `;
+    function prepararExclusaoProduto(event, id) {
+        event.stopPropagation(); // Evita que clique no card adicione o produto ao pedido
+        idProdutoParaExcluir = id;
+        document.getElementById('modalConfirmarExclusaoProduto').style.display = 'block';
+    }
 
-        // Distribui nos containers baseados no ID
-        if (p.id >= 1 && p.id <= 99 && containers[0]) containers[0].innerHTML += cardHTML;
-        else if (p.id >= 100 && p.id <= 199 && containers[1]) containers[1].innerHTML += cardHTML;
-        else if (p.id >= 200 && p.id <= 299 && containers[2]) containers[2].innerHTML += cardHTML;
-        else if (p.id >= 300 && p.id <= 399 && containers[3]) containers[3].innerHTML += cardHTML;
-    });
+    function confirmarExclusaoProduto() {
+        if (idProdutoParaExcluir !== null) {
+            let produtos = JSON.parse(localStorage.getItem('nuance_catalogo') || '[]');
+            produtos = produtos.filter(p => p.id !== idProdutoParaExcluir);
+            localStorage.setItem('nuance_catalogo', JSON.stringify(produtos));
+            carregarCardsSalvos();
+            fecharModal('modalConfirmarExclusaoProduto');
+            idProdutoParaExcluir = null;
+        }
+    }
 
-    // Ativa o arraste lateral com o mouse
-    containers.forEach(setupDraggable);
-}
+    function setupDraggable(el) {
+        if(!el) return;
+        let isDown = false;
+        let startX;
+        let scrollLeft;
 
-// Função para permitir arrastar o carrossel com o mouse (Desktop)
-function setupDraggable(el) {
-    if(!el) return;
-    let isDown = false;
-    let startX;
-    let scrollLeft;
+        el.addEventListener('mousedown', (e) => {
+            isDown = true;
+            el.style.cursor = 'grabbing';
+            startX = e.pageX - el.offsetLeft;
+            scrollLeft = el.scrollLeft;
+        });
+        el.addEventListener('mouseleave', () => { isDown = false; el.style.cursor = 'grab'; });
+        el.addEventListener('mouseup', () => { isDown = false; el.style.cursor = 'grab'; });
+        el.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - el.offsetLeft;
+            const walk = (x - startX) * 2; 
+            el.scrollLeft = scrollLeft - walk;
+        });
+    }
 
-    el.addEventListener('mousedown', (e) => {
-        isDown = true;
-        el.style.cursor = 'grabbing';
-        startX = e.pageX - el.offsetLeft;
-        scrollLeft = el.scrollLeft;
-    });
-    el.addEventListener('mouseleave', () => {
-        isDown = false;
-        el.style.cursor = 'grab';
-    });
-    el.addEventListener('mouseup', () => {
-        isDown = false;
-        el.style.cursor = 'grab';
-    });
-    el.addEventListener('mousemove', (e) => {
-        if (!isDown) return;
-        e.preventDefault();
-        const x = e.pageX - el.offsetLeft;
-        const walk = (x - startX) * 2; 
-        el.scrollLeft = scrollLeft - walk;
-    });
-}
-
-// Função que o card chama ao ser clicado
-function adicionarAoPedido(nome, preco) {
-    const areaProd = document.getElementById('produtos-texto');
-    const valorTotal = document.getElementById('valor-total');
-    
-    // Adiciona o texto do produto
-    const quebra = areaProd.value ? "\n" : "";
-    areaProd.value += quebra + "1x " + nome;
-    
-    // Soma o valor (ajustando vírgula por ponto para o cálculo)
-    let totalAtual = parseFloat(valorTotal.value.replace(',', '.')) || 0;
-    let novoPreco = parseFloat(preco.toString().replace(',', '.')) || 0;
-    valorTotal.value = (totalAtual + novoPreco).toFixed(2);
-    
-    salvarProgresso();
-    atualizarCupom();
-    
-    // Pequeno feedback visual ou sonoro opcional
-    console.log("Adicionado: " + nome);
-}
-     
-        
+    function adicionarAoPedido(nome, preco) {
+        const areaProd = document.getElementById('produtos-texto');
+        const valorTotal = document.getElementById('valor-total');
+        const quebra = areaProd.value ? "\n" : "";
+        areaProd.value += quebra + "1x " + nome;
+        let totalAtual = parseFloat(valorTotal.value.replace(',', '.')) || 0;
+        let novoPreco = parseFloat(preco.toString().replace(',', '.')) || 0;
+        valorTotal.value = (totalAtual + novoPreco).toFixed(2);
+        salvarProgresso();
+        atualizarCupom();
+    }
 
 </script>
 </body>
