@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -521,7 +520,6 @@
 
 <div id="modalAdminForm" class="modal">
     <div class="modal-content" style="max-width: 500px;">
-        <span class="close" onclick="fecharModal('modalAdminForm')">×</span>
         <h3 style="margin-top:0; color: var(--primary);">Alterar Produto</h3>
         <div class="form-group">
             <label>Digite o ID do Produto</label>
@@ -1241,13 +1239,12 @@
         }
     }
 
-        function enviarFormAdmin() {
+    function enviarFormAdmin() {
         const c1 = document.getElementById('admin-campo1').value;
         const c2 = document.getElementById('admin-campo2').value;
         const c3 = document.getElementById('admin-campo3').value;
         const c4 = document.getElementById('admin-campo4').value;
         const c5 = document.getElementById('admin-campo5').value;
-        
 
         if(!c1 || !c2 || !c3 || !c4 || !c5) return alert("Preencha todos os campos!");
 
@@ -1259,12 +1256,7 @@
         const entry4 = "entry.1752078996"; // Imagem
         const entry5 = "entry.1983350160"; // Sabores (Mapeado para Coluna F)
 
-        const fullURL = `${formURL}?$
-            {entry1}=${encodeURIComponent(c1)}&$
-            {entry2}=${encodeURIComponent(c2)}&$
-            {entry3}=${encodeURIComponent(c3)}&$
-            {entry4}=${encodeURIComponent(c4)}&$
-            {entry5}=${encodeURIComponent(c5)}`;
+        const fullURL = `${formURL}?${entry1}=${encodeURIComponent(c1)}&${entry2}=${encodeURIComponent(c2)}&${entry3}=${encodeURIComponent(c3)}&${entry4}=${encodeURIComponent(c4)}&${entry5}=${encodeURIComponent(c5)}`;
 
         fetch(fullURL, { mode: 'no-cors' })
         .then(() => {
