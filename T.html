@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuance | Painel Administrativo de Catálogo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --primary: #6366f1; --accent: #a855f7; --danger: #ef4444; 
+            --success: #10b981; --warning: #f59e0b; --bg: #0f172a; --card: #1e293b;
+            --text: #f8fafc; --text-muted: #94a3b8;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg); color: var(--text); margin: 0;
+            background-image: radial-gradient(circle at top right, #1e1b4b, #0f172a);
+            min-height: 100vh; padding: 20px;
+        }
+
+        /* MODAL DE SABORES */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            display: none; align-items: center; justify-content: center; z-index: 10000;
+        }
+        .modal-content {
+            background: var(--card); padding: 30px; border-radius: 24px;
+            width: 90%; max-width: 400px; border: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+        .sabores-lista { display: flex; flex-direction: column; gap: 10px; margin: 20px 0; }
+        .sabor-item { 
+            background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1); font-weight: 600; color: var(--text);
+        }
+
+        #tela-bloqueio {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 5000;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .auth-container {
+            background: var(--card); padding: 40px; border-radius: 24px;
+            width: 90%; max-width: 400px; border: 1px solid rgba(255,255,255,0.1);
+            text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+
+        .auth-logo {
+            font-size: 32px; font-weight: 800; margin-bottom: 10px;
+            background: linear-gradient(to right, #818cf8, #d8b4fe);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        #admin-content { display: none; }
+        .admin-container { max-width: 900px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { font-weight: 800; background: linear-gradient(to right, #818cf8, #d8b4fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
+
+        .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .dash-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
+        .dash-card span { display: block; font-size: 24px; font-weight: 800; color: var(--accent); }
+        .dash-card label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
+
+        .panel-glass {
+            background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
+            padding: 30px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+
+        .section-title { 
+            font-size: 14px; font-weight: 800; text-transform: uppercase; 
+            color: var(--primary); margin: 30px 0 15px; display: flex; align-items: center; gap: 10px;
+        }
+        .section-title::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
+
+        .search-container { margin: 20px 0; }
+        .search-input { width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 2px solid var(--primary); border-radius: 15px; color: white; font-weight: 700; text-align: center; font-size: 16px; }
+
+        .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .form-group { margin-bottom: 15px; text-align: left; }
+        label { display: block; margin-bottom: 8px; font-size: 12px; font-weight: 600; color: var(--text-muted); }
+
+        input[type="text"], input[type="number"], input[type="password"] { 
+            width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; 
+            border-radius: 10px; color: white; font-family: inherit; box-sizing: border-box;
+        }
+
+        .delete-box {
+            display: flex; align-items: center; gap: 10px; background: rgba(239, 68, 68, 0.1);
+            padding: 15px; border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.2); margin-top: 15px;
+        }
+        .delete-box input { width: 20px; height: 20px; cursor: pointer; }
+        .delete-box span { font-size: 13px; font-weight: 700; color: var(--danger); }
+
+        .btn {
+            border: none; border-radius: 12px; padding: 15px 25px; font-weight: 700;
+            cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; width: 100%;
+            font-size: 14px;
+        }
+        .btn-save { background: linear-gradient(135deg, #6366f1, #a855f7); color: white; margin-top: 20px; }
+        
+        .btn-status { width: 90%; padding: 8px; border-radius: 8px; border: none; font-weight: 800; font-size: 11px; text-transform: uppercase; cursor: pointer; margin-bottom: 8px; }
+        .btn-add { background: #fbbf24; color: #000; }
+        .btn-sabores { background: #10b981; color: white; }
+
+        .carousel-wrapper { margin-bottom: 30px; }
+        .carousel-container { display: flex; gap: 15px; overflow-x: auto; padding: 10px 0 20px 0; }
+
+        .product-card { 
+            background: white; border-radius: 15px; min-width: 200px; max-width: 200px; 
+            color: #1a1a1a; position: relative; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.2); 
+            text-align: center;
+        }
+        .edit-badge {
+            position: absolute; top: 10px; right: 10px; background: var(--primary);
+            color: white; width: 30px; height: 30px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 10; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .product-img { width: 100%; height: 120px; object-fit: cover; background: #eee; }
+        .product-info { padding: 10px; }
+        .p-id-label { font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; }
+        .p-name { font-weight: 800; font-size: 14px; margin: 2px 0 5px 0; height: 35px; overflow: hidden; }
+        .p-price { color: #059669; font-weight: 800; font-size: 16px; margin-bottom: 10px; }
+
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
+        .toast { background: var(--success); color: white; padding: 15px 25px; border-radius: 12px; font-weight: 700; margin-bottom: 10px; }
+
+        .backup-btns { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
+        .btn-util { background: rgba(255,255,255,0.05); color: var(--text-muted); padding: 5px 10px; font-size: 10px; width: auto; }
+    </style>
+</head>
+<body>
+
+    <div id="toast-container"></div>
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+
+    <div id="modal-sabores" class="modal-overlay" onclick="fecharModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h2 id="modal-titulo" style="margin: 0; color: var(--accent);"></h2>
+            <p style="font-size: 12px; color: var(--text-muted);">SABORES DISPONÍVEIS:</p>
+            <div id="lista-sabores" class="sabores-lista"></div>
+            <button class="btn btn-save" onclick="fecharModal()">FECHAR VISUALIZAÇÃO</button>
+        </div>
+    </div>
+
+    <div id="tela-bloqueio">
+        <div class="auth-container">
+            <div class="auth-logo">NUANCE</div>
+            <div class="form-group">
+                <label>Chave de Acesso Admin</label>
+                <input type="password" id="senha-acesso" onkeydown="if(event.key==='Enter') verificarAcesso()">
+            </div>
+            <button class="btn btn-save" onclick="verificarAcesso()">LIBERAR PAINEL</button>
+        </div>
+    </div>
+
+    <div id="admin-content">
+        <div class="admin-container">
+            <header class="header">
+                <h1>NUANCE ADMIN</h1>
+                <div class="backup-btns">
+                    <button class="btn btn-util" onclick="exportarBackup()">📥 EXPORTAR BACKUP</button>
+                    <button class="btn btn-util" onclick="document.getElementById('importInput').click()">📤 IMPORTAR BACKUP</button>
+                    <input type="file" id="importInput" style="display:none" onchange="importarBackup(event)">
+                </div>
+            </header>
+
+            <div class="dash-grid">
+                <div class="dash-card"><span id="count-total">0</span><label>Total Itens</label></div>
+                <div class="dash-card"><span id="count-drinks">0</span><label>Drinks</label></div>
+                <div class="dash-card"><span id="count-combos">0</span><label>Combos</label></div>
+            </div>
+
+            <div class="panel-glass">
+                <div class="section-title">Gerenciar Produto</div>
+                
+                <div class="search-container">
+                    <input type="text" id="busca-id" class="search-input" placeholder="🔍 BUSCAR POR ID..." oninput="carregarCatalogo()">
+                </div>
+
+                <div class="grid-form">
+                    <div class="form-group"><label>ID</label><input type="number" id="admin-campo1"></div>
+                    <div class="form-group"><label>Nome</label><input type="text" id="admin-campo2"></div>
+                    <div class="form-group"><label>Preço</label><input type="text" id="admin-campo3"></div>
+                </div>
+                <div class="form-group"><label>URL Imagem</label><input type="text" id="admin-campo4"></div>
+                <div class="form-group"><label>Sabores (Separar por vírgula)</label><input type="text" id="admin-campo5"></div>
+                
+                <div class="form-group">
+                    <label>Comando Coluna G (O que digitar chegará na planilha)</label>
+                    <input type="text" id="admin-campo6" placeholder="Texto para a Coluna G...">
+                </div>
+
+                <div class="delete-box">
+                    <input type="checkbox" id="check-excluir">
+                    <span>APAGAR PRODUTO DO PAINEL LOCAL</span>
+                </div>
+
+                <button class="btn btn-save" onclick="salvarProduto()">SALVAR E SINCRONIZAR</button>
+            </div>
+
+            <div class="section-title">Catálogo Ativo</div>
+            <div id="carrosséis-container">
+                <div class="carousel-wrapper">
+                    <label style="color: var(--accent); font-weight: 800; font-size: 11px;">🍸 DRINKS C/ ÁLCOOL (1-199)</label>
+                    <div id="carousel-1" class="carousel-container"></div>
+                </div>
+                <div class="carousel-wrapper">
+                    <label style="color: var(--accent); font-weight: 800; font-size: 11px;">🥤 DRINKS S/ ÁLCOOL (200-299)</label>
+                    <div id="carousel-2" class="carousel-container"></div>
+                </div>
+                <div class="carousel-wrapper">
+                    <label style="color: var(--accent); font-weight: 800; font-size: 11px;">🍹 COPÕES (300-399)</label>
+                    <div id="carousel-3" class="carousel-container"></div>
+                </div>
+                <div class="carousel-wrapper">
+                    <label style="color: var(--accent); font-weight: 800; font-size: 11px;">📦 COMBOS (400-499)</label>
+                    <div id="carousel-4" class="carousel-container"></div>
+                </div>
+            </div>
+            
+            <button class="btn" style="background: rgba(255,255,255,0.05); color: var(--danger); margin-top: 40px;" onclick="location.reload()">SAIR</button>
+        </div>
+    </div>
+
+    <script>
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerText = msg;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function verificarAcesso() {
+            if (document.getElementById('senha-acesso').value === "111219") {
+                document.getElementById('tela-bloqueio').style.display = 'none';
+                document.getElementById('admin-content').style.display = 'block';
+                carregarCatalogo();
+            } else showToast("Senha Incorreta!");
+        }
+
+        function abrirModalSabores(nome, sabores) {
+            document.getElementById('modal-titulo').innerText = nome;
+            const lista = document.getElementById('lista-sabores');
+            lista.innerHTML = "";
+            sabores.split(',').forEach(s => {
+                if(s.trim()) lista.innerHTML += `<div class="sabor-item">${s.trim()}</div>`;
+            });
+            document.getElementById('modal-sabores').style.display = 'flex';
+        }
+
+        function fecharModal() {
+            document.getElementById('modal-sabores').style.display = 'none';
+        }
+
+        function atualizarDashboard(produtos) {
+            document.getElementById('count-total').innerText = produtos.length;
+            document.getElementById('count-drinks').innerText = produtos.filter(p => p.id < 300).length;
+            document.getElementById('count-combos').innerText = produtos.filter(p => p.id >= 400).length;
+        }
+
+        function salvarProduto() {
+            const c1 = document.getElementById('admin-campo1').value;
+            const c2 = document.getElementById('admin-campo2').value;
+            const c3 = document.getElementById('admin-campo3').value;
+            const c4 = document.getElementById('admin-campo4').value;
+            const c5 = document.getElementById('admin-campo5').value.trim() || "---";
+            const valorG = document.getElementById('admin-campo6').value.trim();
+            const deveExcluir = document.getElementById('check-excluir').checked;
+
+            if(!c1 || !c2 || !c3 || !c4) return showToast("Campos obrigatórios!");
+
+            const form = document.createElement('form');
+            form.method = "POST";
+            form.action = "https://docs.google.com/forms/d/e/1FAIpQLSfHpe7Idb8cekKYPyOOs8xn5sSfCQhWLKqUYwF4uXaz4QBX9w/formResponse";
+            form.target = "hidden_iframe";
+
+            const dados = {
+                "entry.1183639703": String(c1),
+                "entry.1305746237": String(c2),
+                "entry.204413255": String(c3),
+                "entry.1752078996": String(c4),
+                "entry.150716055": String(c5),
+                "entry.1417905239": String(valorG)
+            };
+
+            for (let key in dados) {
+                let input = document.createElement('input');
+                input.type = "hidden";
+                input.name = key;
+                input.value = dados[key];
+                form.appendChild(input);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+            showToast("Enviando para a planilha...");
+
+            setTimeout(() => {
+                let produtos = JSON.parse(localStorage.getItem('nuance_catalogo') || '[]');
+                const idInt = parseInt(c1);
+
+                if (deveExcluir) {
+                    produtos = produtos.filter(p => p.id !== idInt);
+                } else {
+                    const novoProduto = { id: idInt, nome: c2, preco: c3, img: c4, sabores: c5 };
+                    const index = produtos.findIndex(p => p.id === idInt);
+                    if(index !== -1) produtos[index] = novoProduto;
+                    else produtos.push(novoProduto);
+                }
+                
+                localStorage.setItem('nuance_catalogo', JSON.stringify(produtos));
+                if(document.body.contains(form)) document.body.removeChild(form);
+                carregarCatalogo();
+                limparCampos();
+                document.getElementById('check-excluir').checked = false;
+                showToast(deveExcluir ? "Removido do painel local!" : "Atualizado com sucesso!");
+            }, 1000);
+        }
+
+        function carregarCatalogo() {
+            const produtos = JSON.parse(localStorage.getItem('nuance_catalogo') || '[]');
+            const busca = document.getElementById('busca-id').value;
+            atualizarDashboard(produtos);
+            
+            const carrosséis = [
+                document.getElementById('carousel-1'), 
+                document.getElementById('carousel-2'), 
+                document.getElementById('carousel-3'),
+                document.getElementById('carousel-4')
+            ];
+            carrosséis.forEach(c => c.innerHTML = "");
+
+            produtos.sort((a,b) => a.id - b.id).forEach(p => {
+                if(busca && !p.id.toString().includes(busca)) return;
+                
+                const temSabores = p.sabores && p.sabores !== "---" && p.sabores.trim() !== "";
+                const btnHtml = temSabores 
+                    ? `<button class="btn-status btn-sabores" onclick="abrirModalSabores('${p.nome}', '${p.sabores}')">ESCOLHER SABORES</button>`
+                    : `<button class="btn-status btn-add">ADICIONAR</button>`;
+
+                const card = `
+                    <div class="product-card">
+                        <div class="edit-badge" onclick="editarProduto(${p.id})">✏️</div>
+                        <img src="${p.img}" class="product-img" onerror="this.src='https://placehold.co/400x300?text=Nuance'">
+                        <div class="product-info">
+                            <div class="p-id-label">ID: ${p.id}</div>
+                            <div class="p-name">${p.nome}</div>
+                            <div class="p-price">R$ ${p.preco}</div>
+                            ${btnHtml}
+                        </div>
+                    </div>`;
+                
+                if(p.id >= 1 && p.id <= 199) carrosséis[0].innerHTML += card;
+                else if(p.id >= 200 && p.id <= 299) carrosséis[1].innerHTML += card;
+                else if(p.id >= 300 && p.id <= 399) carrosséis[2].innerHTML += card;
+                else if(p.id >= 400 && p.id <= 499) carrosséis[3].innerHTML += card;
+            });
+        }
+
+        function editarProduto(id) {
+            const p = JSON.parse(localStorage.getItem('nuance_catalogo')).find(prod => prod.id === id);
+            if(p) {
+                document.getElementById('admin-campo1').value = p.id;
+                document.getElementById('admin-campo2').value = p.nome;
+                document.getElementById('admin-campo3').value = p.preco;
+                document.getElementById('admin-campo4').value = p.img;
+                document.getElementById('admin-campo5').value = (p.sabores === "---") ? "" : p.sabores;
+                document.getElementById('admin-campo6').value = "";
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                showToast("Produto carregado!");
+            }
+        }
+
+        function exportarBackup() {
+            const data = localStorage.getItem('nuance_catalogo');
+            const blob = new Blob([data], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "backup.json";
+            a.click();
+        }
+
+        function importarBackup(event) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                localStorage.setItem('nuance_catalogo', e.target.result);
+                carregarCatalogo();
+                showToast("Importado!");
+            };
+            reader.readAsText(event.target.files[0]);
+        }
+
+        function limparCampos() { 
+            document.querySelectorAll('input:not(#senha-acesso, #busca-id)').forEach(i => {
+                i.value = ""; 
+            });
+        }
+    </script>
+</body>
+</html>
