@@ -365,8 +365,8 @@
             <button class="btn btn-nav" onclick="abrirRankingClientes()">👤 VIPs</button>
             <button class="btn btn-nav" style="border-color: var(--primary);" onclick="abrirRankingProdutos()">📦 Estoque</button>
             <button class="btn btn-nav" style="background: #334155; border: none;" onclick="limparHD()">💾 Limpar HD</button>
-            <button class="btn btn-nav" style="background: #f59e0b; border: none;" onclick="abrirLoginAdmin()">🔑 Admin</button>
             <button class="btn btn-nav" style="background: var(--danger); border: none;" onclick="logout()">🚪 Sair</button>
+            <button></button>
         </nav>
     </header>
 
@@ -490,17 +490,6 @@
     </div>
 </div>
 
-<div id="modalConfirmarExclusaoProduto" class="modal" style="z-index: 7000;">
-    <div class="modal-content" style="max-width: 300px; text-align: center; margin-top: 20vh;">
-        <h3 style="color: var(--danger); margin-top: 0;">Excluir Produto?</h3>
-        <p style="font-size: 14px;">Tem certeza que deseja remover este item do catálogo?</p>
-        <div style="display: flex; gap: 10px; margin-top: 20px;">
-            <button class="btn" style="flex: 1; background: #475569; color: white;" onclick="fecharModal('modalConfirmarExclusaoProduto')">NÃO</button>
-            <button class="btn" style="flex: 1; background: var(--danger); color: white;" onclick="confirmarExclusaoProduto()">SIM</button>
-        </div>
-    </div>
-</div>
-
 <div id="modalGestao" class="modal">
     <div class="modal-content">
         <span class="close" onclick="fecharModal('modalGestao')">×</span>
@@ -573,75 +562,10 @@
     </div>
 </div>
 
-<div id="modalLoginAdmin" class="modal">
-    <div class="modal-content" style="max-width: 400px; text-align: center;">
-        <span class="close" onclick="fecharModal('modalLoginAdmin')">×</span>
-        <h3 style="color: var(--accent);">Acesso Restrito Admin</h3>
-        <p style="font-size: 14px; color: var(--text-muted);">Digite a senha de segurança</p>
-        <div class="form-group">
-            <input type="password" id="senha-admin" placeholder="Sua senha master">
-        </div>
-        <button class="btn btn-gerar" style="width:100%;" onclick="verificarLoginAdmin()">LIBERAR ACESSO</button>
-    </div>
-</div>
-
-<div id="modalAdminForm" class="modal" onclick="event.stopPropagation()">
-    <div class="modal-content" style="max-width: 650px;">
-        <h3 style="margin-top:0; color: var(--primary);">Alterar Produto</h3>
-        
-        <div class="form-group">
-            <label>Digite o ID do Produto</label>
-            <input type="number" id="admin-campo1" placeholder="Ex: 1">
-        </div>
-        <div class="form-group">
-            <label>Digite o Nome</label>
-            <input type="text" id="admin-campo2" placeholder="Ex: Gin Tônica Tanqueray">
-        </div>
-        <div class="form-group">
-            <label>Digite o Valor</label>
-            <input type="text" id="admin-campo3" placeholder="Ex: 25.00">
-        </div>
-        <div class="form-group">
-            <label>Cole a URL da imagem do Produto</label>
-            <input type="text" id="admin-campo4" placeholder="URL da imagem...">
-        </div>
-        <div class="form-group">
-            <label>Sabores do Produto se tiver</label>
-            <input type="text" id="admin-campo5" placeholder="Ex: Limão, Morango, Tradicional">
-        </div>
-
-        <button class="btn btn-gerar" style="width:100%; background: var(--success);" onclick="enviarFormAdmin()">Salvar alteração no Catálogo</button>
-        <button class="btn btn-nav" style="width:100%; margin-top:10px; background: var(--danger); border: none;" onclick="fecharModal('modalAdminForm')">SAIR DO ADMIN</button>
-
-        <div class="section-title">🛒 Catálogo de Produtos</div>
-        
-        <div class="carousel-wrapper">
-            <div class="carousel-title">Drinks Com Álcool (ID do 01-199)</div>
-            <div id="carousel-1" class="carousel-container"></div>
-        </div>
-
-        <div class="carousel-wrapper">
-            <div class="carousel-title">Drinks Sem Álcool (ID do 200-299)</div>
-            <div id="carousel-2" class="carousel-container"></div>
-        </div>
-
-        <div class="carousel-wrapper">
-            <div class="carousel-title">COPÃO (ID do 300-399)</div>
-            <div id="carousel-3" class="carousel-container"></div>
-        </div>
-
-        <div class="carousel-wrapper">
-            <div class="carousel-title">COMBOS (ID do 400-499)</div>
-            <div id="carousel-4" class="carousel-container"></div>
-        </div>
-    </div>
-</div>
-
 <script>
     // LÓGICA DE LOGIN E ISOLAMENTO DE DADOS
     let usuarioLogado = null;
     let nomeUsuarioLogado = "";
-    let idProdutoParaExcluir = null;
 
     function verificarSessao() {
         const sessionEmail = localStorage.getItem('nuance_session');
@@ -1308,150 +1232,45 @@
         document.body.removeChild(link);
     }
 
-    // --- FUNÇÕES ADMIN E CATÁLOGO ---
-    function abrirLoginAdmin() {
-        document.getElementById('modalLoginAdmin').style.display = 'block';
-    }
-
-    function verificarLoginAdmin() {
-        const senha = document.getElementById('senha-admin').value;
-        if (senha === "MJ-NUANCE") {
-            fecharModal('modalLoginAdmin');
-            document.getElementById('senha-admin').value = "";
-            document.getElementById('modalAdminForm').style.display = 'block';
-        } else {
-            alert("Senha Incorreta!");
+    function exportarCSV() {
+        let notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
+        const minhasNotas = notas.filter(n => n.atendente === usuarioLogado);
+        
+        if (minhasNotas.length === 0) {
+            alert("Você não possui pedidos salvos para exportar.");
+            return;
         }
-    }
 
-    function enviarFormAdmin() {
-        const c1 = document.getElementById('admin-campo1').value;
-        const c2 = document.getElementById('admin-campo2').value;
-        const c3 = document.getElementById('admin-campo3').value;
-        const c4 = document.getElementById('admin-campo4').value;
-        const c5 = document.getElementById('admin-campo5').value;
+        const cabecalho = ["ID", "Data", "Cliente", "WhatsApp", "Endereço", "Total", "Pagamento", "Produtos"];
+        const linhas = minhasNotas.map(n => [
+            n.shortId,
+            n.data,
+            n.nome,
+            n.whatsapp,
+            `${n.rua}, ${n.numero} - ${n.bairro}`,
+            n.total,
+            n.pagamento,
+            n.produtos.replace(/\n/g, " | ")
+        ]);
 
-        if(!c1 || !c2 || !c3 || !c4) return alert("Preencha todos os campos obrigatórios (ID, Nome, Valor e Imagem)!");
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+        csvContent += cabecalho.join(";") + "\n";
+        linhas.forEach(row => {
+            csvContent += row.join(";") + "\n";
+        });
 
-        let produtosSalvos = JSON.parse(localStorage.getItem('nuance_catalogo') || '[]');
-        const novoProduto = { id: parseInt(c1), nome: c2, preco: c3, img: c4, sabores: c5 || "---" };
-        
-        const index = produtosSalvos.findIndex(p => p.id === novoProduto.id);
-        if(index !== -1) produtosSalvos[index] = novoProduto;
-        else produtosSalvos.push(novoProduto);
-        
-        localStorage.setItem('nuance_catalogo', JSON.stringify(produtosSalvos));
-        carregarCardsSalvos();
-
-        const formURL = "https://docs.google.com/forms/d/e/1FAIpQLSfHpe7Idb8cekKYPyOOs8xn5sSfCQhWLKqUYwF4uXaz4QBX9w/formResponse";
-        const entry1 = "entry.1183639703"; 
-        const entry2 = "entry.1305746237"; 
-        const entry3 = "entry.204413255"; 
-        const entry4 = "entry.1752078996"; 
-        const entry5 = "entry.150716055"; 
-
-        const fullURL = `${formURL}?${entry1}=${encodeURIComponent(c1)}&${entry2}=${encodeURIComponent(c2)}&${entry3}=${encodeURIComponent(c3)}&${entry4}=${encodeURIComponent(c4)}&${entry5}=${encodeURIComponent(c5)}`;
-
-        fetch(fullURL, { mode: 'no-cors' })
-        .then(() => {
-            alert("Produto salvo com sucesso no sistema!");
-            // Não fecha o modal aqui para permitir ver o catálogo atualizado
-        })
-        .catch(err => alert("Erro ao enviar: " + err));
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `Relatorio_${nomeUsuarioLogado.replace(/\s+/g, '_')}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
     function carregarCardsSalvos() {
         const produtos = JSON.parse(localStorage.getItem('nuance_catalogo') || '[]');
-        const containers = [
-            document.getElementById('carousel-1'),
-            document.getElementById('carousel-2'),
-            document.getElementById('carousel-3'),
-            document.getElementById('carousel-4')
-        ];
-
-        containers.forEach(c => { if(c) c.innerHTML = ""; });
-
-        if (produtos.length === 0) return;
-
-        produtos.sort((a,b) => a.id - b.id).forEach(p => {
-            const cardHTML = `
-                <div class="preview-product-card" onclick="adicionarAoPedido('${p.nome}', '${p.preco}')">
-                    <button class="btn-excluir-produto" onclick="prepararExclusaoProduto(event, ${p.id})">🗑️</button>
-                    <img class="preview-product-img" src="${p.img || 'https://placehold.co/400x400?text=Nuance'}" alt="${p.nome}">
-                    <div class="preview-content">
-                        <span class="preview-id">ID: ${p.id}</span>
-                        <div class="preview-name">${p.nome}</div>
-                        <div class="preview-price">R$ ${p.preco}</div>
-                        <div class="preview-flavors">Sabores: ${p.sabores}</div>
-                    </div>
-                </div>
-            `;
-
-            // Lógica Corrigida para Distribuição por IDs nos 4 Carrosséis
-            if (p.id >= 1 && p.id <= 199 && containers[0]) {
-                containers[0].innerHTML += cardHTML;
-            } else if (p.id >= 200 && p.id <= 299 && containers[1]) {
-                containers[1].innerHTML += cardHTML;
-            } else if (p.id >= 300 && p.id <= 399 && containers[2]) {
-                containers[2].innerHTML += cardHTML;
-            } else if (p.id >= 400 && p.id <= 499 && containers[3]) {
-                containers[3].innerHTML += cardHTML;
-            }
-        });
-
-        containers.forEach(setupDraggable);
-    }
-
-    function prepararExclusaoProduto(event, id) {
-        event.stopPropagation(); // Evita que clique no card adicione o produto ao pedido
-        idProdutoParaExcluir = id;
-        document.getElementById('modalConfirmarExclusaoProduto').style.display = 'block';
-    }
-
-    function confirmarExclusaoProduto() {
-        if (idProdutoParaExcluir !== null) {
-            let produtos = JSON.parse(localStorage.getItem('nuance_catalogo') || '[]');
-            produtos = produtos.filter(p => p.id !== idProdutoParaExcluir);
-            localStorage.setItem('nuance_catalogo', JSON.stringify(produtos));
-            carregarCardsSalvos();
-            fecharModal('modalConfirmarExclusaoProduto');
-            idProdutoParaExcluir = null;
-        }
-    }
-
-    function setupDraggable(el) {
-        if(!el) return;
-        let isDown = false;
-        let startX;
-        let scrollLeft;
-
-        el.addEventListener('mousedown', (e) => {
-            isDown = true;
-            el.style.cursor = 'grabbing';
-            startX = e.pageX - el.offsetLeft;
-            scrollLeft = el.scrollLeft;
-        });
-        el.addEventListener('mouseleave', () => { isDown = false; el.style.cursor = 'grab'; });
-        el.addEventListener('mouseup', () => { isDown = false; el.style.cursor = 'grab'; });
-        el.addEventListener('mousemove', (e) => {
-            if (!isDown) return;
-            e.preventDefault();
-            const x = e.pageX - el.offsetLeft;
-            const walk = (x - startX) * 2; 
-            el.scrollLeft = scrollLeft - walk;
-        });
-    }
-
-    function adicionarAoPedido(nome, preco) {
-        const areaProd = document.getElementById('produtos-texto');
-        const valorTotal = document.getElementById('valor-total');
-        const quebra = areaProd.value ? "\n" : "";
-        areaProd.value += quebra + "1x " + nome;
-        let totalAtual = parseFloat(valorTotal.value.replace(',', '.')) || 0;
-        let novoPreco = parseFloat(preco.toString().replace(',', '.')) || 0;
-        valorTotal.value = (totalAtual + novoPreco).toFixed(2);
-        salvarProgresso();
-        atualizarCupom();
+        // Função mantida para compatibilidade, mas sem os elementos de exibição do carrossel no admin que foi removido
     }
 
 </script>
