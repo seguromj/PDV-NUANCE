@@ -216,20 +216,39 @@
             color: #1a1a1a;
             box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             text-align: left;
+            flex: 0 0 200px; /* Largura fixa para o carrossel */
         }
         .preview-product-img {
             width: 100%;
-            height: 200px;
+            height: 150px; /* Ajustado para caber melhor no carrossel */
             object-fit: cover;
             background: #eee;
         }
         .preview-content {
-            padding: 15px;
+            padding: 10px;
         }
-        .preview-id { font-size: 10px; color: #888; text-transform: uppercase; }
-        .preview-name { font-weight: 800; font-size: 16px; margin: 5px 0; color: #000; }
-        .preview-price { color: var(--success); font-weight: 900; font-size: 18px; }
-        .preview-flavors { font-size: 11px; color: #555; margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee; }
+        .preview-id { font-size: 9px; color: #888; text-transform: uppercase; }
+        .preview-name { font-weight: 800; font-size: 14px; margin: 3px 0; color: #000; }
+        .preview-price { color: var(--success); font-weight: 900; font-size: 16px; }
+        .preview-flavors { font-size: 10px; color: #555; margin-top: 5px; padding-top: 5px; border-top: 1px solid #eee; }
+
+        /* ESTILOS DO CARROSSEL */
+        .carousel-container {
+            width: 100%;
+            overflow-x: auto;
+            display: flex;
+            gap: 15px;
+            padding: 10px 0 20px 0;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE/Edge */
+            cursor: grab;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch; /* Scroll suave no iOS */
+        }
+        .carousel-container::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+        .carousel-container:active { cursor: grabbing; }
+        .carousel-wrapper { margin-bottom: 30px; }
+        .carousel-title { font-size: 14px; font-weight: 800; color: var(--primary); margin-bottom: 5px; border-left: 4px solid var(--accent); padding-left: 10px; }
 
         @media print {
             @page { margin: 0; }
@@ -250,7 +269,7 @@
         }
     </style>
 </head>
-<body onload="verificarSessao()">
+<body onload="verificarSessao(); carregarCardsSalvos();">
 
 <div id="tela-bloqueio">
     <div id="auth-login" class="auth-container">
@@ -372,6 +391,28 @@
                 <div class="form-group"><label>Cupom Promocional</label><input type="text" id="cupom-input" placeholder="Ex: BLACK10" oninput="salvarProgresso(); atualizarCupom()"></div>
             </div>
             <div class="form-group"><label>Observações Internas</label><input type="text" id="obs" oninput="salvarProgresso(); atualizarCupom()"></div>
+
+            <div class="section-title">🛒 Catálogo de Produtos</div>
+            
+            <div class="carousel-wrapper">
+                <div class="carousel-title">PRODUTOS (ID 01-99)</div>
+                <div id="carousel-1" class="carousel-container"></div>
+            </div>
+
+            <div class="carousel-wrapper">
+                <div class="carousel-title">PRODUTOS (ID 100-199)</div>
+                <div id="carousel-2" class="carousel-container"></div>
+            </div>
+
+            <div class="carousel-wrapper">
+                <div class="carousel-title">PRODUTOS (ID 200-299)</div>
+                <div id="carousel-3" class="carousel-container"></div>
+            </div>
+
+            <div class="carousel-wrapper">
+                <div class="carousel-title">PRODUTOS (ID 300-399)</div>
+                <div id="carousel-4" class="carousel-container"></div>
+            </div>
 
             <div class="form-group" style="margin-top: 20px;">
                 <label style="color: var(--primary); font-weight: 800;">Prefixo da Ordem</label>
@@ -551,7 +592,7 @@
         
         <div class="form-group">
             <label>Digite o ID do Produto</label>
-            <input type="text" id="admin-campo1" placeholder="Ex: GIN-01" oninput="atualizarPreviewAdmin()">
+            <input type="number" id="admin-campo1" placeholder="Ex: 1" oninput="atualizarPreviewAdmin()">
         </div>
         <div class="form-group">
             <label>Digite o Nome</label>
@@ -1306,27 +1347,108 @@
 
         if(!c1 || !c2 || !c3 || !c4 || !c5) return alert("Preencha todos os campos!");
 
+        // SALVAR LOCALMENTE PARA O CARROSSEL (PERSISTÊNCIA)
+        let produtosSalvos = JSON.parse(localStorage.getItem('nuance_catalogo') || '[]');
+        const novoProduto = { id: parseInt(c1), nome: c2, preco: c3, img: c4, sabores: c5 };
+        
+        const index = produtosSalvos.findIndex(p => p.id === novoProduto.id);
+        if(index !== -1) produtosSalvos[index] = novoProduto;
+        else produtosSalvos.push(novoProduto);
+        
+        localStorage.setItem('nuance_catalogo', JSON.stringify(produtosSalvos));
+        carregarCardsSalvos();
+
         // CONFIGURAÇÃO DO GOOGLE FORMS
         const formURL = "https://docs.google.com/forms/d/e/1FAIpQLSfHpe7Idb8cekKYPyOOs8xn5sSfCQhWLKqUYwF4uXaz4QBX9w/formResponse";
-        const entry1 = "entry.1183639703"; // ID
-        const entry2 = "entry.1305746237"; // Nome
-        const entry3 = "entry.204413255"; // Valor
-        const entry4 = "entry.1752078996"; // Imagem
-        const entry5 = "entry.150716055"; // Sabores
+        const entry1 = "entry.1183639703"; 
+        const entry2 = "entry.1305746237"; 
+        const entry3 = "entry.204413255"; 
+        const entry4 = "entry.1752078996"; 
+        const entry5 = "entry.150716055"; 
 
         const fullURL = `${formURL}?${entry1}=${encodeURIComponent(c1)}&${entry2}=${encodeURIComponent(c2)}&${entry3}=${encodeURIComponent(c3)}&${entry4}=${encodeURIComponent(c4)}&${entry5}=${encodeURIComponent(c5)}`;
 
         fetch(fullURL, { mode: 'no-cors' })
         .then(() => {
-            alert("Dados enviados com sucesso para a planilha!");
-            fecharModal('modalAdminForm');
-            document.getElementById('admin-campo1').value = "";
-            document.getElementById('admin-campo2').value = "";
-            document.getElementById('admin-campo3').value = "";
-            document.getElementById('admin-campo4').value = "";
-            document.getElementById('admin-campo5').value = "";
+            alert("Alteração salva com sucesso!");
+            // MANTÉM O MODAL ABERTO E OS CAMPOS PREENCHIDOS CONFORME SOLICITADO
         })
         .catch(err => alert("Erro ao enviar: " + err));
+    }
+
+    // --- FUNÇÕES DOS CARROSSÉIS ---
+    function carregarCardsSalvos() {
+        const produtos = JSON.parse(localStorage.getItem('nuance_catalogo') || '[]');
+        const containers = [
+            document.getElementById('carousel-1'),
+            document.getElementById('carousel-2'),
+            document.getElementById('carousel-3'),
+            document.getElementById('carousel-4')
+        ];
+
+        containers.forEach(c => c.innerHTML = "");
+
+        produtos.sort((a,b) => a.id - b.id).forEach(p => {
+            const cardHTML = `
+                <div class="preview-product-card" onclick="adicionarAoPedido('${p.nome}', '${p.preco}')">
+                    <img class="preview-product-img" src="${p.img}" alt="${p.nome}">
+                    <div class="preview-content">
+                        <span class="preview-id">ID: ${p.id}</span>
+                        <div class="preview-name">${p.nome}</div>
+                        <div class="preview-price">R$ ${p.preco}</div>
+                        <div class="preview-flavors">Sabores: ${p.sabores}</div>
+                    </div>
+                </div>
+            `;
+
+            if (p.id >= 1 && p.id <= 99) containers[0].innerHTML += cardHTML;
+            else if (p.id >= 100 && p.id <= 199) containers[1].innerHTML += cardHTML;
+            else if (p.id >= 200 && p.id <= 299) containers[2].innerHTML += cardHTML;
+            else if (p.id >= 300 && p.id <= 399) containers[3].innerHTML += cardHTML;
+        });
+
+        containers.forEach(setupDraggable);
+    }
+
+    function setupDraggable(el) {
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        el.addEventListener('mousedown', (e) => {
+            isDown = true;
+            el.classList.add('active');
+            startX = e.pageX - el.offsetLeft;
+            scrollLeft = el.scrollLeft;
+        });
+        el.addEventListener('mouseleave', () => {
+            isDown = false;
+        });
+        el.addEventListener('mouseup', () => {
+            isDown = false;
+        });
+        el.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - el.offsetLeft;
+            const walk = (x - startX) * 2; 
+            el.scrollLeft = scrollLeft - walk;
+        });
+    }
+
+    function adicionarAoPedido(nome, preco) {
+        const areaProd = document.getElementById('produtos-texto');
+        const valorTotal = document.getElementById('valor-total');
+        
+        areaProd.value += (areaProd.value ? "\n" : "") + "1x " + nome;
+        
+        let totalAtual = parseFloat(valorTotal.value) || 0;
+        let novoPreco = parseFloat(preco.replace(',', '.')) || 0;
+        valorTotal.value = (totalAtual + novoPreco).toFixed(2);
+        
+        salvarProgresso();
+        atualizarCupom();
+        alert(nome + " adicionado ao pedido!");
     }
 
 </script>
