@@ -539,6 +539,10 @@
             <label>Cole a URL da imagem do Produto</label>
             <input type="text" id="admin-campo4" placeholder="Digite aqui...">
         </div>
+        <div class="form-group">
+            <label>Sabores do Produto se tiver</label>
+            <input type="text" id="admin-campo5" placeholder="Digite aqui...">
+        </div>
         <button class="btn btn-gerar" style="width:100%; background: var(--success);" onclick="enviarFormAdmin()">Salvar alteração no Produto</button>
     </div>
 </div>
@@ -1242,6 +1246,8 @@
         const c2 = document.getElementById('admin-campo2').value;
         const c3 = document.getElementById('admin-campo3').value;
         const c4 = document.getElementById('admin-campo4').value;
+        const c5 = document.getElementById('admin-campo5').value;
+        
 
         if(!c1 || !c2 || !c3 || !c4) return alert("Preencha todos os campos!");
 
@@ -1251,6 +1257,7 @@
         const entry2 = "entry.1305746237"; // Nome
         const entry3 = "entry.204413255"; // Valor
         const entry4 = "entry.1752078996"; // Imagem
+        const entry5 = "entry.150716055"; // Sabores
 
         const fullURL = `${formURL}?${entry1}=${encodeURIComponent(c1)}&${entry2}=${encodeURIComponent(c2)}&${entry3}=${encodeURIComponent(c3)}&${entry4}=${encodeURIComponent(c4)}`;
 
@@ -1262,6 +1269,7 @@
             document.getElementById('admin-campo2').value = "";
             document.getElementById('admin-campo3').value = "";
             document.getElementById('admin-campo4').value = "";
+            document.getElementById('admin-campo5').value = "";
         })
         .catch(err => alert("Erro ao enviar: " + err));
     }
