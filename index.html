@@ -205,6 +205,32 @@
         .coupon-item { background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 12px; border-left: 4px solid var(--primary); display: flex; flex-direction: column; margin-bottom: 8px; }
         .discount-text { color: #00ff88; font-size: 0.85rem; font-weight: bold; }
 
+        /* Estilo do Card Visualizado no Admin */
+        .preview-product-card {
+            background: #ffffff;
+            border-radius: 15px;
+            overflow: hidden;
+            width: 100%;
+            max-width: 250px;
+            margin: 20px auto;
+            color: #1a1a1a;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            text-align: left;
+        }
+        .preview-product-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #eee;
+        }
+        .preview-content {
+            padding: 15px;
+        }
+        .preview-id { font-size: 10px; color: #888; text-transform: uppercase; }
+        .preview-name { font-weight: 800; font-size: 16px; margin: 5px 0; color: #000; }
+        .preview-price { color: var(--success); font-weight: 900; font-size: 18px; }
+        .preview-flavors { font-size: 11px; color: #555; margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee; }
+
         @media print {
             @page { margin: 0; }
             body { background: white !important; margin: 0; padding: 0; }
@@ -520,29 +546,45 @@
 
 <div id="modalAdminForm" class="modal">
     <div class="modal-content" style="max-width: 500px;">
+        <span class="close" onclick="fecharModal('modalAdminForm')">×</span>
         <h3 style="margin-top:0; color: var(--primary);">Alterar Produto</h3>
+        
         <div class="form-group">
             <label>Digite o ID do Produto</label>
-            <input type="text" id="admin-campo1" placeholder="Digite aqui...">
+            <input type="text" id="admin-campo1" placeholder="Ex: GIN-01" oninput="atualizarPreviewAdmin()">
         </div>
         <div class="form-group">
             <label>Digite o Nome</label>
-            <input type="text" id="admin-campo2" placeholder="Digite aqui...">
+            <input type="text" id="admin-campo2" placeholder="Ex: Gin Tônica Tanqueray" oninput="atualizarPreviewAdmin()">
         </div>
         <div class="form-group">
             <label>Digite o Valor</label>
-            <input type="text" id="admin-campo3" placeholder="Digite aqui...">
+            <input type="text" id="admin-campo3" placeholder="Ex: 25.00" oninput="atualizarPreviewAdmin()">
         </div>
         <div class="form-group">
             <label>Cole a URL da imagem do Produto</label>
-            <input type="text" id="admin-campo4" placeholder="Digite aqui...">
+            <input type="text" id="admin-campo4" placeholder="URL da imagem..." oninput="atualizarPreviewAdmin()">
         </div>
         <div class="form-group">
             <label>Sabores do Produto se tiver</label>
-            <input type="text" id="admin-campo5" placeholder="Digite aqui...">
+            <input type="text" id="admin-campo5" placeholder="Ex: Limão, Morango, Tradicional" oninput="atualizarPreviewAdmin()">
         </div>
+
+        <div id="admin-preview-container" style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 15px; margin: 20px 0;">
+            <p style="font-size: 10px; text-align: center; color: var(--text-muted); margin-bottom: 10px;">PRÉ-VISUALIZAÇÃO DO PRODUTO</p>
+            <div id="preview-card-admin" class="preview-product-card">
+                <img id="preview-img" class="preview-product-img" src="" alt="Produto">
+                <div class="preview-content">
+                    <span id="preview-id-text" class="preview-id">ID: ---</span>
+                    <div id="preview-name-text" class="preview-name">Nome do Produto</div>
+                    <div id="preview-price-text" class="preview-price">R$ 0.00</div>
+                    <div id="preview-flavors-text" class="preview-flavors">Sabores: ---</div>
+                </div>
+            </div>
+        </div>
+
         <button class="btn btn-gerar" style="width:100%; background: var(--success);" onclick="enviarFormAdmin()">Salvar alteração no Produto</button>
-        <button class="btn btn-nav" style="width:100%; margin-top:10px; background: var(--danger); border: none;" onclick="fecharModal('modalAdminForm')">SAIR</button>
+        <button class="btn btn-nav" style="width:100%; margin-top:10px; background: var(--danger); border: none;" onclick="fecharModal('modalAdminForm')">SAIR DO ADMIN</button>
     </div>
 </div>
 
@@ -816,8 +858,6 @@
         
         const endereco = `${rua}, ${num}, ${bairro}, ${cep}`;
         document.getElementById('titulo-mapa').innerText = "📍 Rota: " + nome;
-        document.getElementById('iframe-mapa').src = `https://www.google.com/maps/embed/v1/search?key=SEU_API_KEY_AQUI&q=${encodeURIComponent(endereco)}`;
-        // Nota: O embed do Google requer API Key. Caso não tenha, usa-se a URL de visualização:
         document.getElementById('iframe-mapa').src = `https://maps.google.com/maps?q=${encodeURIComponent(endereco)}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
         document.getElementById('modalMapa').style.display = 'block';
     }
@@ -1181,7 +1221,7 @@
                 1: "10% de desconto",
                 2: "Não Foi dessa vez",
                 3: "4% de desconto",
-                4: "100% de desconto para um Drink só",
+                4: "100% de desconto para um Drink solo",
                 5: "7% de desconto",
                 6: "Frete Gratis"
             };
@@ -1236,9 +1276,25 @@
             fecharModal('modalLoginAdmin');
             document.getElementById('senha-admin').value = "";
             document.getElementById('modalAdminForm').style.display = 'block';
+            atualizarPreviewAdmin();
         } else {
             alert("Senha Incorreta!");
         }
+    }
+
+    // Função para atualizar o Card de visualização no Admin
+    function atualizarPreviewAdmin() {
+        const id = document.getElementById('admin-campo1').value || "---";
+        const nome = document.getElementById('admin-campo2').value || "Nome do Produto";
+        const valor = document.getElementById('admin-campo3').value || "0.00";
+        const img = document.getElementById('admin-campo4').value || "https://placehold.co/400x400?text=Nuance+Drinks";
+        const sabores = document.getElementById('admin-campo5').value || "---";
+
+        document.getElementById('preview-id-text').innerText = "ID: " + id;
+        document.getElementById('preview-name-text').innerText = nome;
+        document.getElementById('preview-price-text').innerText = "R$ " + valor;
+        document.getElementById('preview-img').src = img;
+        document.getElementById('preview-flavors-text').innerText = "Sabores: " + sabores;
     }
 
     function enviarFormAdmin() {
@@ -1256,7 +1312,7 @@
         const entry2 = "entry.1305746237"; // Nome
         const entry3 = "entry.204413255"; // Valor
         const entry4 = "entry.1752078996"; // Imagem
-        const entry5 = "entry.1983350160"; // Sabores (Mapeado para Coluna F)
+        const entry5 = "entry.150716055"; // Sabores
 
         const fullURL = `${formURL}?${entry1}=${encodeURIComponent(c1)}&${entry2}=${encodeURIComponent(c2)}&${entry3}=${encodeURIComponent(c3)}&${entry4}=${encodeURIComponent(c4)}&${entry5}=${encodeURIComponent(c5)}`;
 
