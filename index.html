@@ -1241,7 +1241,7 @@
         }
     }
 
-    function enviarFormAdmin() {
+        function enviarFormAdmin() {
         const c1 = document.getElementById('admin-campo1').value;
         const c2 = document.getElementById('admin-campo2').value;
         const c3 = document.getElementById('admin-campo3').value;
@@ -1257,9 +1257,14 @@
         const entry2 = "entry.1305746237"; // Nome
         const entry3 = "entry.204413255"; // Valor
         const entry4 = "entry.1752078996"; // Imagem
-        const entry5 = "entry.150716055"; // Sabores
+        const entry5 = "entry.1983350160"; // Sabores (Mapeado para Coluna F)
 
-        const fullURL = `${formURL}?${entry1}=${encodeURIComponent(c1)}&${entry2}=${encodeURIComponent(c2)}&${entry3}=${encodeURIComponent(c3)}&${entry4}=${encodeURIComponent(c4)}&${entry5}=${encodeURIComponent(c5)}`;
+        const fullURL = `${formURL}?$
+            {entry1}=${encodeURIComponent(c1)}&$
+            {entry2}=${encodeURIComponent(c2)}&$
+            {entry3}=${encodeURIComponent(c3)}&$
+            {entry4}=${encodeURIComponent(c4)}&$
+            {entry5}=${encodeURIComponent(c5)}`;
 
         fetch(fullURL, { mode: 'no-cors' })
         .then(() => {
@@ -1273,6 +1278,7 @@
         })
         .catch(err => alert("Erro ao enviar: " + err));
     }
+
 </script>
 </body>
 </html>
