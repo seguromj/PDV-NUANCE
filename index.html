@@ -1387,10 +1387,16 @@
                 </div>
             `;
 
-            if (p.id >= 1 && p.id <= 99 && containers[0]) containers[0].innerHTML += cardHTML;
-            else if (p.id >= 100 && p.id <= 199 && containers[1]) containers[1].innerHTML += cardHTML;
-            else if (p.id >= 200 && p.id <= 299 && containers[2]) containers[2].innerHTML += cardHTML;
-            else if (p.id >= 300 && p.id <= 399 && containers[3]) containers[3].innerHTML += cardHTML;
+            // Lógica Corrigida para Distribuição por IDs nos 4 Carrosséis
+            if (p.id >= 1 && p.id <= 199 && containers[0]) {
+                containers[0].innerHTML += cardHTML;
+            } else if (p.id >= 200 && p.id <= 299 && containers[1]) {
+                containers[1].innerHTML += cardHTML;
+            } else if (p.id >= 300 && p.id <= 399 && containers[2]) {
+                containers[2].innerHTML += cardHTML;
+            } else if (p.id >= 400 && p.id <= 499 && containers[3]) {
+                containers[3].innerHTML += cardHTML;
+            }
         });
 
         containers.forEach(setupDraggable);
