@@ -371,7 +371,7 @@
                 document.getElementById('admin-campo2').value = p.nome;
                 document.getElementById('admin-campo3').value = p.preco;
                 document.getElementById('admin-campo4').value = p.img;
-                document.getElementById('admin-campo5').value = (p.sabores === "---") ? "" : p.sabores;
+                document.getElementById('admin-campo5').value = (p.sabores === "") ? "" : p.sabores;
                 document.getElementById('admin-campo6').value = "";
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 showToast("Produto carregado!");
