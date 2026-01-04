@@ -202,10 +202,59 @@
         .face-6 .dot:nth-child(1) { grid-area: 1/1; } .face-6 .dot:nth-child(2) { grid-area: 2/1; } .face-6 .dot:nth-child(3) { grid-area: 3/1; } .face-6 .dot:nth-child(4) { grid-area: 1/3; } .face-6 .dot:nth-child(5) { grid-area: 2/3; } .face-6 .dot:nth-child(6) { grid-area: 3/3; }
         @keyframes jump { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-80px); } }
         .jumping { animation: jump 2s ease-in-out; }
-        .coupon-item { background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 12px; border-left: 4px solid var(--primary); display: flex; flex-direction: column; margin-bottom: 8px; }
-        .discount-text { color: #00ff88; font-size: 0.85rem; font-weight: bold; }
 
-        /* Estilo do Card Visualizado no Admin */
+        /* Novos Estilos Elegantes para o Sorteio */
+        .sorteio-header {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            margin: -30px -30px 20px -30px;
+            padding: 30px;
+            border-radius: 24px 24px 0 0;
+        }
+        .sorteio-header h2 { margin: 0; color: white; letter-spacing: 2px; }
+
+        .premio-display {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 15px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        .premio-texto {
+            font-size: 18px;
+            font-weight: 800;
+            color: #4ade80;
+            text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .lista-premios-clean {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .coupon-item-clean {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            transition: all 0.3s;
+            text-align: left;
+        }
+        .coupon-item-clean.active-win {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+            transform: scale(1.05);
+        }
+
+        /* Restante dos estilos originais */
         .preview-product-card {
             background: #ffffff;
             border-radius: 15px;
@@ -216,62 +265,28 @@
             color: #1a1a1a;
             box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             text-align: left;
-            flex: 0 0 200px; /* Largura fixa para o carrossel */
+            flex: 0 0 200px;
             transition: transform 0.2s;
             position: relative;
         }
         .preview-product-card:active { transform: scale(0.95); }
-        
-        .preview-product-img {
-            width: 100%;
-            height: 150px; /* Ajustado para caber melhor no carrossel */
-            object-fit: cover;
-            background: #eee;
-        }
-        .preview-content {
-            padding: 10px;
-        }
+        .preview-product-img { width: 100%; height: 150px; object-fit: cover; background: #eee; }
+        .preview-content { padding: 10px; }
         .preview-id { font-size: 9px; color: #888; text-transform: uppercase; }
         .preview-name { font-weight: 800; font-size: 14px; margin: 3px 0; color: #000; }
         .preview-price { color: var(--success); font-weight: 900; font-size: 16px; }
         .preview-flavors { font-size: 10px; color: #555; margin-top: 5px; padding-top: 5px; border-top: 1px solid #eee; }
-
-        /* Botão de Excluir no Card */
         .btn-excluir-produto {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(239, 68, 68, 0.9);
-            color: white;
-            border: none;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            transition: all 0.2s;
-            z-index: 10;
+            position: absolute; top: 10px; right: 10px; background: rgba(239, 68, 68, 0.9);
+            color: white; border: none; width: 28px; height: 28px; border-radius: 50%;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 14px; transition: all 0.2s; z-index: 10;
         }
-        .btn-excluir-produto:hover { transform: scale(1.1); background: #ef4444; }
-
-        /* ESTILOS DO CARROSSEL */
         .carousel-container {
-            width: 100%;
-            overflow-x: auto;
-            display: flex;
-            gap: 15px;
-            padding: 10px 0 20px 0;
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE/Edge */
-            cursor: grab;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch; /* Scroll suave no iOS */
+            width: 100%; overflow-x: auto; display: flex; gap: 15px; padding: 10px 0 20px 0;
+            scrollbar-width: none; cursor: grab; scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
         }
-        .carousel-container::-webkit-scrollbar { display: none; } /* Chrome/Safari */
-        .carousel-container:active { cursor: grabbing; }
+        .carousel-container::-webkit-scrollbar { display: none; }
         .carousel-wrapper { margin-bottom: 30px; }
         .carousel-title { font-size: 14px; font-weight: 800; color: var(--primary); margin-bottom: 5px; border-left: 4px solid var(--accent); padding-left: 10px; }
 
@@ -280,16 +295,7 @@
             body { background: white !important; margin: 0; padding: 0; }
             body * { visibility: hidden; }
             #area-cupom, #area-cupom *, #area-etiqueta, #area-etiqueta * { visibility: visible; }
-            #area-cupom, #area-etiqueta { 
-                position: absolute; 
-                left: 0; 
-                top: 0; 
-                width: 80mm; 
-                box-shadow: none; 
-                padding: 5mm;
-                background: white !important;
-                color: black !important;
-            }
+            #area-cupom, #area-etiqueta { position: absolute; left: 0; top: 0; width: 80mm; box-shadow: none; padding: 5mm; background: white !important; color: black !important; }
             .btn, .top-bar, .panel-left, #tela-bloqueio, .modal { display: none !important; }
         }
     </style>
@@ -464,11 +470,6 @@
                 <div id="view-cupom-aplicado" style="font-size: 11px; margin-top: 10px; text-align: center; background: #eee; padding: 5px; display:none;"></div>
                 <div id="view-obs" style="font-size: 11px; margin-top: 10px; font-style: italic;"></div>
                 <div id="view-versiculo" style="margin-top: 20px; font-size: 10px; text-align: center; color: #666; border-top: 1px dashed #ccc; padding-top: 10px;"></div>
-                
-                <div id="qr-code-area" style="text-align: center; margin-top: 15px;">
-                    <img id="qr-code-img" src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=https://seguromj.github.io/Nuance-/&choe=UTF-8" style="width: 100px; height: 100px;">
-                    <p style="font-size: 9px; margin-top: 5px;">ACESSE NOSSO MENU</p>
-                </div>
             </div>
 
             <div style="width: 80mm; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -537,11 +538,14 @@
 </div>
 
 <div id="modalSorteio" class="modal">
-    <div class="modal-content" style="max-width: 400px; text-align: center;">
+    <div class="modal-content" style="max-width: 450px; text-align: center; overflow: hidden;">
         <span class="close" onclick="fecharModal('modalSorteio')">×</span>
-        <h2 style="color: var(--primary); margin-bottom: 10px;">Nuance</h2>
-        <p style="font-size: 14px; color: var(--text-muted);">Sorteio de Descontos para VIPs</p>
         
+        <div class="sorteio-header">
+            <h2 style="font-weight: 800;">NUANCE VIP</h2>
+            <p style="font-size: 12px; color: rgba(255,255,255,0.8); margin: 5px 0 0 0;">SORTEIO DE FIDELIDADE</p>
+        </div>
+
         <div class="scene" id="scene">
             <div class="dice" id="dice">
                 <div class="face face-1"><div class="dot"></div></div>
@@ -553,15 +557,20 @@
             </div>
         </div>
 
-        <button class="btn btn-gerar" style="width:100%; margin: 20px 0;" onclick="rollDice()">🎲 LANÇAR DADO!</button>
+        <div id="resultado-sorteio" class="premio-display">
+            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Prêmio Ganho:</div>
+            <div id="texto-premio-ganho" class="premio-texto"></div>
+        </div>
 
-        <div style="text-align: left; margin-top: 20px;">
-            <div class="coupon-item"><span class="discount-text">10% de desconto</span><span>Número 1</span></div>
-            <div class="coupon-item"><span class="discount-text">Não Foi dessa vez</span><span>Número 2</span></div>
-            <div class="coupon-item"><span class="discount-text">4% de desconto</span><span>Número 3</span></div>
-            <div class="coupon-item"><span class="discount-text">100% de desconto para um Drink só</span><span>Número 4</span></div>
-            <div class="coupon-item"><span class="discount-text">7% de desconto</span><span>Número 5</span></div>
-            <div class="coupon-item"><span class="discount-text">Frete Gratis</span><span>Número 6</span></div>
+        <button id="btn-rodar" class="btn btn-gerar" style="width:100%; margin: 20px 0;" onclick="rollDice()">🎲 LANÇAR SORTE!</button>
+
+        <div class="lista-premios-clean">
+            <div class="coupon-item-clean" id="p-1"><span style="color:var(--accent)">1:</span> 10% OFF</div>
+            <div class="coupon-item-clean" id="p-2"><span style="color:var(--accent)">2:</span> Azar</div>
+            <div class="coupon-item-clean" id="p-3"><span style="color:var(--accent)">3:</span> 4% OFF</div>
+            <div class="coupon-item-clean" id="p-4"><span style="color:var(--accent)">4:</span> Drink Grátis</div>
+            <div class="coupon-item-clean" id="p-5"><span style="color:var(--accent)">5:</span> 7% OFF</div>
+            <div class="coupon-item-clean" id="p-6"><span style="color:var(--accent)">6:</span> Frete Grátis</div>
         </div>
     </div>
 </div>
@@ -637,7 +646,6 @@
     }
 
     function abrirModalCadastro(isRedefinir = false) {
-        // Solicita senha para liberar acesso ao cadastro
         const acessoSenha = prompt("Digite a senha para liberar o cadastro:");
         if (acessoSenha !== "DeD-NUANCE") {
             return alert("Senha incorreta! Acesso negado.");
@@ -647,7 +655,6 @@
             document.getElementById('modal-cadastro-titulo').innerText = "🔑 🚨Digite seu email e senha para trocar de Senha 🚨🔑";
         } else {
             document.getElementById('modal-cadastro-titulo').innerText = "Configuração de Cadastro";
-            // Limpa os campos para um novo cadastro
             document.getElementById('cad-nome').value = "";
             document.getElementById('cad-email').value = "";
             document.getElementById('cad-senha').value = "";
@@ -677,11 +684,9 @@
         const index = users.findIndex(u => u.email === email);
         
         if (index !== -1) {
-            // Se já existe, atualiza (Redefinição de Senha)
             users[index] = { nome, email, senha };
             alert("Dados de acesso atualizados com sucesso!");
         } else {
-            // Se não existe, cria novo
             users.push({ nome, email, senha });
             alert("Cadastro realizado com sucesso! Agora você pode logar.");
         }
@@ -708,7 +713,6 @@
         }
     }
 
-    // NOVAS FUNÇÕES DE PERSISTÊNCIA POR USUÁRIO
     function salvarProgresso() {
         if (!usuarioLogado) return;
         const campos = ['nome', 'data-hora', 'whatsapp', 'CPF', 'rua', 'numero', 'bairro', 'cep', 'complemento', 'pagamento', 'coleta', 'esta-pago', 'produtos-texto', 'valor-total', 'cupom-input', 'obs', 'prefixo-ordem'];
@@ -882,7 +886,6 @@
         
         document.getElementById('view-id-cupom').innerText = shortId;
 
-        // VERIFICAÇÃO DO JOGO DO DADO (10 COMPRAS)
         const totalCompras = notas.filter(n => (n.whatsapp && n.whatsapp === cleanZap) || (n.nome && n.nome === document.getElementById('nome').value)).length;
         if (totalCompras % 10 === 0 && totalCompras > 0) {
             abrirSorteio();
@@ -1164,8 +1167,16 @@
     function rollDice() {
         const dice = document.getElementById('dice');
         const scene = document.getElementById('scene');
+        const resDiv = document.getElementById('resultado-sorteio');
+        const btn = document.getElementById('btn-rodar');
+        
+        resDiv.style.display = 'none';
+        document.querySelectorAll('.coupon-item-clean').forEach(i => i.classList.remove('active-win'));
+        btn.disabled = true;
+        btn.innerText = "SORTEANDO...";
+
         let result;
-        do { result = Math.floor(Math.random() * 6) + 1; } while (result === 4);
+        do { result = Math.floor(Math.random() * 6) + 1; } while (result === 4 && Math.random() > 0.1);
         
         scene.classList.remove('jumping');
         void scene.offsetWidth; 
@@ -1189,51 +1200,21 @@
         
         setTimeout(() => {
             const premios = {
-                1: "10% de desconto",
-                2: "Não Foi dessa vez",
-                3: "4% de desconto",
-                4: "100% de desconto para um Drink solo",
-                5: "7% de desconto",
-                6: "Frete Gratis"
+                1: "10% DE DESCONTO",
+                2: "NÃO FOI DESSA VEZ",
+                3: "4% DE DESCONTO",
+                4: "100% DE DESCONTO (1 DRINK)",
+                5: "7% DE DESCONTO",
+                6: "FRETE GRÁTIS"
             };
-            alert("O dado caiu em " + result + "! Prêmio: " + premios[result]);
+            
+            document.getElementById('texto-premio-ganho').innerText = premios[result];
+            resDiv.style.display = 'block';
+            document.getElementById('p-' + result).classList.add('active-win');
+            
+            btn.disabled = false;
+            btn.innerText = "TENTAR NOVAMENTE";
         }, 2100);
-    }
-
-    function exportarCSV() {
-        let notas = JSON.parse(localStorage.getItem('notas_nuance') || '[]');
-        const minhasNotas = notas.filter(n => n.atendente === usuarioLogado);
-        
-        if (minhasNotas.length === 0) {
-            alert("Você não possui pedidos salvos para exportar.");
-            return;
-        }
-
-        const cabecalho = ["ID", "Data", "Cliente", "WhatsApp", "Endereço", "Total", "Pagamento", "Produtos"];
-        const linhas = minhasNotas.map(n => [
-            n.shortId,
-            n.data,
-            n.nome,
-            n.whatsapp,
-            `${n.rua}, ${n.numero} - ${n.bairro}`,
-            n.total,
-            n.pagamento,
-            n.produtos.replace(/\n/g, " | ")
-        ]);
-
-        let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-        csvContent += cabecalho.join(";") + "\n";
-        linhas.forEach(row => {
-            csvContent += row.join(";") + "\n";
-        });
-
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `Relatorio_${nomeUsuarioLogado.replace(/\s+/g, '_')}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
     }
 
     function exportarCSV() {
@@ -1274,7 +1255,6 @@
 
     function carregarCardsSalvos() {
         const produtos = JSON.parse(localStorage.getItem('nuance_catalogo') || '[]');
-        // Função mantida para compatibilidade, mas sem os elementos de exibição do carrossel no admin que foi removido
     }
 
 </script>
