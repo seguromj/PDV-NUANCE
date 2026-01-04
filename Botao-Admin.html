@@ -28,14 +28,57 @@
         }
         .modal-content {
             background: var(--card); padding: 30px; border-radius: 24px;
-            width: 90%; max-width: 400px; border: 1px solid rgba(255,255,255,0.1);
-            text-align: center;
+            width: 90%; max-width: 450px; border: 1px solid rgba(255,255,255,0.1);
+            text-align: center; max-height: 80vh; overflow-y: auto;
         }
         .sabores-lista { display: flex; flex-direction: column; gap: 10px; margin: 20px 0; }
         .sabor-item { 
             background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px;
             border: 1px solid rgba(255,255,255,0.1); font-weight: 600; color: var(--text);
         }
+
+        /* ESTILOS GALERIA DE HOSPEDAGEM */
+        .host-header-fixed {
+            position: sticky; top: -30px; background: var(--card); z-index: 100;
+            padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px; margin-top: -10px;
+        }
+        #lista-hospedagem {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+        }
+        .host-item {
+            background: rgba(255,255,255,0.05); border-radius: 12px; padding: 8px;
+            border: 1px solid rgba(255,255,255,0.1); position: relative;
+        }
+        .host-img-preview {
+            width: 100%; height: 80px; object-fit: cover; border-radius: 8px; margin-bottom: 5px;
+        }
+        .loading-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); display: flex; align-items: center;
+            justify-content: center; border-radius: 12px; font-size: 8px; font-weight: 800;
+        }
+        .btn-trash {
+            position: absolute; top: 5px; right: 5px; background: var(--danger);
+            color: white; border: none; width: 24px; height: 24px; border-radius: 6px;
+            cursor: pointer; font-size: 10px; z-index: 5;
+        }
+
+        /* Estilo do Input de Nome na Hospedagem */
+        .host-name-input {
+            width: 100%; padding: 5px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px; color: white; font-size: 9px; margin-bottom: 5px; box-sizing: border-box;
+            text-align: center; font-weight: 600;
+        }
+
+        /* MODAL DE CONFIRMAÇÃO MODERNO */
+        .confirm-modal {
+            background: var(--card); padding: 25px; border-radius: 20px;
+            border: 1px solid var(--danger); text-align: center; max-width: 320px;
+        }
+        .confirm-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-no { background: #334155; color: white; }
+        .btn-yes { background: var(--danger); color: white; }
 
         #tela-bloqueio {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -60,10 +103,10 @@
         .header { text-align: center; margin-bottom: 30px; }
         .header h1 { font-weight: 800; background: linear-gradient(to right, #818cf8, #d8b4fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
 
-        .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .dash-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
-        .dash-card span { display: block; font-size: 24px; font-weight: 800; color: var(--accent); }
-        .dash-card label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
+        .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 15px; }
+        .dash-card { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
+        .dash-card span { display: block; font-size: 20px; font-weight: 800; color: var(--accent); }
+        .dash-card label { font-size: 9px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
 
         .panel-glass {
             background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px);
@@ -127,7 +170,7 @@
         .p-name { font-weight: 800; font-size: 14px; margin: 2px 0 5px 0; height: 35px; overflow: hidden; }
         .p-price { color: #059669; font-weight: 800; font-size: 16px; margin-bottom: 10px; }
 
-        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 11000; }
         .toast { background: var(--success); color: white; padding: 15px 25px; border-radius: 12px; font-weight: 700; margin-bottom: 10px; }
 
         .backup-btns { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
@@ -145,6 +188,38 @@
             <p style="font-size: 12px; color: var(--text-muted);">SABORES DISPONÍVEIS:</p>
             <div id="lista-sabores" class="sabores-lista"></div>
             <button class="btn btn-save" onclick="fecharModal()">FECHAR VISUALIZAÇÃO</button>
+        </div>
+    </div>
+
+    <div id="modal-hospedagem" class="modal-overlay" onclick="fecharModalHost()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="host-header-fixed">
+                <h2 style="margin: 0; color: var(--primary); font-size: 18px;">HOSPEDAGEM</h2>
+                <p style="font-size: 9px; color: var(--text-muted); margin: 5px 0 10px;">TRANSFORME FOTOS EM LINKS</p>
+                
+                <button class="btn" style="background: #334155; color: white; margin-bottom: 10px; font-size: 11px; padding: 8px;" onclick="fecharModalHost()">FECHAR GALERIA</button>
+
+                <button id="btn-importar-img" class="btn btn-save" style="background: var(--success); margin-bottom: 0; font-size: 11px; padding: 10px;" onclick="document.getElementById('input-file-host').click()">
+                    ➕ IMPORTAR NOVA IMAGEM
+                </button>
+            </div>
+            
+            <input type="file" id="input-file-host" style="display:none" accept="image/*" onchange="fazerUploadImagem(this)">
+
+            <div id="lista-hospedagem">
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-confirmacao" class="modal-overlay">
+        <div class="confirm-modal">
+            <div style="font-size: 40px; margin-bottom: 10px;">⚠️</div>
+            <h3 style="margin: 0; color: var(--text);">Remover Imagem?</h3>
+            <p style="font-size: 12px; color: var(--text-muted); margin: 10px 0 20px;">Esta ação removerá o link da sua galeria local.</p>
+            <div class="confirm-btns">
+                <button class="btn btn-no" onclick="fecharConfirmacao()">CANCELAR</button>
+                <button id="confirmar-exclusao-btn" class="btn btn-yes">EXCLUIR</button>
+            </div>
         </div>
     </div>
 
@@ -171,18 +246,20 @@
             </header>
 
             <div class="dash-grid">
-                <div class="dash-card"><span id="count-total">0</span><label>Total Itens</label></div>
-                <div class="dash-card"><span id="count-drinks">0</span><label>Drinks</label></div>
-                <div class="dash-card"><span id="count-combos">0</span><label>Combos</label></div>
+                <div class="dash-card"><span id="count-total">0</span><label>Total</label></div>
+                <div class="dash-card"><span id="count-alcool">0</span><label>C/ Álcool</label></div>
+                <div class="dash-card"><span id="count-sem-alcool">0</span><label>S/ Álcool</label></div>
+                <div class="dash-card"><span id="count-copao">0</span><label>Copão</label></div>
+                <div class="dash-card"><span id="count-combos">0</span><label>Combo</label></div>
             </div>
+
+            <button class="btn" style="background: linear-gradient(135deg, #10b981, #3b82f6); color: white; margin-bottom: 30px; border-radius: 16px; font-size: 12px;" onclick="abrirModalHost()">
+                🖼️ GERENCIAR HOSPEDAGEM DE IMAGENS
+            </button>
 
             <div class="panel-glass">
                 <div class="section-title">Gerenciar Produto</div>
                 
-                <div class="search-container">
-                    <input type="text" id="busca-id" class="search-input" placeholder="🔍 BUSCAR POR ID..." oninput="carregarCatalogo()">
-                </div>
-
                 <div class="grid-form">
                     <div class="form-group"><label>ID</label><input type="number" id="admin-campo1"></div>
                     <div class="form-group"><label>Nome</label><input type="text" id="admin-campo2"></div>
@@ -205,6 +282,11 @@
             </div>
 
             <div class="section-title">Catálogo Ativo</div>
+            
+            <div class="search-container">
+                <input type="text" id="busca-id" class="search-input" placeholder="🔍 BUSCAR POR ID..." oninput="carregarCatalogo()">
+            </div>
+
             <div id="carrosséis-container">
                 <div class="carousel-wrapper">
                     <label style="color: var(--accent); font-weight: 800; font-size: 11px;">🍸 DRINKS C/ ÁLCOOL (1-199)</label>
@@ -229,6 +311,8 @@
     </div>
 
     <script>
+        let imagemParaExcluirId = null;
+
         function showToast(msg) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -239,10 +323,11 @@
         }
 
         function verificarAcesso() {
-            if (document.getElementById('senha-acesso').value === "111219") {
+            if (document.getElementById('senha-acesso').value === "MJ-NUNACE") { //🚨🚨Senha🚨🚨
                 document.getElementById('tela-bloqueio').style.display = 'none';
                 document.getElementById('admin-content').style.display = 'block';
                 carregarCatalogo();
+                renderizarHospedagens();
             } else showToast("Senha Incorreta!");
         }
 
@@ -260,10 +345,138 @@
             document.getElementById('modal-sabores').style.display = 'none';
         }
 
+        function abrirModalHost() {
+            renderizarHospedagens();
+            document.getElementById('modal-hospedagem').style.display = 'flex';
+        }
+
+        function fecharModalHost() {
+            document.getElementById('modal-hospedagem').style.display = 'none';
+        }
+
+        // FUNÇÃO DE UPLOAD USANDO O SERVIDOR CATBOX (ESTÁVEL)
+        function fazerUploadImagem(input) {
+            if (!input.files || !input.files[0]) return;
+            
+            const file = input.files[0];
+            const btn = document.getElementById('btn-importar-img');
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const tempId = 'temp_' + Date.now();
+                const lista = document.getElementById('lista-hospedagem');
+                
+                const tempItem = document.createElement('div');
+                tempItem.className = 'host-item';
+                tempItem.id = tempId;
+                tempItem.innerHTML = `
+                    <img src="${e.target.result}" class="host-img-preview" style="opacity: 0.5">
+                    <div class="loading-overlay">SUBINDO...</div>
+                `;
+                lista.insertBefore(tempItem, lista.firstChild);
+                
+                btn.disabled = true;
+                btn.innerText = "⌛...";
+
+                const formData = new FormData();
+                formData.append('reqtype', 'fileupload');
+                formData.append('fileToUpload', file);
+
+                fetch('https://catbox.moe/user/api.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.text())
+                .then(link => {
+                    if(link.includes('https://files.catbox.moe/')) {
+                        const novaImg = { id: Date.now(), url: link.trim(), nomePersonalizado: "" };
+                        let hospedadas = JSON.parse(localStorage.getItem('nuance_hospedadas') || '[]');
+                        hospedadas.push(novaImg);
+                        localStorage.setItem('nuance_hospedadas', JSON.stringify(hospedadas));
+                        showToast("Sucesso!");
+                    } else {
+                        showToast("Erro no servidor de imagens.");
+                    }
+                })
+                .catch(() => showToast("Erro de conexão. Tente novamente."))
+                .finally(() => {
+                    renderizarHospedagens();
+                    btn.disabled = false;
+                    btn.innerText = "➕ IMPORTAR NOVA IMAGEM";
+                    input.value = "";
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderizarHospedagens() {
+            const lista = document.getElementById('lista-hospedagem');
+            const hospedadas = JSON.parse(localStorage.getItem('nuance_hospedadas') || '[]');
+            lista.innerHTML = hospedadas.length ? "" : "<p style='color:var(--text-muted); font-size:12px; margin:20px 0; grid-column: span 2;'>Nenhuma imagem hospedada ainda.</p>";
+            
+            [...hospedadas].reverse().forEach(img => {
+                const item = document.createElement('div');
+                item.className = 'host-item';
+                item.innerHTML = `
+                    <button class="btn-trash" onclick="abrirConfirmacao(${img.id})">🗑️</button>
+                    <img src="${img.url}" class="host-img-preview">
+                    <input type="text" class="host-name-input" placeholder="Nome..." value="${img.nomePersonalizado || ''}" onchange="salvarNomeImagem(${img.id}, this.value)">
+                    <button class="btn btn-util" style="background:var(--primary); color:white; width:100%; border-radius:6px; padding:6px; font-size:9px;" onclick="copiarLink('${img.url}')">
+                        📋 COPIAR
+                    </button>
+                `;
+                lista.appendChild(item);
+            });
+        }
+
+        function salvarNomeImagem(id, novoNome) {
+            let hospedadas = JSON.parse(localStorage.getItem('nuance_hospedadas') || '[]');
+            const index = hospedadas.findIndex(img => img.id === id);
+            if(index !== -1) {
+                hospedadas[index].nomePersonalizado = novoNome;
+                localStorage.setItem('nuance_hospedadas', JSON.stringify(hospedadas));
+                showToast("Nome atualizado!");
+            }
+        }
+
+        function copiarLink(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                showToast("Link copiado!");
+                document.getElementById('admin-campo4').value = url;
+            }).catch(() => {
+                showToast("Erro ao copiar.");
+            });
+        }
+
+        /* FUNÇÕES DO MODAL DE CONFIRMAÇÃO */
+        function abrirConfirmacao(id) {
+            imagemParaExcluirId = id;
+            document.getElementById('modal-confirmacao').style.display = 'flex';
+            document.getElementById('confirmar-exclusao-btn').onclick = function() {
+                removerHospedagem(imagemParaExcluirId);
+                fecharConfirmacao();
+            };
+        }
+
+        function fecharConfirmacao() {
+            document.getElementById('modal-confirmacao').style.display = 'none';
+            imagemParaExcluirId = null;
+        }
+
+        function removerHospedagem(id) {
+            let hospedadas = JSON.parse(localStorage.getItem('nuance_hospedadas') || '[]');
+            hospedadas = hospedadas.filter(img => img.id !== id);
+            localStorage.setItem('nuance_hospedadas', JSON.stringify(hospedadas));
+            renderizarHospedagens();
+            showToast("Removido!");
+        }
+
         function atualizarDashboard(produtos) {
             document.getElementById('count-total').innerText = produtos.length;
-            document.getElementById('count-drinks').innerText = produtos.filter(p => p.id < 300).length;
-            document.getElementById('count-combos').innerText = produtos.filter(p => p.id >= 400).length;
+            document.getElementById('count-alcool').innerText = produtos.filter(p => p.id >= 1 && p.id <= 199).length;
+            document.getElementById('count-sem-alcool').innerText = produtos.filter(p => p.id >= 200 && p.id <= 299).length;
+            document.getElementById('count-copao').innerText = produtos.filter(p => p.id >= 300 && p.id <= 399).length;
+            document.getElementById('count-combos').innerText = produtos.filter(p => p.id >= 400 && p.id <= 499).length;
         }
 
         function salvarProduto() {
@@ -271,7 +484,7 @@
             const c2 = document.getElementById('admin-campo2').value;
             const c3 = document.getElementById('admin-campo3').value;
             const c4 = document.getElementById('admin-campo4').value;
-            const c5 = document.getElementById('admin-campo5').value.trim(); // Modificado para aceitar vazio
+            const c5 = document.getElementById('admin-campo5').value.trim();
             const valorG = document.getElementById('admin-campo6').value.trim();
             const deveExcluir = document.getElementById('check-excluir').checked;
 
@@ -380,21 +593,31 @@
         }
 
         function exportarBackup() {
-            const data = localStorage.getItem('nuance_catalogo');
-            const blob = new Blob([data], {type: 'application/json'});
+            const catalogo = localStorage.getItem('nuance_catalogo') || '[]';
+            const hospedadas = localStorage.getItem('nuance_hospedadas') || '[]';
+            const dataCompleta = JSON.stringify({ catalogo: JSON.parse(catalogo), hospedadas: JSON.parse(hospedadas) });
+            
+            const blob = new Blob([dataCompleta], {type: 'application/json'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = "backup.json";
+            a.download = "backup_nuance.json";
             a.click();
         }
 
         function importarBackup(event) {
             const reader = new FileReader();
             reader.onload = (e) => {
-                localStorage.setItem('nuance_catalogo', e.target.result);
-                carregarCatalogo();
-                showToast("Importado!");
+                try {
+                    const dados = JSON.parse(e.target.result);
+                    if(dados.catalogo) localStorage.setItem('nuance_catalogo', JSON.stringify(dados.catalogo));
+                    if(dados.hospedadas) localStorage.setItem('nuance_hospedadas', JSON.stringify(dados.hospedadas));
+                    carregarCatalogo();
+                    renderizarHospedagens();
+                    showToast("Tudo importado com sucesso!");
+                } catch(err) {
+                    showToast("Erro ao ler arquivo de backup.");
+                }
             };
             reader.readAsText(event.target.files[0]);
         }
