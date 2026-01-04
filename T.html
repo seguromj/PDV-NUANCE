@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Stock Pro - JSON FIX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-cyan: #00f3ff;
+            --neon-pink: #ff00c1;
+            --neon-yellow: #f3ff00;
+            --dark-bg: #0d1117;
+            --glass-bg: #161b22;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            background-color: var(--dark-bg);
+            color: #e6edf3;
+            font-family: 'Inter', sans-serif;
+            padding: 15px;
+            min-height: 100vh;
+        }
+
+        .container { max-width: 1200px; margin: auto; }
+
+        header { text-align: center; margin-bottom: 20px; }
+        .logo { font-weight: 900; font-size: 1.8rem; color: var(--neon-cyan); letter-spacing: -1px; }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 768px) { .control-grid { grid-template-columns: 1fr; } }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .panel-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #8b949e;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            background: #010409;
+            border: 1px solid #30363d;
+            padding: 12px;
+            color: #fff;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 12px;
+            transition: 0.2s;
+        }
+        .btn-cad { background: var(--neon-cyan); color: #000; }
+        .btn-baixa { background: transparent; border: 1px solid var(--neon-pink); color: var(--neon-pink); }
+        .btn-baixa:hover { background: var(--neon-pink); color: #fff; }
+
+        .backup-zone { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        .btn-backup { background: #21262d; color: #c9d1d9; font-size: 10px; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        
+        /* Grid e Cards */
+        .grid-container { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 10px; 
+        }
+
+        @media (min-width: 769px) {
+            .grid-container { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        }
+
+        .card {
+            background: #1c2128;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            position: relative;
+        }
+
+        .edit-icon {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .delete-icon {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            filter: grayscale(1);
+            transition: 0.3s;
+        }
+        .delete-icon:hover { filter: grayscale(0); }
+
+        .card-img {
+            width: 60px; height: 60px;
+            border-radius: 10px;
+            object-fit: cover;
+            margin-bottom: 8px;
+            border: 2px solid #30363d;
+        }
+
+        .card-nome { font-weight: 700; font-size: 0.85rem; color: #fff; }
+        .card-id { 
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--neon-pink); 
+            font-size: 11px; 
+            font-weight: 800;
+            background: rgba(255, 0, 193, 0.1);
+            padding: 2px 5px;
+            border-radius: 4px;
+            margin: 4px 0;
+            display: inline-block;
+        }
+        
+        .saldo-box {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            color: var(--neon-cyan);
+            font-weight: 800;
+        }
+
+        /* Modais */
+        #customAlert, #confirmModal {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: #161b22;
+            border: 2px solid var(--neon-pink);
+            padding: 25px;
+            border-radius: 15px;
+            z-index: 1000;
+            text-align: center;
+            width: 300px;
+            box-shadow: 0 0 20px rgba(255, 0, 193, 0.2);
+        }
+        
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; }
+
+        .btn-sim {
+            background: #ff4444;
+            color: white;
+            animation: pulse-red 1s infinite;
+            margin-bottom: 10px;
+        }
+
+        .btn-nao {
+            background: #444;
+            color: white;
+        }
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay" id="overlay"></div>
+    
+    <div id="customAlert">
+        <p id="alertMsg" style="margin-bottom: 20px; color: #fff; font-weight: bold;"></p>
+        <button class="btn btn-cad" onclick="closeAlert()">OK</button>
+    </div>
+
+    <div id="confirmModal">
+        <p id="confirmMsg" style="margin-bottom: 20px; color: #fff; font-weight: bold;"></p>
+        <button class="btn btn-sim" id="confirmarExcluirBtn">SIM, EXCLUIR</button>
+        <button class="btn btn-nao" onclick="closeConfirm()">NÃO</button>
+    </div>
+
+    <div class="container">
+        <header><div class="logo">QUANTUM STOCK PRO</div></header>
+        
+        <div class="control-grid">
+            <section class="glass-panel">
+                <div class="panel-title">REGISTRO</div>
+                <input type="text" id="nomeProd" placeholder="NOME">
+                <input type="text" id="idProd" placeholder="ID">
+                <input type="number" id="totalProd" placeholder="ESTOQUE INICIAL">
+                <select id="catProd">
+                    <option value="ML">ML</option>
+                    <option value="UN">UN</option>
+                </select>
+                <input type="file" id="fotoProd" accept="image/*">
+                <button class="btn btn-cad" id="btnAcao" onclick="cadastrar()">SALVAR PRODUTO</button>
+                
+                <div class="backup-zone">
+                    <button class="btn-backup" onclick="exportarJson()">BAIXAR ARQUIVO .JSON</button>
+                    <button class="btn-backup" onclick="document.getElementById('importFile').click()">RESTAURAR BACKUP</button>
+                    <input type="file" id="importFile" style="display:none" onchange="importarBackup(event)">
+                </div>
+            </section>
+
+            <section class="glass-panel">
+                <div class="panel-title">TERMINAL DE BAIXA</div>
+                <textarea id="comandoBaixa" placeholder="Ex: ID: 501 (10)"></textarea>
+                <button class="btn btn-baixa" onclick="processarBaixas()">PROCESSAR</button>
+                <button class="btn-backup" style="margin-top:10px" onclick="addShortcut()">+ ATALHO ID:0</button>
+            </section>
+        </div>
+
+        <div id="lista" class="grid-container"></div>
+    </div>
+
+    <script>
+        let estoque = [];
+        try {
+            const data = localStorage.getItem('quantum_data_v2');
+            if (data) estoque = JSON.parse(data);
+        } catch (e) { estoque = []; }
+
+        let idEditando = null;
+        let idParaExcluir = null;
+
+        window.onload = render;
+
+        function showAlert(msg) {
+            document.getElementById('alertMsg').innerText = msg;
+            document.getElementById('customAlert').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        function closeAlert() {
+            document.getElementById('customAlert').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        function showConfirm(id, nome) {
+            idParaExcluir = id;
+            document.getElementById('confirmMsg').innerText = "Você Realmente quer Excluir o Produto: " + nome + "?";
+            document.getElementById('confirmModal').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+            
+            document.getElementById('confirmarExcluirBtn').onclick = function() {
+                excluirProduto(idParaExcluir, nome);
+            };
+        }
+
+        function closeConfirm() {
+            document.getElementById('confirmModal').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+            idParaExcluir = null;
+        }
+
+        function excluirProduto(id, nome) {
+            estoque = estoque.filter(p => p.id !== id);
+            localStorage.setItem('quantum_data_v2', JSON.stringify(estoque));
+            closeConfirm();
+            render();
+            showAlert(nome + " Excluído com Sucesso");
+        }
+
+        function cadastrar() {
+            const nome = document.getElementById('nomeProd').value.trim();
+            const id = document.getElementById('idProd').value.trim();
+            const total = parseFloat(document.getElementById('totalProd').value);
+            const cat = document.getElementById('catProd').value;
+            const foto = document.getElementById('fotoProd').files[0];
+
+            if(!nome || !id || isNaN(total)) return showAlert("Preencha os campos!");
+
+            const concluir = (img) => {
+                if(idEditando) {
+                    const idx = estoque.findIndex(p => p.id === idEditando);
+                    estoque[idx] = { ...estoque[idx], nome: nome.toUpperCase(), id, saldo: total, unidade: cat };
+                    if(img) estoque[idx].img = img;
+                } else {
+                    if(!img) return showAlert("Falta a foto!");
+                    estoque.push({ id, nome: nome.toUpperCase(), saldo: total, unidade: cat, img: img });
+                }
+                idEditando = null;
+                const btn = document.getElementById('btnAcao');
+                btn.innerText = "SALVAR PRODUTO";
+                btn.style.background = "var(--neon-cyan)";
+                localStorage.setItem('quantum_data_v2', JSON.stringify(estoque));
+                render(); limpar();
+            }
+
+            if(foto) {
+                const reader = new FileReader();
+                reader.onload = (e) => concluir(e.target.result);
+                reader.readAsDataURL(foto);
+            } else { concluir(null); }
+        }
+
+        function editar(id) {
+            const p = estoque.find(x => x.id === id);
+            idEditando = id;
+            document.getElementById('nomeProd').value = p.nome;
+            document.getElementById('idProd').value = p.id;
+            document.getElementById('totalProd').value = p.saldo;
+            document.getElementById('catProd').value = p.unidade;
+            
+            const btn = document.getElementById('btnAcao');
+            btn.innerText = "ATUALIZAR";
+            btn.style.background = "var(--neon-yellow)";
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function render() {
+            document.getElementById('lista').innerHTML = estoque.map(p => `
+                <div class="card">
+                    <span class="delete-icon" onclick="showConfirm('${p.id}', '${p.nome}')">🗑️</span>
+                    <span class="edit-icon" onclick="editar('${p.id}')">✏️</span>
+                    <img src="${p.img}" class="card-img">
+                    <div class="card-nome">${p.nome}</div>
+                    <div class="card-id">ID: ${p.id}</div>
+                    <div class="saldo-box">${p.saldo} <small>${p.unidade}</small></div>
+                </div>
+            `).join('');
+        }
+
+        function processarBaixas() {
+            const texto = document.getElementById('comandoBaixa').value;
+            const regex = /ID:\s*\(?(\w+)\)?\s*\((\d+\.?\d*)\)/gi;
+            let match, houve = false;
+            while ((match = regex.exec(texto)) !== null) {
+                const p = estoque.find(x => x.id === match[1]);
+                if (p) { p.saldo = parseFloat((p.saldo - parseFloat(match[2])).toFixed(2)); houve = true; }
+            }
+            if(houve) { 
+                localStorage.setItem('quantum_data_v2', JSON.stringify(estoque)); 
+                render(); 
+                document.getElementById('comandoBaixa').value = ''; 
+            }
+        }
+
+        function addShortcut() { document.getElementById('comandoBaixa').value += "ID: 0 (0)\n"; }
+
+        function exportarJson() {
+            if (estoque.length === 0) return showAlert("Estoque vazio!");
+            const dataStr = JSON.stringify(estoque, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = "backup_estoque.json";
+            document.body.appendChild(link);
+            link.click();
+            setTimeout(() => {
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }, 100);
+        }
+
+        function importarBackup(event) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                estoque = JSON.parse(e.target.result);
+                localStorage.setItem('quantum_data_v2', JSON.stringify(estoque));
+                render(); showAlert("Restaurado!");
+            };
+            reader.readAsText(event.target.files[0]);
+        }
+
+        function limpar() {
+            ['nomeProd', 'idProd', 'totalProd', 'fotoProd'].forEach(id => document.getElementById(id).value = '');
+        }
+    </script>
+</body>
+</html>
