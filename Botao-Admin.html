@@ -340,7 +340,7 @@
             produtos.sort((a,b) => a.id - b.id).forEach(p => {
                 if(busca && !p.id.toString().includes(busca)) return;
                 
-                const temSabores = p.sabores && p.sabores !== "---" && p.sabores.trim() !== "";
+                const temSabores = p.sabores && p.sabores !== "" && p.sabores.trim() !== "";
                 const btnHtml = temSabores 
                     ? `<button class="btn-status btn-sabores" onclick="abrirModalSabores('${p.nome}', '${p.sabores}')">ESCOLHER SABORES</button>`
                     : `<button class="btn-status btn-add">ADICIONAR</button>`;
