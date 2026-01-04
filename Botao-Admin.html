@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -270,7 +271,7 @@
             const c2 = document.getElementById('admin-campo2').value;
             const c3 = document.getElementById('admin-campo3').value;
             const c4 = document.getElementById('admin-campo4').value;
-            const c5 = document.getElementById('admin-campo5').value.trim() || "---";
+            const c5 = document.getElementById('admin-campo5').value.trim(); // Modificado para aceitar vazio
             const valorG = document.getElementById('admin-campo6').value.trim();
             const deveExcluir = document.getElementById('check-excluir').checked;
 
@@ -340,7 +341,7 @@
             produtos.sort((a,b) => a.id - b.id).forEach(p => {
                 if(busca && !p.id.toString().includes(busca)) return;
                 
-                const temSabores = p.sabores && p.sabores !== "" && p.sabores.trim() !== "";
+                const temSabores = p.sabores && p.sabores !== "---" && p.sabores.trim() !== "";
                 const btnHtml = temSabores 
                     ? `<button class="btn-status btn-sabores" onclick="abrirModalSabores('${p.nome}', '${p.sabores}')">ESCOLHER SABORES</button>`
                     : `<button class="btn-status btn-add">ADICIONAR</button>`;
@@ -371,7 +372,7 @@
                 document.getElementById('admin-campo2').value = p.nome;
                 document.getElementById('admin-campo3').value = p.preco;
                 document.getElementById('admin-campo4').value = p.img;
-                document.getElementById('admin-campo5').value = (p.sabores === "") ? "" : p.sabores;
+                document.getElementById('admin-campo5').value = (p.sabores === "---") ? "" : p.sabores;
                 document.getElementById('admin-campo6').value = "";
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 showToast("Produto carregado!");
