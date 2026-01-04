@@ -286,7 +286,6 @@
             width: 100%; overflow-x: auto; display: flex; gap: 15px; padding: 10px 0 20px 0;
             scrollbar-width: none; cursor: grab; scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
         }
-        .carousel-container::-webkit-scrollbar { display: none; }
         .carousel-wrapper { margin-bottom: 30px; }
         .carousel-title { font-size: 14px; font-weight: 800; color: var(--primary); margin-bottom: 5px; border-left: 4px solid var(--accent); padding-left: 10px; }
 
@@ -576,6 +575,101 @@
 </div>
 
 <script>
+    // ==========================================
+    // ÁREA DE MAPEAMENTO DE TECLAS DO TECLADO
+    // ==========================================
+     window.addEventListener('keydown', (event) => {
+    // Bloqueia atalhos se estiver digitando (exceto as teclas F e Alt+Enter)
+    const estaDigitando = document.activeElement.tagName === 'INPUT' || 
+                          document.activeElement.tagName === 'TEXTAREA' || 
+                          document.activeElement.isContentEditable;
+
+    // Estilo para o efeito de piscar
+    const aplicarEfeitoVisual = (botao) => {
+        if (!botao) return;
+        
+        // Remove destaque de qualquer outro botão antes
+        document.querySelectorAll('button').forEach(b => {
+            b.style.outline = "none";
+            b.classList.remove('piscando-vermelho');
+        });
+
+        // Aplica o novo estilo
+        botao.style.outline = "5px solid red";
+        botao.focus();
+
+        // Adiciona uma animação simples de piscar via código
+        if (!document.getElementById('style-piscando')) {
+            const style = document.createElement('style');
+            style.id = 'style-piscando';
+            style.innerHTML = `
+                @keyframes blink-red {
+                    0% { outline-color: red; }
+                    50% { outline-color: transparent; }
+                    100% { outline-color: red; }
+                }
+                .piscando-vermelho { animation: blink-red 0.5s infinite; }
+            `;
+            document.head.appendChild(style);
+        }
+        botao.classList.add('piscando-vermelho');
+    };
+
+    // --- MAPEAMENTO DE TECLAS ---
+
+    // F1 até F10 e outros
+    let alvo = null;
+
+    if (event.key === 'F1') alvo = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('Histórico') || b.onclick?.toString().includes('abrirGestao'));
+    if (event.key === 'F2') alvo = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('VIPs') || b.onclick?.toString().includes('abrirRankingClientes'));
+    if (event.key === 'F3') alvo = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('Estoque') || b.onclick?.toString().includes('abrirRankingProdutos'));
+    if (event.key === 'F4') alvo = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('Limpar HD') || b.onclick?.toString().includes('limparHD'));
+    if (event.key === 'F5') { event.preventDefault(); alvo = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('Sair') || b.onclick?.toString().includes('logout')); }
+    if (event.key === 'F6') alvo = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('Admin'));
+    if (event.key === 'F7') alvo = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('Imprimir') || b.onclick?.toString().includes('window.print'));
+    if (event.key === 'F8') alvo = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('ETIQUETA') || b.onclick?.toString().includes('imprimirEtiqueta'));
+    if (event.key === 'F9') alvo = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('PDF') || b.onclick?.toString().includes('baixarPDF'));
+    if (event.key === 'F10') alvo = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('Exportar') || b.onclick?.toString().includes('exportarCSV'));
+
+    // Tecla DELETAR (Alternância)
+    if (event.key === 'Delete') {
+        event.preventDefault();
+        const btnLimparTudo = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('Limpar Tudo'));
+        const btnLimpar = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('Limpar') && !b.innerText.includes('Tudo'));
+        
+        // Se já estiver no Limpar Tudo, vai para o Limpar. Senão, vai para o Limpar Tudo.
+        if (document.activeElement === btnLimparTudo) {
+            alvo = btnLimpar;
+        } else {
+            alvo = btnLimparTudo;
+        }
+    }
+
+    // ALT + ENTER (Finalizar)
+    if (event.altKey && event.key === 'Enter') {
+        event.preventDefault();
+        alvo = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('FINALIZAR E SALVAR PEDIDO') || b.onclick?.toString().includes('finalizarEGerar'));
+    }
+
+    // Se encontrou um botão pelo atalho, aplica o efeito e para por aqui
+    if (alvo) {
+        event.preventDefault();
+        aplicarEfeitoVisual(alvo);
+        return;
+    }
+
+    // Se apertar ENTER e o botão estiver piscando, ele executa a função
+    if (event.key === 'Enter' && document.activeElement.classList.contains('piscando-vermelho')) {
+        if (!estaDigitando) {
+            event.preventDefault();
+            document.activeElement.click();
+        }
+    }
+});
+
+
+
+
     // LÓGICA DE LOGIN E ISOLAMENTO DE DADOS
     let usuarioLogado = null;
     let nomeUsuarioLogado = "";
@@ -1260,3 +1354,4 @@
 </script>
 </body>
 </html>
+
