@@ -312,6 +312,8 @@
 
     <script>
         let imagemParaExcluirId = null;
+        //🚨🚨🚨 SUBSTITUA ESTA CHAVE PELA SUA GERADA EM api.imgbb.com
+        const IMGBB_API_KEY = 'b2f2d2c7f96736dadf9fd17f82c72fb3'; 
 
         function showToast(msg) {
             const container = document.getElementById('toast-container');
@@ -354,7 +356,6 @@
             document.getElementById('modal-hospedagem').style.display = 'none';
         }
 
-        // FUNÇÃO DE UPLOAD USANDO O SERVIDOR CATBOX (ESTÁVEL)
         function fazerUploadImagem(input) {
             if (!input.files || !input.files[0]) return;
             
@@ -379,26 +380,26 @@
                 btn.innerText = "⌛...";
 
                 const formData = new FormData();
-                formData.append('reqtype', 'fileupload');
-                formData.append('fileToUpload', file);
+                formData.append('image', file);
 
-                fetch('https://catbox.moe/user/api.php', {
+                fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
                     method: 'POST',
                     body: formData
                 })
-                .then(res => res.text())
-                .then(link => {
-                    if(link.includes('https://files.catbox.moe/')) {
+                .then(res => res.json())
+                .then(data => {
+                    if(data && data.success) {
+                        const link = data.data.url;
                         const novaImg = { id: Date.now(), url: link.trim(), nomePersonalizado: "" };
                         let hospedadas = JSON.parse(localStorage.getItem('nuance_hospedadas') || '[]');
                         hospedadas.push(novaImg);
                         localStorage.setItem('nuance_hospedadas', JSON.stringify(hospedadas));
                         showToast("Sucesso!");
                     } else {
-                        showToast("Erro no servidor de imagens.");
+                        showToast("Erro ao processar imagem.");
                     }
                 })
-                .catch(() => showToast("Erro de conexão. Tente novamente."))
+                .catch(() => showToast("Erro de rede. Verifique sua internet."))
                 .finally(() => {
                     renderizarHospedagens();
                     btn.disabled = false;
