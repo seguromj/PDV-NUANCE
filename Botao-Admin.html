@@ -127,7 +127,7 @@
         .form-group { margin-bottom: 15px; text-align: left; }
         label { display: block; margin-bottom: 8px; font-size: 12px; font-weight: 600; color: var(--text-muted); }
 
-        input[type="text"], input[type="number"], input[type="password"] { 
+        input[type="text"], input[type="number"], input[type="password"], input[type="time"] { 
             width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; 
             border-radius: 10px; color: white; font-family: inherit; box-sizing: border-box;
         }
@@ -188,6 +188,37 @@
             <p style="font-size: 12px; color: var(--text-muted);">SABORES DISPONÍVEIS:</p>
             <div id="lista-sabores" class="sabores-lista"></div>
             <button class="btn btn-save" onclick="fecharModal()">FECHAR VISUALIZAÇÃO</button>
+        </div>
+    </div>
+
+    <div id="modal-status-funcionamento" class="modal-overlay" onclick="fecharModalStatus()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h2 style="margin: 0; color: var(--warning);">STATUS DA LOJA</h2>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 20px;">ATUALIZAR HORÁRIO NA PLANILHA</p>
+            
+            <div class="form-group">
+                <label>ID DE STATUS (FIXO)</label>
+                <input type="text" id="status-id-fixo" value="100" disabled style="background: rgba(0,0,0,0.5); border-color: var(--text-muted); opacity: 0.7;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                <div class="form-group">
+                    <label>ABERTO AS:</label>
+                    <input type="time" id="time-aberto" oninput="atualizarTextoHorario()">
+                </div>
+                <div class="form-group">
+                    <label>FECHADO AS:</label>
+                    <input type="time" id="time-fechado" oninput="atualizarTextoHorario()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>HORÁRIO DE FUNCIONAMENTO (GERADO)</label>
+                <input type="text" id="status-horario" placeholder="(Aberto: 18:00)(Fechado: 22:00)">
+            </div>
+
+            <button class="btn" style="background: var(--warning); color: #000; margin-top: 20px;" onclick="enviarStatusPlanilha()">ENVIAR STATUS PARA PLANILHA</button>
+            <button class="btn btn-util" style="margin-top: 10px;" onclick="fecharModalStatus()">CANCELAR</button>
         </div>
     </div>
 
@@ -253,6 +284,10 @@
                 <div class="dash-card"><span id="count-combos">0</span><label>Combo</label></div>
             </div>
 
+            <button class="btn" style="background: var(--warning); color: #000; margin-bottom: 15px; border-radius: 16px; font-size: 12px;" onclick="abrirModalStatus()">
+                🕒 ATUALIZAR STATUS DE FUNCIONAMENTO
+            </button>
+
             <button class="btn" style="background: linear-gradient(135deg, #10b981, #3b82f6); color: white; margin-bottom: 30px; border-radius: 16px; font-size: 12px;" onclick="abrirModalHost()">
                 🖼️ GERENCIAR HOSPEDAGEM DE IMAGENS
             </button>
@@ -269,8 +304,14 @@
                 <div class="form-group"><label>Sabores (Separar por vírgula)</label><input type="text" id="admin-campo5"></div>
                 
                 <div class="form-group">
-                    <label>Comando Coluna G (O que digitar chegará na planilha)</label>
-                    <input type="text" id="admin-campo6" placeholder="Texto para a Coluna G...">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <label style="margin-bottom: 0;">Clica no botão Excluir para Evitar Digitar:</label>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 11px; color: var(--danger); font-weight: 700;"> 👉</span>
+                            <button type="button" onclick="document.getElementById('admin-campo6').value = 'Excluir'" style="background: var(--danger); color: white; border: none; padding: 4px 10px; border-radius: 6px; font-size: 10px; cursor: pointer; font-weight: 800;">Excluir</button>
+                        </div>
+                    </div>
+                    <input type="text" id="admin-campo6" placeholder="Digite Excluir para apagar Produto">
                 </div>
 
                 <div class="delete-box">
@@ -345,6 +386,58 @@
 
         function fecharModal() {
             document.getElementById('modal-sabores').style.display = 'none';
+        }
+
+        /* FUNÇÕES DO MODAL DE STATUS */
+        function abrirModalStatus() {
+            document.getElementById('modal-status-funcionamento').style.display = 'flex';
+        }
+
+        function fecharModalStatus() {
+            document.getElementById('modal-status-funcionamento').style.display = 'none';
+        }
+
+        function atualizarTextoHorario() {
+            const aberto = document.getElementById('time-aberto').value;
+            const fechado = document.getElementById('time-fechado').value;
+            if(aberto && fechado) {
+                document.getElementById('status-horario').value = `(Aberto: ${aberto})(Fechado: ${fechado})`;
+            }
+        }
+          //🚨🚨👇👇👇🚨🚨
+        function enviarStatusPlanilha() {
+            const statusId = "100";
+            const statusTxt = document.getElementById('status-horario').value.trim();
+
+            if(!statusTxt) return showToast("Digite o horário!");
+
+            const form = document.createElement('form');
+            form.method = "POST";
+            form.action = "https://docs.google.com/forms/d/e/1FAIpQLSfHpe7Idb8cekKYPyOOs8xn5sSfCQhWLKqUYwF4uXaz4QBX9w/formResponse";
+            form.target = "hidden_iframe";
+
+            const dados = {
+                "entry.1183639703": String(statusId),
+                "entry.1305746237": String(statusTxt)
+            };
+
+            for (let key in dados) {
+                let input = document.createElement('input');
+                input.type = "hidden";
+                input.name = key;
+                input.value = dados[key];
+                form.appendChild(input);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+            showToast("Enviando Status...");
+
+            setTimeout(() => {
+                if(document.body.contains(form)) document.body.removeChild(form);
+                fecharModalStatus();
+                showToast("Status atualizado na planilha!");
+            }, 1000);
         }
 
         function abrirModalHost() {
@@ -489,6 +582,8 @@
             const valorG = document.getElementById('admin-campo6').value.trim();
             const deveExcluir = document.getElementById('check-excluir').checked;
 
+            if(c1 === "100") return showToast("Esse ID: 100 não pode ser Usado.");
+
             if(!c1 || !c2 || !c3 || !c4) return showToast("Campos obrigatórios!");
 
             const form = document.createElement('form');
@@ -624,7 +719,7 @@
         }
 
         function limparCampos() { 
-            document.querySelectorAll('input:not(#senha-acesso, #busca-id)').forEach(i => {
+            document.querySelectorAll('input:not(#senha-acesso, #busca-id, #status-id-fixo)').forEach(i => {
                 i.value = ""; 
             });
         }
