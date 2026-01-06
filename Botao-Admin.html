@@ -156,7 +156,7 @@
         .product-card { 
             background: white; border-radius: 15px; min-width: 200px; max-width: 200px; 
             color: #1a1a1a; position: relative; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.2); 
-            text-align: center;
+            text-align: center; padding-bottom: 10px;
         }
         .edit-badge {
             position: absolute; top: 10px; right: 10px; background: var(--primary);
@@ -167,8 +167,13 @@
         .product-img { width: 100%; height: 120px; object-fit: cover; background: #eee; }
         .product-info { padding: 10px; }
         .p-id-label { font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; }
-        .p-name { font-weight: 800; font-size: 14px; margin: 2px 0 5px 0; height: 35px; overflow: hidden; }
-        .p-price { color: #059669; font-weight: 800; font-size: 16px; margin-bottom: 10px; }
+        .p-name { font-weight: 800; font-size: 14px; margin: 2px 0 5px 0; height: 35px; overflow: hidden; color: #e11d48; }
+        
+        /* ESTILO DO PREÇO ANTIGO E ML */
+        .p-old-price { color: #94a3b8; text-decoration: line-through; font-size: 12px; margin-bottom: 2px; }
+        .p-price-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; }
+        .p-price { color: #059669; font-weight: 800; font-size: 18px; }
+        .p-ml-badge { background: #f1f5f9; color: #475569; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; }
 
         #toast-container { position: fixed; top: 20px; right: 20px; z-index: 11000; }
         .toast { background: var(--success); color: white; padding: 15px 25px; border-radius: 12px; font-weight: 700; margin-bottom: 10px; }
@@ -300,6 +305,12 @@
                     <div class="form-group"><label>Nome</label><input type="text" id="admin-campo2"></div>
                     <div class="form-group"><label>Preço</label><input type="text" id="admin-campo3"></div>
                 </div>
+                
+                <div class="grid-form">
+                    <div class="form-group"><label>Preço Antigo</label><input type="text" id="admin-campo7"></div>
+                    <div class="form-group"><label>ML</label><input type="text" id="admin-campo8"></div>
+                </div>
+
                 <div class="form-group"><label>URL Imagem</label><input type="text" id="admin-campo4"></div>
                 <div class="form-group"><label>Sabores (Separar por vírgula)</label><input type="text" id="admin-campo5"></div>
                 
@@ -580,6 +591,8 @@
             const c4 = document.getElementById('admin-campo4').value;
             const c5 = document.getElementById('admin-campo5').value.trim();
             const valorG = document.getElementById('admin-campo6').value.trim();
+            const c7 = document.getElementById('admin-campo7').value;
+            const c8 = document.getElementById('admin-campo8').value;
             const deveExcluir = document.getElementById('check-excluir').checked;
 
             if(c1 === "100") return showToast("Esse ID: 100 não pode ser Usado.");
@@ -597,7 +610,9 @@
                 "entry.204413255": String(c3),
                 "entry.1752078996": String(c4),
                 "entry.150716055": String(c5),
-                "entry.1417905239": String(valorG)
+                "entry.1417905239": String(valorG),
+                "entry.982615910": String(c7),
+                "entry.1688936222": String(c8)
             };
 
             for (let key in dados) {
@@ -619,7 +634,7 @@
                 if (deveExcluir) {
                     produtos = produtos.filter(p => p.id !== idInt);
                 } else {
-                    const novoProduto = { id: idInt, nome: c2, preco: c3, img: c4, sabores: c5 };
+                    const novoProduto = { id: idInt, nome: c2, preco: c3, img: c4, sabores: c5, precoAntigo: c7, ml: c8 };
                     const index = produtos.findIndex(p => p.id === idInt);
                     if(index !== -1) produtos[index] = novoProduto;
                     else produtos.push(novoProduto);
@@ -655,6 +670,7 @@
                     ? `<button class="btn-status btn-sabores" onclick="abrirModalSabores('${p.nome}', '${p.sabores}')">ESCOLHER SABORES</button>`
                     : `<button class="btn-status btn-add">ADICIONAR</button>`;
 
+                // AQUI FOI ADICIONADO O PREÇO ANTIGO E O ML NO HTML DO CARD
                 const card = `
                     <div class="product-card">
                         <div class="edit-badge" onclick="editarProduto(${p.id})">✏️</div>
@@ -662,7 +678,14 @@
                         <div class="product-info">
                             <div class="p-id-label">ID: ${p.id}</div>
                             <div class="p-name">${p.nome}</div>
-                            <div class="p-price">R$ ${p.preco}</div>
+                            
+                            <div class="p-old-price">${p.precoAntigo ? 'R$' + p.precoAntigo : ''}</div>
+                            
+                            <div class="p-price-row">
+                                <div class="p-price">R$ ${p.preco}</div>
+                                ${p.ml ? `<span class="p-ml-badge">${p.ml}</span>` : ''}
+                            </div>
+                            
                             ${btnHtml}
                         </div>
                     </div>`;
@@ -683,6 +706,8 @@
                 document.getElementById('admin-campo4').value = p.img;
                 document.getElementById('admin-campo5').value = (p.sabores === "---") ? "" : p.sabores;
                 document.getElementById('admin-campo6').value = "";
+                document.getElementById('admin-campo7').value = p.precoAntigo || "";
+                document.getElementById('admin-campo8').value = p.ml || "";
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 showToast("Produto carregado!");
             }
