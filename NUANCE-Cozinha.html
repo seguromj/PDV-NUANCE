@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Pedidos Futurista Pro</title>
+    <title>NUANCE Cozinha</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -250,13 +250,13 @@
             font-size: 0.8rem;
             color: #888;
             cursor: pointer;
-            text-decoration: underline;
+            text-decoration: underline;w
         }
     </style>
 </head>
 <body>
 
-    <h1>Neo Order System</h1>
+    <h1>System Enviar a Cozinha</h1>
 
     <div class="input-container">
         <input type="text" id="order-id-input" class="id-input-field" placeholder="ID do Pedido">
@@ -383,10 +383,12 @@
             if (status === 'Cozinha') {
                 formData.append('entry.1580330767', orderData.content);
                 formData.append('entry.646404687', orderData.customId); // Alterado para o ID da Coluna C
+                formData.append('entry.442837320', orderData.customId); // Enviado para a Coluna F
             } else if (status === 'Pago') {
                 formData.append('entry.1335824849', 'Excluir');
                 formData.append('entry.646404687', orderData.customId);
            formData.append('entry.1580330767', orderData.content);
+                formData.append('entry.442837320', orderData.customId); // Enviado para a Coluna F
                 
             } else {
                 return; // Não envia se for outro status
