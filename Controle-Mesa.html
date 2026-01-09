@@ -4,13 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Futuristic Dashboard</title>
+    <title>Controle das Mesas</title>
     <style>
         :root {
-            --primary-neon: #FF0000;
+            --primary-neon: #F52727;
             --secondary-neon: #7000ff;
             --bg-dark: #050505;
             --glass: rgba(255, 255, 255, 0.1);
+            --occupied-bg: rgba(255, 170, 0, 0.2); /* Fundo laranja para ocupado */
+            --occupied-border: #ffaa00;
         }
 
         body {
@@ -38,7 +40,7 @@
         .id-monitor {
             width: 80%;
             max-width: 580px;
-            min-height: 80px; /* Garante que o campo tenha altura */
+            min-height: 80px; 
             background: rgba(0, 242, 255, 0.05);
             border: 1px solid var(--primary-neon);
             border-radius: 8px;
@@ -75,29 +77,55 @@
         /* Estilo dos Cards */
         .card {
             width: 100px;
-            height: 100px;
+            height: 120px; 
             background: var(--glass);
             border: 1px solid rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
+            font-size: 1.5rem;
             font-weight: bold;
             cursor: pointer;
             border-radius: 12px;
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            position: relative;
         }
 
         .card:hover {
             transform: scale(1.1) translateY(-5px);
             border-color: var(--primary-neon);
             box-shadow: 0 0 20px var(--primary-neon);
-            color: var(--primary-neon);
         }
 
-        /* --- ANIMAÇÃO PISCAR (ADICIONADO) --- */
+        /* --- ESTADO OCUPADO (MUDANÇA DE COR DO CARD) --- */
+        .card-ocupado {
+            background: var(--occupied-bg) !important;
+            border-color: var(--occupied-border) !important;
+            color: var(--occupied-border) !important;
+            animation: occupied-blink 1s infinite alternate;
+        }
+
+        @keyframes occupied-blink {
+            from { box-shadow: 0 0 5px var(--occupied-border); }
+            to { box-shadow: 0 0 20px var(--occupied-border); }
+        }
+
+        .btn-mesa-status {
+            margin-top: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #555;
+            color: white;
+            font-size: 0.7rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        /* --- ANIMAÇÃO PISCAR (PLANILHA) --- */
         .blink {
             animation: alert-blink 0.6s infinite alternate;
             border-color: var(--primary-neon) !important;
@@ -110,7 +138,7 @@
             }
             to { 
                 box-shadow: 0 0 30px var(--primary-neon); 
-                background: rgba(0, 242, 255, 0.3);
+                background: rgba(245, 39, 39, 0.3);
             }
         }
 
@@ -141,16 +169,6 @@
             animation: modalIn 0.4s ease-out;
         }
 
-        @keyframes modalIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        .modal-content h2 {
-            font-size: 3rem;
-            margin-bottom: 30px;
-        }
-
         .action-btn {
             background: transparent;
             color: white;
@@ -163,12 +181,6 @@
             border-radius: 50px;
             transition: all 0.3s;
             box-shadow: 0 0 10px var(--primary-neon);
-        }
-
-        .action-btn:hover {
-            background: var(--primary-neon);
-            color: black;
-            box-shadow: 0 0 30px var(--primary-neon);
         }
 
         .close-btn {
@@ -184,9 +196,9 @@
         }
     </style>
 </head>
-<body>
+<body onload="carregarEstados()">
 
-    <h1>Nova Era Digital</h1>
+    <h1>PDV Mesa para Cozinha</h1>
 
     <div class="id-monitor">
         <label>Garson Ativo</label>
@@ -194,27 +206,25 @@
     </div>
 
     <div class="grid-container">
-        <div class="card" id="1" onclick="openModal(1)">1</div>
-        <div class="card" id="2" onclick="openModal(2)">2</div>
-        <div class="card" id="3" onclick="openModal(3)">3</div>
-        <div class="card" id="4" onclick="openModal(4)">4</div>
-        <div class="card" id="5" onclick="openModal(5)">5</div>
-        <div class="card" id="6" onclick="openModal(6)">6</div>
-        <div class="card" id="7" onclick="openModal(7)">7</div>
-        <div class="card" id="8" onclick="openModal(8)">8</div>
-        <div class="card" id="9" onclick="openModal(9)">9</div>
-        <div class="card" id="10" onclick="openModal(10)">10</div>
+        <div class="card" id="1" onclick="openModal(1)">1 <button class="btn-mesa-status" onclick="toggleMesa(event, this)">Vazio</button></div>
+        <div class="card" id="2" onclick="openModal(2)">2 <button class="btn-mesa-status" onclick="toggleMesa(event, this)">Vazio</button></div>
+        <div class="card" id="3" onclick="openModal(3)">3 <button class="btn-mesa-status" onclick="toggleMesa(event, this)">Vazio</button></div>
+        <div class="card" id="4" onclick="openModal(4)">4 <button class="btn-mesa-status" onclick="toggleMesa(event, this)">Vazio</button></div>
+        <div class="card" id="5" onclick="openModal(5)">5 <button class="btn-mesa-status" onclick="toggleMesa(event, this)">Vazio</button></div>
+        <div class="card" id="6" onclick="openModal(6)">6 <button class="btn-mesa-status" onclick="toggleMesa(event, this)">Vazio</button></div>
+        <div class="card" id="7" onclick="openModal(7)">7 <button class="btn-mesa-status" onclick="toggleMesa(event, this)">Vazio</button></div>
+        <div class="card" id="8" onclick="openModal(8)">8 <button class="btn-mesa-status" onclick="toggleMesa(event, this)">Vazio</button></div>
+        <div class="card" id="9" onclick="openModal(9)">9 <button class="btn-mesa-status" onclick="toggleMesa(event, this)">Vazio</button></div>
+        <div class="card" id="10" onclick="openModal(10)">10 <button class="btn-mesa-status" onclick="toggleMesa(event, this)">Vazio</button></div>
+        <div class="card" id="11" onclick="openModal(11)">11 <button class="btn-mesa-status" onclick="toggleMesa(event, this)">Vazio</button></div>
+        <div class="card" id="12" onclick="openModal(12)">12 <button class="btn-mesa-status" onclick="toggleMesa(event, this)">Vazio</button></div>
     </div>
 
     <div id="modalContainer" class="modal">
         <div class="modal-content">
-            <h2 id="modalTitle">Card ID: 0</h2>
-            <p style="margin-bottom: 30px; opacity: 0.7;">Acesso autorizado ao módulo de dados futurista.</p>
-           
-            <a href="NUANCE-Cozinha.html">
-            <button class="action-btn">Executar Protocolo</button>
-            </a>
-            
+            <h2 id="modalTitle">Central Para Cozinha</h2>
+            <p style="margin-bottom: 30px; opacity: 0.7;">Enviar Pedidos a Cozinha</p>
+            <a href="NUANCE-Cozinha.html"><button class="action-btn">Enviar</button></a>
             <span class="close-btn" onclick="closeModal()">Fechar interface</span>
         </div>
     </div>
@@ -232,54 +242,74 @@
             modal.style.display = "none";
         }
 
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                closeModal();
+        // SALVA O ESTADO NO LOCALSTORAGE
+        function salvarEstados() {
+            const estados = {};
+            document.querySelectorAll('.card').forEach(card => {
+                const btn = card.querySelector('.btn-mesa-status');
+                estados[card.id] = {
+                    texto: btn.innerText,
+                    ocupado: card.classList.contains('card-ocupado')
+                };
+            });
+            localStorage.setItem('estadosMesas', JSON.stringify(estados));
+        }
+
+        // CARREGA O ESTADO DO LOCALSTORAGE AO ABRIR
+        function carregarEstados() {
+            const estadosSalvos = JSON.parse(localStorage.getItem('estadosMesas'));
+            if (estadosSalvos) {
+                Object.keys(estadosSalvos).forEach(id => {
+                    const card = document.getElementById(id);
+                    if (card) {
+                        const btn = card.querySelector('.btn-mesa-status');
+                        btn.innerText = estadosSalvos[id].texto;
+                        if (estadosSalvos[id].ocupado) {
+                            card.classList.add('card-ocupado');
+                        }
+                    }
+                });
             }
+        }
+
+        // ALTERA A COR DO CARD E DO BOTÃO
+        function toggleMesa(event, btn) {
+            event.stopPropagation();
+            const card = btn.parentElement; 
+            
+            if (btn.innerText === "VAZIO") {
+                btn.innerText = "Ocupado";
+                card.classList.add("card-ocupado");
+            } else {
+                btn.innerText = "Vazio";
+                card.classList.remove("card-ocupado");
+            }
+            salvarEstados(); // Salva a alteração imediatamente
         }
 
         async function fetchSheetData() {
             const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSLyfJ_DxYlM85wk6yabreWrfU6JPMY05-DWcbAvILym3bsNQsegVhTS5fkohmtwpWu7HzH6_4hoVLH/pub?output=tsv";
-            
             try {
                 const response = await fetch(url);
-                if (!response.ok) throw new Error('Falha na resposta');
                 const data = await response.text();
-                
                 const rows = data.split('\n');
                 let columnEValues = [];
-
                 for (let i = 1; i < rows.length; i++) {
                     const columns = rows[i].split('\t');
-                    if (columns[4] && columns[4].trim() !== "") { 
-                        columnEValues.push(columns[4].trim());
-                    }
+                    if (columns[4] && columns[4].trim() !== "") { columnEValues.push(columns[4].trim()); }
                 }
-
                 const result = columnEValues.reverse().join(' — ');
                 document.getElementById('lista-ids').innerText = result || "Aguardando dados...";
-
-                /* --- LÓGICA PARA PISCAR CARDS --- */
-                // Remove o efeito de todos primeiro para atualizar
                 document.querySelectorAll('.card').forEach(card => card.classList.remove('blink'));
-                
-                // Se o número do ID estiver presente na lista da Coluna E, faz o card piscar
                 columnEValues.forEach(val => {
                     const targetCard = document.getElementById(val);
-                    if (targetCard) {
-                        targetCard.classList.add('blink');
-                    }
+                    if (targetCard) { targetCard.classList.add('blink'); }
                 });
-
-            } catch (error) {
-                console.error("Erro:", error);
-                document.getElementById('lista-ids').innerText = "Erro ao conectar com a planilha.";
-            }
+            } catch (error) { console.error("Erro:", error); }
         }
 
         fetchSheetData();
-        setInterval(fetchSheetData, 5000); // Atualiza a cada 300ms
+        setInterval(fetchSheetData, 5000); 
     </script>
-
 </body>
 </html>
