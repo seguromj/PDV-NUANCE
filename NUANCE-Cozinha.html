@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -381,10 +382,12 @@
 
             if (status === 'Cozinha') {
                 formData.append('entry.1580330767', orderData.content);
-                formData.append('entry.1894120511', orderData.customId);
+                formData.append('entry.646404687', orderData.customId); // Alterado para o ID da Coluna C
             } else if (status === 'Pago') {
                 formData.append('entry.1335824849', 'Excluir');
                 formData.append('entry.646404687', orderData.customId);
+           formData.append('entry.1580330767', orderData.content);
+                
             } else {
                 return; // Não envia se for outro status
             }
