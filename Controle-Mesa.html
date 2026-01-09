@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -246,24 +247,24 @@
                 const data = await response.text();
                 
                 const rows = data.split('\n');
-                let columnCValues = [];
+                let columnEValues = [];
 
                 for (let i = 1; i < rows.length; i++) {
                     const columns = rows[i].split('\t');
-                    if (columns[2] && columns[2].trim() !== "") { 
-                        columnCValues.push(columns[2].trim());
+                    if (columns[4] && columns[4].trim() !== "") { 
+                        columnEValues.push(columns[4].trim());
                     }
                 }
 
-                const result = columnCValues.reverse().join(' — ');
+                const result = columnEValues.reverse().join(' — ');
                 document.getElementById('lista-ids').innerText = result || "Aguardando dados...";
 
-                /* --- LÓGICA PARA PISCAR CARDS (ADICIONADO) --- */
+                /* --- LÓGICA PARA PISCAR CARDS --- */
                 // Remove o efeito de todos primeiro para atualizar
                 document.querySelectorAll('.card').forEach(card => card.classList.remove('blink'));
                 
-                // Se o número do ID estiver presente na lista da Coluna C, faz o card piscar
-                columnCValues.forEach(val => {
+                // Se o número do ID estiver presente na lista da Coluna E, faz o card piscar
+                columnEValues.forEach(val => {
                     const targetCard = document.getElementById(val);
                     if (targetCard) {
                         targetCard.classList.add('blink');
@@ -277,7 +278,7 @@
         }
 
         fetchSheetData();
-        setInterval(fetchSheetData, 300); // Atualiza a cada 300ms
+        setInterval(fetchSheetData, 2000); // Atualiza a cada 300ms
     </script>
 
 </body>
