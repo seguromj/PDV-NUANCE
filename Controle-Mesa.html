@@ -300,20 +300,29 @@
     const indicadoresContainer = document.getElementById('indicadores');
 
     function enviarEX(idMesa) {
-        const prefixoID = `EX${idMesa}`;
+        // Envia o ID para a coluna C (entry.1646513792) e "Excluir" para a coluna I (entry.1564619212)
         const formURL = "https://docs.google.com/forms/d/e/1FAIpQLSdqJeSChWOP4EhrJZO3T2HERuGgU9Tjax7GVM-pTH0MBpVXGw/formResponse";
         const tempForm = document.createElement("form");
         tempForm.action = formURL;
         tempForm.method = "POST";
         tempForm.target = "hidden_iframe";
-        const input = document.createElement("input");
-        input.name = "entry.1646513792";
-        input.value = prefixoID;
-        tempForm.appendChild(input);
+
+        // Input ID da Mesa (Coluna C)
+        const inputID = document.createElement("input");
+        inputID.name = "entry.1646513792";
+        inputID.value = idMesa;
+        tempForm.appendChild(inputID);
+
+        // Input Comando Excluir (Coluna I)
+        const inputExcluir = document.createElement("input");
+        inputExcluir.name = "entry.1564619212";
+        inputExcluir.value = "Excluir";
+        tempForm.appendChild(inputExcluir);
+
         document.body.appendChild(tempForm);
         tempForm.submit();
         document.body.removeChild(tempForm);
-        alert(`Enviado: ${prefixoID}`);
+        alert(`Mesa ${idMesa} enviada para liberação.`);
     }
 
     for (let i = 1; i <= 20; i++) {
@@ -339,7 +348,7 @@
             <div class="resultado-b" id="res-${idMesa}">Sincronizando...</div>
             <div class="resultado-h" id="res-h-${idMesa}"></div>
             <div class="total-card" id="total-card-${idMesa}">R$ 0,00</div>
-            <button class="btn-ex" onclick="event.stopPropagation(); enviarEX(${idMesa})">EX${idMesa}</button>
+            <button class="btn-ex" onclick="event.stopPropagation(); enviarEX(${idMesa})">Liberar mesa</button>
             <div class="id-label">LOG ID: ${idMesa}</div>
         `;
         div.onclick = () => abrirModal(i, idMesa);
@@ -438,7 +447,6 @@
                 }
 
                 if (acumuladorH[currentId] && acumuladorH[currentId].length > 0) {
-                    // Modificado para mostrar todos os resultados da coluna H separados por linha
                     displayH.innerText = acumuladorH[currentId].join('\n');
                     displayH.style.display = 'block';
                 } else {
@@ -487,3 +495,4 @@
 
 </body>
 </html>
+a
